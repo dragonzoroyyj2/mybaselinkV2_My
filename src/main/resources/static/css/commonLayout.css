@@ -1,0 +1,35 @@
+/* ===============================================
+   commonLayout.css
+   전체 톤 & 기본 설정 / 페이지 컨테이너
+=============================================== */
+body {
+  font-family: "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+  font-size: 0.95rem;
+  margin: 0;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 0.6rem;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  font-weight: 600;
+  color: #111827;
+}
+
+.content-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  margin-top: 0.3rem;
+  padding: 1rem 2%;
+  box-sizing: border-box;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+  .content-container { margin-top: 0.2rem; padding: 0.5rem 1%; }
+  h2 { font-size: 1rem; margin-bottom: 0.4rem; }
+}

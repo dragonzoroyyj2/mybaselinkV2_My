@@ -1,0 +1,114 @@
+<div id="stockLayerPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+     width:90%; max-width:1200px; max-height:80%; background:#fff; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.3);
+     overflow:auto; z-index:1000; padding:1rem; font-family:'Noto Sans KR',Arial,sans-serif;">
+
+  <!-- 레이어 헤더 -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+    <h3 style="margin:0; font-size:1.1rem;">📊 KRX 상장 종목 리스트</h3>
+    <button id="closeLayerBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">&times;</button>
+  </div>
+
+  <!-- 검색 바 -->
+  <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+    <input type="text" id="searchInputLayer" placeholder="회사명으로 검색..." style="flex:1; min-width:150px; padding:0.5rem; border:1px solid #ccc; border-radius:5px;">
+    <button id="fetchBtnLayer" style="padding:0.5rem 1rem; background:#3b82f6; color:#fff; border:none; border-radius:5px; cursor:pointer;">조회</button>
+  </div>
+
+  <!-- 종목 테이블 -->
+  <div style="overflow:auto;">
+    <table id="krxLayerTable" style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f3f4f6; font-weight:600;">
+          <th style="padding:0.5rem; border-bottom:1px solid #ddd;">종목코드</th>
+          <th style="padding:0.5rem; border-bottom:1px solid #ddd;">회사명</th>
+          <th style="padding:0.5rem; border-bottom:1px solid #ddd;">업종</th>
+          <th style="padding:0.5rem; border-bottom:1px solid #ddd;">대표자</th>
+        </tr>
+      </thead>
+      <tbody id="krxLayerBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 레이어 배경 -->
+<div id="layerBackdrop" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+     background:rgba(0,0,0,0.5); z-index:999;"></div>
+
+<script>
+let krxDataLayer = [];
+
+// 레이어 열기 함수
+function openStockLayerPopup() {
+  document.getElementById('stockLayerPopup').style.display = 'block';
+  document.getElementById('layerBackdrop').style.display = 'block';
+}
+
+// 레이어 닫기 함수
+document.getElementById('closeLayerBtn').addEventListener('click', () => {
+  document.getElementById('stockLayerPopup').style.display = 'none';
+  document.getElementById('layerBackdrop').style.display = 'none';
+});
+
+// 배경 클릭 시 레이어 닫기
+document.getElementById('layerBackdrop').addEventListener('click', () => {
+  document.getElementById('stockLayerPopup').style.display = 'none';
+  document.getElementById('layerBackdrop').style.display = 'none';
+});
+
+// 테이블 렌더링
+function renderLayerTable(data) {
+  const tbody = document.getElementById('krxLayerBody');
+  tbody.innerHTML = '';
+  data.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.innerHTML = `
+      <td style="padding:0.5rem; border-bottom:1px solid #ddd;">${item.code}</td>
+      <td style="padding:0.5rem; border-bottom:1px solid #ddd;">${item.name}</td>
+      <td style="padding:0.5rem; border-bottom:1px solid #ddd;">${item.sector || ''}</td>
+      <td style="padding:0.5rem; border-bottom:1px solid #ddd;">${item.ceo || ''}</td>
+    `;
+    // 클릭 시 부모 창 input으로 값 전달
+    tr.addEventListener('click', () => {
+      const companyInput = document.getElementById('company');
+      const companyCodeInput = document.getElementById('companyCode');
+      if(companyInput && companyCodeInput){
+        companyInput.value = item.name;
+        companyCodeInput.value = item.code;
+      }
+      document.getElementById('stockLayerPopup').style.display = 'none';
+      document.getElementById('layerBackdrop').style.display = 'none';
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// KRX 조회
+document.getElementById('fetchBtnLayer').addEventListener('click', () => {
+  const btn = document.getElementById('fetchBtnLayer');
+  btn.disabled = true;
+  btn.textContent = '조회 중...';
+
+  fetch('/api/krx')  // 서버에서 JSON 데이터 받기
+    .then(res => res.json())
+    .then(data => {
+      krxDataLayer = data;
+      renderLayerTable(data);
+      btn.disabled = false;
+      btn.textContent = '조회';
+    })
+    .catch(err => {
+      console.error(err);
+      btn.disabled = false;
+      btn.textContent = '조회';
+      alert('데이터 조회 중 오류 발생');
+    });
+});
+
+// 회사명 검색
+document.getElementById('searchInputLayer').addEventListener('input', (e) => {
+  const keyword = e.target.value.trim().toLowerCase();
+  const filtered = krxDataLayer.filter(item => item.name.toLowerCase().includes(keyword));
+  renderLayerTable(filtered);
+});
+</script>

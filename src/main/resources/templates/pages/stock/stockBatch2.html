@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <title>📦 종목 데이터 일괄 업데이트 (관리자)</title>
+  <style>
+    .content-container{ padding:1rem; }
+    .controls{ display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
+    .controls input[type=number]{ width:90px; padding:0.45rem 0.6rem; border:1px solid #ccc; border-radius:6px; }
+    .btn-start{ background:#2563eb; color:#fff; border:none; padding:0.55rem 0.9rem; border-radius:8px; cursor:pointer; }
+    .btn-cancel{ background:#dc2626; color:#fff; border:none; padding:0.55rem 0.9rem; border-radius:8px; cursor:pointer; }
+    .btn-start:disabled,.btn-cancel:disabled{ opacity:.5; cursor:not-allowed; }
+    .bar-wrap{ margin-top:1rem; }
+    .bar-label{ display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:0.25rem; }
+    .bar{ height:12px; background:#eee; border-radius:6px; overflow:hidden; }
+    .bar>div{ height:100%; width:0%; transition:width .25s; }
+    .bar-total>div{ background:#2563eb; }
+    .bar-krx>div{ background:#10b981; }
+    .bar-data>div{ background:#f59e0b; }
+    .status{ margin-top:.5rem; font-size:0.92rem; }
+    .msg{ margin-top:.5rem; font-weight:600; }
+    .msg.err{ color:#dc2626; }
+    .msg.ok{ color:#16a34a; }
+    .hint{ color:#6b7280; font-size:12px; margin-top:4px; }
+    .log-box {
+      margin-top:1rem;
+      background:#111;
+      color:#fff;
+      font-family:Consolas, monospace;
+      font-size:13px;
+      padding:10px;
+      border-radius:8px;
+      height:350px;
+      overflow-y:auto;
+      white-space:pre-wrap;
+      border:1px solid #333;
+    }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+    <h2>📦 종목 데이터 일괄 업데이트 (관리자)</h2>
+
+    <div class="controls">
+      <label>동시 작업 수(워커): <input type="number" id="workers" value="8" min="1" max="16"></label>
+      <label><input type="checkbox" id="force"> 캐시 무시(강제 재다운로드)</label>
+      <button id="btnStart" class="btn-start">업데이트 시작</button>
+      <button id="btnCancel" class="btn-cancel" disabled>취소</button>
+    </div>
+    <div class="hint">※ 관리자 전용 화면입니다. 다른 사용자는 "잠시 후 다시 시도하세요" 메시지를 받습니다.</div>
+
+    <div class="bar-wrap">
+      <div class="bar-label"><span>총 진행률</span><span id="pctTotal">0%</span></div>
+      <div class="bar bar-total"><div id="barTotal"></div></div>
+    </div>
+
+    <div class="bar-wrap">
+      <div class="bar-label"><span>KRX 종목 목록</span><span id="pctKrx">0%</span></div>
+      <div class="bar bar-krx"><div id="barKrx"></div></div>
+    </div>
+
+    <div class="bar-wrap">
+      <div class="bar-label"><span>개별 종목 데이터</span><span id="pctData">0%</span></div>
+      <div class="bar bar-data"><div id="barData"></div></div>
+    </div>
+
+    <div class="status" id="status">대기</div>
+    <div class="msg" id="message"></div>
+
+    <div id="logBox" class="log-box">로그가 여기에 표시됩니다...</div>
+  </div>
+</div>
+
+<th:block layout:fragment="pageScript">
+<script>
+(function(){
+  const API = {
+    start:(w,f)=>`/api/stock/batch/update?workers=${w}${f?"&force=true":""}`,
+    status:(id)=>`/api/stock/batch/status/${id}`,
+    cancel:(id)=>`/api/stock/batch/cancel/${id}`
+  };
+
+  const $workers=document.getElementById("workers"),
+        $force=document.getElementById("force"),
+        $btnStart=document.getElementById("btnStart"),
+        $btnCancel=document.getElementById("btnCancel"),
+        $barTotal=document.getElementById("barTotal"),
+        $barKrx=document.getElementById("barKrx"),
+        $barData=document.getElementById("barData"),
+        $pctTotal=document.getElementById("pctTotal"),
+        $pctKrx=document.getElementById("pctKrx"),
+        $pctData=document.getElementById("pctData"),
+        $status=document.getElementById("status"),
+        $msg=document.getElementById("message"),
+        $log=document.getElementById("logBox");
+
+  let taskId=null, poll=null, lastLogSeq=0, polling=false;
+  let logBuffer=[], logTimer=null; // ✅ 로그 누적용 버퍼
+
+  const token=()=>localStorage.getItem("token");
+  const headers=()=>token()?{"Authorization":"Bearer "+token()}: {};
+
+  // ========================================
+  // 🧠 공용 UI 함수
+  // ========================================
+  function setBar(bar,pct,v){
+    v=Math.max(0,Math.min(100,Math.round(v||0)));
+    bar.style.width=v+"%"; pct.textContent=v+"%";
+  }
+
+  function disableUI(dis){
+    $btnStart.disabled=dis;
+    $btnCancel.disabled=!dis;
+    $workers.disabled=dis;
+    $force.disabled=dis;
+  }
+
+  // ✅ 초기화 강화 — 두 번째 실행 진행률 정상화
+  function resetAll(){
+    setBar($barTotal,$pctTotal,0);
+    setBar($barKrx,$pctKrx,0);
+    setBar($barData,$pctData,0);
+    $status.textContent="대기";
+    $msg.textContent="";
+    $msg.className="msg";
+    $log.textContent="";
+    logBuffer=[];
+    lastLogSeq=0;
+    if(poll){clearInterval(poll);poll=null;}
+    polling=false;
+  }
+
+  // ========================================
+  // 🧠 로그 렌더링 최적화 (버벅임 완화)
+  // ========================================
+  function appendLog(t){
+    logBuffer.push(t);
+    if(!logTimer){
+      logTimer=setTimeout(()=>{
+        if(logBuffer.length>0){
+          $log.textContent += "\n" + logBuffer.join("\n");
+          $log.scrollTop = $log.scrollHeight;
+          logBuffer=[];
+        }
+        logTimer=null;
+      }, 200);
+    }
+  }
+
+  // ========================================
+  // 진행률 및 상태 반영
+  // ========================================
+  function applyProgress(data){
+    const pct=Number(data?.result?.progress??data?.progress??0);
+    const msg=(data?.result?.message??data?.message??"").trim();
+
+    if(!isNaN(pct)) setBar($barTotal,$pctTotal,pct);
+    if(msg && !/다른 사용자가/.test(msg)) $status.textContent=msg;
+
+    const m=msg.match(/종목\s*저장\s+(\d+)\s*\/\s*(\d+)/);
+    if(m){
+      const s=+m[1],t=+m[2];
+      if(t>0)setBar($barData,$pctData,Math.round((s/t)*100));
+    }
+
+    // ✅ KRX 진행률 고정 (즉시 100%)
+    if(/KRX/.test(msg)) setBar($barKrx,$pctKrx,100);
+    
+ 	// ✅ 최종 완료 감지 시 100% 보정 (캐시 초기화 후 첫 실행용 안정화)
+    if (data?.status === "COMPLETED" || /전체\s*완료/.test(data?.message ?? "")) {
+      setBar($barKrx,$pctKrx,100);
+      setBar($barData,$pctData,100);
+      setBar($barTotal,$pctTotal,100);
+    }
+  }
+
+  // ========================================
+  // 폴링
+  // ========================================
+  async function pollStatus(){
+    if(polling||!taskId)return; polling=true;
+    try{
+      const res=await fetch(API.status(taskId),{headers:headers()});
+      if(!res.ok){polling=false;return;}
+      const data=await res.json();
+
+      applyProgress(data);
+
+      if(Array.isArray(data.logs)){
+        const newLogs=data.logs.filter(l=>l.seq>lastLogSeq);
+        newLogs.forEach(l=>appendLog(l.line));
+        if(newLogs.length)lastLogSeq=newLogs.at(-1).seq;
+      }
+
+      if(["COMPLETED","FAILED","CANCELLED"].includes(data.status)){
+        clearInterval(poll);poll=null;disableUI(false);
+        if(data.status==="COMPLETED"){
+          setBar($barData,$pctData,100); // ✅ 강제 마무리
+          setBar($barTotal,$pctTotal,100);
+          $msg.textContent="✅ 업데이트 완료";
+          $msg.className="msg ok";
+        } else {
+          const txt=data.errorMessage||data.message||data.result?.message||"";
+          $msg.textContent=txt||"❌ 오류";
+          $msg.className="msg err";
+        }
+      }
+    }catch(e){console.error(e);}
+    polling=false;
+  }
+
+  // ========================================
+  // 시작 버튼
+  // ========================================
+  $btnStart.onclick=async()=>{
+    if(!token()){alert("로그인이 필요합니다.");return;}
+    resetAll();disableUI(true);
+    const w=+$workers.value||8,f=$force.checked;
+    try{
+      const res=await fetch(API.start(w,f),{method:"POST",headers:{...headers()}});
+      const data=await res.json();
+      if(!res.ok){
+        if(data.error && data.error.includes("다른 사용자가")){
+          $status.textContent=""; 
+          $msg.textContent=data.error; 
+          $msg.className="msg err";
+        } else {
+          $msg.textContent=data.error||"요청 실패";
+          $msg.className="msg err";
+        }
+        disableUI(false);
+        return;
+      }
+      taskId=data.taskId;
+      appendLog("작업 시작됨: "+taskId);
+      poll=setInterval(pollStatus,700);
+    }catch(e){console.error(e);disableUI(false);}
+  };
+
+  // ========================================
+  // 취소 버튼
+  // ========================================
+  $btnCancel.onclick=async()=>{
+    if(!taskId){alert("취소할 작업이 없습니다.");return;}
+    $btnCancel.disabled=true;
+    await fetch(API.cancel(taskId),{method:"POST",headers:headers()});
+    appendLog("⏹ 취소 요청됨");
+    clearInterval(poll);poll=null;taskId=null;disableUI(false);
+  };
+})();
+</script>
+</th:block>
+
+
+
+
+</body>
+</html>

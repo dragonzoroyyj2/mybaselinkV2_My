@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title} ?: 'MyBaseLink'">MyBaseLink</title>
+
+  <!-- CSRF Token -->
+  <th:block th:if="${_csrf} != null">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+  </th:block>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="/css/commonLayout.css">
+  <link rel="stylesheet" href="/css/commonPagination.css">
+  <link rel="stylesheet" href="/css/commonSearch.css">
+  <link rel="stylesheet" href="/css/commonTable.css">
+
+</head>
+
+<body>
+
+  <!-- ✅ 상단바 -->
+  <header th:replace="~{fragments/top :: topFragment}"></header>
+
+  <!-- ✅ 오버레이(전역 한 개만 존재해야 함) -->
+  <div id="sidebarOverlay"></div>
+
+  <!-- ✅ 왼쪽 메뉴 -->
+  <div th:replace="~{fragments/left :: leftFragment}"></div>
+
+  <!-- ✅ 메인 컨텐츠 -->
+  <main>
+    <div class="content" layout:fragment="content">
+      <!-- 페이지 본문 -->
+    </div>
+  </main>
+
+  <!-- ✅ 하단 -->
+  <footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
+
+  <!-- ✅ 사이드바 토글 글로벌 스크립트 -->
+  <script>
+    window.toggleSidebar = () => {
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.getElementById("sidebarOverlay");
+
+      const isOpen = sidebar.classList.contains("open");
+      sidebar.classList.toggle("open", !isOpen);
+      overlay.classList.toggle("active", !isOpen);
+    };
+
+    document.getElementById("sidebarOverlay").addEventListener("click", () => {
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.getElementById("sidebarOverlay");
+
+      sidebar.classList.remove("open");
+      overlay.classList.remove("active");
+    });
+  </script>
+
+  <!-- ✅ 페이지별 스크립트 -->
+  <th:block layout:fragment="pageScript"></th:block>
+
+</body>
+</html>

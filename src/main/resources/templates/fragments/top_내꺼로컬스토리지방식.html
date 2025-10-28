@@ -1,0 +1,297 @@
+<!-- fragments/top.html -->
+<div th:fragment="topFragment">
+  <header class="top-bar">
+    <div class="left-section">
+      <button id="menuToggle" title="메뉴 열기/닫기">
+        <i class="fas fa-bars"></i>
+      </button>
+      <h1>MyBaseLink</h1>
+    </div>
+
+    <div class="right-section">
+      <div id="profileBtn" class="unified-btn" title="Profile">
+        <i class="fas fa-user-circle"></i>
+      </div>
+
+      <div id="sessionRefreshContainer" class="session-refresh-btn unified-btn" title="Remaining time">
+        <i class="fas fa-clock" id="timerIcon"></i>
+        <span id="sessionTimer">--:--</span>
+        <i id="refreshSessionBtn" class="fas fa-rotate-right" title="Refresh"></i>
+      </div>
+
+      <button id="logoutBtn" class="unified-btn" title="Logout">
+        <i class="fas fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <div id="profileLayer" class="profile-layer">
+    <h3>내 프로필</h3>
+    <label>이름:<input type="text" id="profileName" readonly></label>
+    <label>이메일:<input type="email" id="profileEmail" placeholder="you@example.com"></label>
+    <div class="profile-layer-btns">
+      <button id="saveProfileBtn">저장</button>
+      <button id="closeProfileBtn">닫기</button>
+    </div>
+  </div>
+
+  <style>
+    /* ✅ 전체 헤더 */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      background: #f3f4f6;
+      border-bottom: 1px solid #d1d5db;
+      color: #111827;
+      z-index: 4000;
+      box-sizing: border-box;
+      padding: 0 1rem;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .top-bar h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .right-section {
+      position: absolute;
+      right: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .unified-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 36px;
+      min-width: 36px;
+      padding: 0 10px;
+      background: #e5e7eb;
+      color: #1f2937;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .unified-btn i { font-size: 16px; color: #374151; transition: color 0.2s; }
+    .session-refresh-btn { gap: 6px; }
+
+    .profile-layer {
+      position: absolute;
+      top: 60px;
+      right: 1rem;
+      width: 250px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 5000;
+      color: #111827;
+    }
+
+    /* ✅ 세션 관련 알림 메시지 (추가됨) */
+    .session-alert {
+      position: absolute;
+      top: 50px; /* 타이머 바로 아래 */
+      right: 1rem;
+      background: rgba(37, 99, 235, 0.15);
+      color: #1e3a8a;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      opacity: 0.9;
+      backdrop-filter: blur(4px);
+      z-index: 6000;
+    }
+
+    @media (max-width: 640px) {
+      .right-section { right: 0.5rem; gap: 6px; }
+      .profile-layer { right: 0.5rem; width: 220px; }
+      .session-alert { right: 0.5rem; font-size: 12px; }
+      .unified-btn { font-size: 13px; padding: 0 8px; }
+    }
+  </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", ()=>{
+  const toggleBtn = document.getElementById("menuToggle");
+  const refreshBtn = document.getElementById("refreshSessionBtn");
+  const refreshContainer = document.getElementById("sessionRefreshContainer");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const timerEl = document.getElementById("sessionTimer");
+  const timerIcon = document.getElementById("timerIcon");
+  const profileBtn = document.getElementById("profileBtn");
+  const profileLayer = document.getElementById("profileLayer");
+  const closeProfileBtn = document.getElementById("closeProfileBtn");
+  const saveProfileBtn = document.getElementById("saveProfileBtn");
+  const profileName = document.getElementById("profileName");
+
+  let token = localStorage.getItem("token");
+  let sessionExpireAt = parseInt(localStorage.getItem("sessionMillis"));
+  let refreshing = false;
+  let alertShown = false;
+  let alertVisible = false;
+
+  // JWT 파싱 (프로필용)
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(decodeURIComponent(atob(base64).split('').map(c =>
+        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      ).join('')));
+    } catch (e) { return null; }
+  }
+
+  if (token) {
+    const decoded = parseJwt(token);
+    if (decoded && decoded.sub) profileName.value = decoded.sub;
+  }
+
+  // 세션 안내 메시지 표시
+  function showSessionAlert(message) {
+    document.querySelectorAll('.session-alert').forEach(el => el.remove());
+    const alertBox = document.createElement('div');
+    alertBox.className = 'session-alert';
+    alertBox.textContent = message;
+    refreshContainer.parentNode.insertBefore(alertBox, refreshContainer.nextSibling);
+  }
+
+  // 안내문 제거
+  function removeSessionAlert() {
+    document.querySelectorAll('.session-alert').forEach(el => el.remove());
+    alertVisible = false;
+  }
+
+  // 타이머 갱신 함수
+  function updateTimer(){
+    if(!sessionExpireAt || isNaN(sessionExpireAt)) return;
+    const remaining = sessionExpireAt - Date.now();
+    if(remaining <= 0){
+      timerEl.textContent="00:00";
+      if(!alertShown){
+        alertShown = true;
+        localStorage.clear();
+        window.location.href="/login";
+      }
+      return;
+    }
+
+    const min=Math.floor(remaining/60000);
+    const sec=Math.floor((remaining%60000)/1000);
+    timerEl.textContent=`${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+
+    // 남은 시간에 따라 색상 표시
+    if(remaining <= 1*60*1000){ timerEl.style.color="#dc2626"; timerIcon.style.color="#dc2626"; }
+    else if(remaining <= 5*60*1000){ timerEl.style.color="#f59e0b"; timerIcon.style.color="#f59e0b"; }
+    else { timerEl.style.color="#111827"; timerIcon.style.color="#111827"; }
+
+    // 5분 이하에서는 버튼 항상 활성화
+    if(remaining <= 5*60*1000){
+      refreshContainer.classList.remove("refresh-disabled");
+    } else {
+      refreshContainer.classList.add("refresh-disabled");
+    }
+
+    // 5분 이하일 때 한 번만 알림 표시
+    if(remaining <= 5*60*1000 && !alertVisible){
+      showSessionAlert("세션이 곧 만료됩니다 ⏳ 새로고침하여 연장하세요");
+      alertVisible = true;
+    }
+  }
+
+  // 세션 새로고침 (확실한 버전)
+  async function refreshSession(){
+    const remaining = sessionExpireAt - Date.now();
+    if(remaining > 5*60*1000) return; // 5분 이상 남으면 제한
+    if(refreshing || !token) return;
+    refreshing = true;
+
+    try{
+      const res = await fetch("/auth/refresh",{ method:"POST", headers:{"Authorization":"Bearer "+token}});
+      const data = await res.json();
+
+      if(!res.ok){
+        showSessionAlert(data.error || "세션 연장 불가");
+        refreshing=false;
+        return;
+      }
+
+      // 새 토큰 및 세션 갱신
+      token=data.token;
+      localStorage.setItem("token", token);
+      localStorage.setItem("sessionMillis", data.sessionMillis);
+      localStorage.setItem("serverTime", data.serverTime);
+      const remaining=data.sessionMillis - data.serverTime;
+      sessionExpireAt=Date.now()+remaining;
+
+      updateTimer();
+
+      // 메시지 교체 후 일정 시간 후 제거
+      showSessionAlert("세션이 연장되었습니다 ✅");
+      setTimeout(removeSessionAlert, 2500);
+
+      alertVisible = false;
+    }catch(e){
+      console.error(e);
+      showSessionAlert("연장 중 오류 발생 ❌");
+    }finally{
+      refreshing=false;
+      updateTimer();
+    }
+  }
+
+  // 타이머 주기 실행
+  updateTimer();
+  setInterval(updateTimer,1000);
+
+  // 버튼 이벤트 등록
+  refreshBtn.addEventListener("click", refreshSession);
+  logoutBtn.addEventListener("click", ()=>{ localStorage.clear(); window.location.href="/login"; });
+  toggleBtn.addEventListener("click", ()=>{ if(typeof window.toggleSidebar==="function") window.toggleSidebar(); });
+
+  // 프로필 제어
+  profileBtn.addEventListener("click",(e)=>{
+    e.stopPropagation();
+    profileLayer.style.display = profileLayer.style.display==="block"?"none":"block";
+  });
+  closeProfileBtn.addEventListener("click",()=>{ profileLayer.style.display="none"; });
+  saveProfileBtn.addEventListener("click",()=>{
+    showSessionAlert("프로필 저장 완료 ✅");
+    setTimeout(removeSessionAlert,2000);
+    profileLayer.style.display="none";
+  });
+  document.addEventListener("click",(e)=>{
+    if(!profileLayer.contains(e.target) && e.target!==profileBtn){
+      profileLayer.style.display="none";
+    }
+  });
+});
+</script>
+
+</div>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>에러 발생</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; background:#f8fafc; text-align:center; padding:5rem; }
+    h1 { color:#dc2626; margin-bottom:1rem; }
+    p { color:#555; font-size:1rem; margin-bottom:2rem; }
+    a { color:#2563eb; text-decoration:none; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <h1>⚠ 오류가 발생했습니다</h1>
+  <p th:text="${message}">요청을 처리하는 중 문제가 발생했습니다.</p>
+  <a href="/login">로그인 페이지로 돌아가기</a>
+</body>
+</html>

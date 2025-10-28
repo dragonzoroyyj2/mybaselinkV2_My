@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <title>P01A05 서버 리스트</title>
+
+  <!-- Font Awesome은 default_layout에서 이미 포함 -->
+  <!-- 공용 CSS는 default_layout에서 이미 포함 -->
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+    <h2>P01A05 서버 리스트</h2>
+
+    <!-- 검색 라인 -->
+    <div class="toolbar">
+      <div class="search-group">
+        <input type="text" id="searchInput" placeholder="검색어 입력" />
+        <button id="searchBtn" class="btn"><i class="fas fa-search"></i></button>
+        <button class="btn"><i class="fas fa-filter"></i></button>
+        <button class="btn"><i class="fas fa-sync-alt"></i></button>
+      </div>
+    </div>
+
+    <!-- 총건 + 기능 버튼 -->
+    <div class="list-info">
+      <span id="totalCount">총 0건</span>
+      <div class="action-buttons">
+        <button id="excelBtn" class="btn excel" title="엑셀 다운로드"><i class="fa-solid fa-file-excel"></i></button>
+        <button id="addBtn" class="btn" title="추가"><i class="fas fa-plus"></i></button>
+        <button id="deleteSelectedBtn" class="btn red" title="삭제"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+
+    <!-- 테이블 -->
+    <div class="table-container">
+      <table>
+        <thead>
+        <tr>
+          <th><input type="checkbox" id="checkAll" /></th>
+          <th>No</th>
+          <th>제목</th>
+          <th>담당자</th>
+          <th>등록일</th>
+        </tr>
+        </thead>
+        <tbody id="dataTable"></tbody>
+      </table>
+    </div>
+
+    <!-- 페이징 -->
+    <div id="pagination" class="pagination"></div>
+  </div>
+
+  <!-- 등록 모달 -->
+  <div id="addModal" class="modal">
+    <div class="elegant-modal">
+      <div class="elegant-header">
+        <h3>서버 등록</h3>
+        <span data-close="addModal" class="close-btn">&times;</span>
+      </div>
+      <div class="elegant-body">
+        <div class="form-group"><label>제목</label><input id="titleInput" /></div>
+        <div class="form-group"><label>담당자</label><input id="ownerInput" /></div>
+        <div class="form-group"><label>서버 종류</label>
+          <select id="serverType"><option>웹 서버</option><option>DB 서버</option><option>API 서버</option></select>
+        </div>
+        <div class="form-group"><label>운영 상태</label>
+          <div class="option-group">
+            <label><input type="radio" name="status" value="active" checked>운영</label>
+            <label><input type="radio" name="status" value="pause">중지</label>
+          </div>
+        </div>
+        <div class="form-group"><label>기능 옵션</label>
+          <div class="option-group">
+            <label><input type="checkbox">백업 활성화</label>
+            <label><input type="checkbox">자동 모니터링</label>
+          </div>
+        </div>
+        <div class="form-group"><label>등록일</label><input type="date" id="regDateInput" /></div>
+        <div class="form-group"><label>비고</label><textarea id="noteInput" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer elegant-footer">
+        <button id="saveBtn" class="btn">저장</button>
+        <button class="btn gray" data-close="addModal">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 상세 / 수정 모달 -->
+  <div id="detailModal" class="modal">
+    <div class="elegant-modal">
+      <div class="elegant-header">
+        <h3>상세 정보</h3>
+        <span data-close="detailModal" class="close-btn">&times;</span>
+      </div>
+      <div class="elegant-body">
+        <div class="form-group"><label>No</label><input id="detailId" readonly /></div>
+        <div class="form-group"><label>제목</label><input id="detailTitle" /></div>
+        <div class="form-group"><label>담당자</label><input id="detailOwner" /></div>
+        <div class="form-group"><label>등록일</label><input id="detailRegDate" readonly /></div>
+        <div class="form-group"><label>서버 상태</label>
+          <select><option>정상</option><option>점검중</option></select>
+        </div>
+        <div class="form-group"><label>기능 옵션</label>
+          <div class="option-group">
+            <label><input type="checkbox">백업 활성화</label>
+            <label><input type="checkbox">자동 모니터링</label>
+          </div>
+        </div>
+        <div class="form-group"><label>비고</label><textarea id="detailNote" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer elegant-footer">
+        <button id="updateBtn" class="btn">수정</button>
+        <button class="btn gray" data-close="detailModal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 페이지별 초기화 -->
+<th:block layout:fragment="pageScript">
+
+  <script src="/js/commonPagination_op.js"></script>
+  <script src="/js/commonUnifiedList_op.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      function getPageGroupSize() {
+        const width = window.innerWidth;
+        if (width < 480) return 3;
+        if (width < 768) return 5;
+        if (width < 1024) return 10;
+        return 20;
+      }
+
+      let pageGroupSize = getPageGroupSize();
+
+      // ================================
+      // 공용 리스트 초기화
+      // ================================
+      initUnifiedList({
+        mode: "server",           // server / client	✅ client - [전체데이터 한 번에 로드]선택        
+        pagination: true,        // true / false 		✅ false  - 페이징 완전 비활성화
+        apiUrl: "/api/p01a05",
+        tableBodySelector: "#dataTable",
+        paginationSelector: "#pagination",
+        searchInputSelector: "#searchInput",
+        searchBtnSelector: "#searchBtn",
+        addBtnSelector: "#addBtn",
+        modalId: "#addModal",
+        saveBtnSelector: "#saveBtn",
+        closeBtnSelector: "[data-close]",
+        checkAllSelector: "#checkAll",
+        deleteSelectedBtnSelector: "#deleteSelectedBtn",
+        detailModalId: "#detailModal",
+        detailFields: {
+          id: "#detailId",
+          title: "#detailTitle",
+          owner: "#detailOwner",
+          regDate: "#detailRegDate"
+        },
+        updateBtnSelector: "#updateBtn",
+        excelBtnSelector: "#excelBtn",
+        columns: [
+          { key: "id", label: "No" },
+          { key: "title", label: "제목", isDetailLink: true },
+          { key: "owner", label: "담당자" },
+          { key: "regDate", label: "등록일" }
+        ],
+        pageSize: 10,
+        pageGroupSize: pageGroupSize
+      });
+
+      // ================================
+      // 검색 엔터 이벤트
+      // ================================
+      const searchInput = document.getElementById("searchInput");
+      const searchBtn = document.getElementById("searchBtn");
+      searchInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") searchBtn.click();
+      });
+
+      // ================================
+      // 화면 리사이즈 시 페이지 그룹 재조정
+      // ================================
+      window.addEventListener("resize", () => {
+        const newGroupSize = getPageGroupSize();
+        if (newGroupSize !== pageGroupSize) {
+          pageGroupSize = newGroupSize;
+		  
+		  // pagination 재렌더링 이벤트 호출
+          const event = new Event("resizePagination");
+          document.dispatchEvent(event);
+        }
+      });
+
+    });
+  </script>
+</th:block>
+
+</body>
+</html>

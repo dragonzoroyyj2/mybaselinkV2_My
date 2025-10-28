@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyNova 대시보드</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+      font-size: 0.95rem;
+      margin: 0;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    h2 {
+      margin-top: 0;          
+      margin-bottom: 0.6rem;  
+      font-size: 1.2rem;      
+      line-height: 1.3;       
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .content-container {
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      margin-top: 0.3rem;
+      padding: 1rem 2%;
+      box-sizing: border-box;
+    }
+
+    .dashboard-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    .card {
+      flex: 1 1 220px;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      min-height: 100px;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-header i {
+      font-size: 1.4rem;
+      color: #2563eb;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .card p {
+      margin: 0.2rem 0;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+    <h2>📊 시스템 현황 대시보드</h2>
+    <p>환영합니다! 이곳에서 주요 지표와 상태를 확인할 수 있습니다.</p>
+
+    <div class="dashboard-cards">
+      <!-- 서버 상태 -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-server"></i>
+          <h3>서버 상태</h3>
+        </div>
+        <p>활성 서버: 12대</p>
+        <p>점검 중: 2대</p>
+      </div>
+
+      <!-- 사용자 활동 -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-users"></i>
+          <h3>사용자 활동</h3>
+        </div>
+        <p>오늘 로그인: 34명</p>
+        <p>신규 가입: 5명</p>
+      </div>
+
+      <!-- 전체 사용자 수 -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-user-check"></i>
+          <h3>총 사용자 수</h3>
+        </div>
+        <p>활성 사용자: 150명</p>
+        <p>비활성 사용자: 10명</p>
+      </div>
+
+      <!-- DB 상태 -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-database"></i>
+          <h3>DB 상태</h3>
+        </div>
+        <p>활성 DB: 5개</p>
+        <p>백업 완료: 100%</p>
+      </div>
+
+      <!-- API 응답률 -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-chart-line"></i>
+          <h3>API 응답률</h3>
+        </div>
+        <p>99.8%</p>
+      </div>
+
+      <!-- 알림 -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-bell"></i>
+          <h3>알림</h3>
+        </div>
+        <p>처리 대기: 3건</p>
+        <p>긴급 알림: 1건</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="pageScript">
+  <script>
+    console.log("✅ MyNova dashboard with icons and user stats loaded successfully");
+  </script>
+</th:block>
+</body>
+</html>

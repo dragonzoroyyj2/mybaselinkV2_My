@@ -1,0 +1,31 @@
+/* ===============================================
+   📦 commonLayout.css
+   전체 페이지 레이아웃 및 기본 구조
+   =============================================== */
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  background-color: #f6f8fa;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1, h2, h3 {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 12px;
+  border-left: 4px solid #0066cc;
+  padding-left: 8px;
+}

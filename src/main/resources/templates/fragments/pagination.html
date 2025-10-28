@@ -1,0 +1,13 @@
+<!-- ===============================================
+📄 pagination.html
+공통 페이지네이션 프래그먼트
+=============================================== -->
+<div th:fragment="paginationFragment">
+  <div class="pagination-container">
+    <ul class="pagination">
+      <li class="page-item" id="prevPage">이전</li>
+      <li class="page-item disabled"><span id="pageInfo">1 / 1</span></li>
+      <li class="page-item" id="nextPage">다음</li>
+    </ul>
+  </div>
+</div>

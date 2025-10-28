@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>📊 KRX 차트 패턴 조회</title>
+  <link rel="stylesheet" th:href="@{/css/commonStock.css}" href="/css/commonStock.css">
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+    <h1>KRX 차트 패턴 조회</h1>
+
+    <div class="search-row">
+      <label for="patternSelect">패턴 종류:</label>
+      <select id="patternSelect">
+        <option value="head_and_shoulders">헤드앤숄더</option>
+        <option value="inverse_head_and_shoulders">역헤드앤숄더</option>
+        <option value="double_top">이중 천정</option>
+        <option value="double_bottom">이중 바닥</option>
+        <option value="cup_and_handle">컵앤핸들</option>
+      </select>
+
+      <label for="rangeSelectPattern">기간 선택:</label>
+      <select id="rangeSelectPattern">
+        <option value="30" selected>1개월</option>
+        <option value="90">3개월</option>
+        <option value="180">6개월</option>
+        <option value="365">1년</option>
+        <option value="730">2년</option>
+      </select>
+
+      <label for="startPattern">시작일:</label>
+      <input type="date" id="startPattern" required>
+      <label for="endPattern">종료일:</label>
+      <input type="date" id="endPattern" required>
+
+      <label for="nStocksPattern">상위 N개:</label>
+      <input type="number" id="nStocksPattern" value="10" min="1" max="50">
+
+      <button id="searchBtnPattern" class="btn">분석 시작</button>
+    </div>
+
+    <div id="warningPattern" class="warning"></div>
+
+    <div class="table-container">
+      <table id="resultTablePattern">
+        <thead>
+        <tr><th>종목 코드</th><th>종목명</th><th>패턴</th></tr>
+        </thead>
+        <tbody id="resultTableBodyPattern"></tbody>
+      </table>
+    </div>
+
+    <!-- 팝업 (차트/뉴스) 그대로 유지 -->
+    <div class="modal" id="chartPopup">
+      <div class="elegant-modal">
+        <div class="elegant-header">
+          <h3>종목 상세 정보</h3>
+          <span class="close-btn" data-close="chartPopup">&times;</span>
+        </div>
+        <div class="elegant-body">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="chart-content">차트</button>
+            <button class="tab-btn" data-tab="news-content">뉴스/공시</button>
+          </div>
+          <div id="chart-content" class="tab-content active">
+            <img id="chartImage" src="" alt="차트 이미지" style="max-width:100%;border-radius:8px;">
+          </div>
+          <div id="news-content" class="tab-content">
+            <ul id="newsList"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div id="overlayLoading">
+      <div class="loading-box">
+        <div class="loading-icon">⌛</div>
+        <div>분석 중입니다...</div>
+        <button id="cancelLoadingBtn">취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<th:block layout:fragment="pageScript">
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const rangeSelect = document.getElementById('rangeSelectPattern');
+      const startInput = document.getElementById('startPattern');
+      const endInput = document.getElementById('endPattern');
+      const searchBtn = document.getElementById('searchBtnPattern');
+      const overlay = document.getElementById('overlayLoading');
+      const cancelBtn = document.getElementById('cancelLoadingBtn');
+      const warning = document.getElementById('warningPattern');
+      const tbody = document.getElementById('resultTableBodyPattern');
+
+      let currentTaskId = null;
+      let pollTimer = null;
+
+      // ===== 기본 날짜 설정 (1개월)
+      function setInitialDates(days = 30) {
+        const today = new Date();
+        const past = new Date();
+        past.setDate(today.getDate() - days);
+        endInput.value = formatDate(today);
+        startInput.value = formatDate(past);
+      }
+      function formatDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+      setInitialDates(30);
+      rangeSelect.addEventListener('change', (e) => setInitialDates(parseInt(e.target.value, 10)));
+
+      // ===== 분석 시작
+      searchBtn.addEventListener('click', async () => {
+        const start = startInput.value;
+        const end = endInput.value;
+        const pattern = document.getElementById('patternSelect').value;
+        const topN = document.getElementById('nStocksPattern').value;
+
+        if (!start || !end || !pattern || !topN) {
+          displayMsg('⚠️ 모든 필드를 입력해주세요.', 'error');
+          return;
+        }
+
+        displayMsg('⌛ 분석 요청 중...', 'info');
+        overlay.style.display = 'flex';
+
+        try {
+          const formData = new URLSearchParams();
+          formData.append('start', start);
+          formData.append('end', end);
+          formData.append('pattern', pattern);
+          formData.append('topN', topN);
+
+          const response = await fetch('/chart/patterns/start', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: formData
+          });
+
+          const data = await response.json();
+
+          // ✅ 선점 큐: 다른 유저가 실행 중일 때 (409)
+          if (response.status === 409) {
+            overlay.style.display = 'none';
+            displayMsg(data.message || '다른 사용자가 분석 중입니다. 잠시 후 다시 시도해주세요.', 'error');
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(data.message || '요청 실패');
+          }
+
+          if (!data.taskId) {
+            throw new Error('taskId 누락');
+          }
+
+          currentTaskId = data.taskId;
+          displayMsg('✔️ 분석 요청 성공. 결과를 기다리는 중...', 'success');
+          startPolling(currentTaskId);
+        } catch (err) {
+          overlay.style.display = 'none';
+          displayMsg(`⚠️ 요청 실패: ${err.message}`, 'error');
+        }
+      });
+
+      // ===== 상태 폴링
+      function startPolling(taskId) {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(async () => {
+          try {
+            const res = await fetch(`/chart/task/status/${taskId}`);
+            if (!res.ok) throw new Error('상태 조회 실패');
+            const data = await res.json();
+
+            switch (data.status) {
+              case 'COMPLETED':
+                clearInterval(pollTimer);
+                overlay.style.display = 'none';
+                displayMsg('✔️ 분석 완료', 'success');
+                renderResults(data.result);
+                currentTaskId = null;
+                break;
+              case 'FAILED':
+                clearInterval(pollTimer);
+                overlay.style.display = 'none';
+                displayMsg(`❌ 실패: ${data.errorMessage || '분석 실패'}`, 'error');
+                currentTaskId = null;
+                break;
+              case 'CANCELLED':
+                clearInterval(pollTimer);
+                overlay.style.display = 'none';
+                displayMsg('🛑 분석이 취소되었습니다.', 'info');
+                currentTaskId = null;
+                break;
+              case 'RUNNING':
+                displayMsg('⏳ 분석 중입니다...', 'info');
+                break;
+              case 'WAITING':
+                displayMsg('⌛ 대기 중입니다...', 'info');
+                break;
+              default:
+                displayMsg('⏳ 상태 확인 중...', 'info');
+                break;
+            }
+          } catch (e) {
+            clearInterval(pollTimer);
+            overlay.style.display = 'none';
+            displayMsg(`⚠️ 상태 확인 실패: ${e.message}`, 'error');
+            currentTaskId = null;
+          }
+        }, 1500);
+      }
+
+      // ===== 취소 버튼
+      cancelBtn.addEventListener('click', async () => {
+        try {
+          if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+          }
+          if (currentTaskId) {
+            await fetch(`/chart/task/cancel/${currentTaskId}`, {method: 'POST'});
+          }
+          overlay.style.display = 'none';
+          displayMsg('🛑 분석이 취소되었습니다.', 'info');
+          currentTaskId = null;
+        } catch (e) {
+          overlay.style.display = 'none';
+          displayMsg(`⚠️ 취소 중 오류: ${e.message}`, 'error');
+        }
+      });
+
+      // ===== 결과 렌더링
+      function renderResults(results) {
+        tbody.innerHTML = '';
+        if (!results || results.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3">결과 없음</td></tr>';
+          return;
+        }
+        results.forEach(r => {
+          const row = document.createElement('tr');
+          const patterns = Array.isArray(r.patterns) ? r.patterns.join(', ') : r.patterns;
+          row.innerHTML = `<td>${r.symbol}</td><td>${r.name}</td><td>${patterns}</td>`;
+          tbody.appendChild(row);
+        });
+      }
+
+      // ===== 메시지 표시
+      function displayMsg(msg, type) {
+        warning.innerText = msg;
+        warning.className =
+          type === 'success'
+            ? 'msg-success'
+            : type === 'error'
+              ? 'msg-error'
+              : 'msg-info';
+      }
+    });
+  </script>
+</th:block>
+
+
+
+</body>
+</html>

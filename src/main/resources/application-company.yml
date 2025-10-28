@@ -1,0 +1,43 @@
+###########################################################################
+# 🏢 회사 환경 전용 설정 파일
+# - 공통(application.yml)의 설정을 그대로 상속받고
+# - 아래 값들만 집 환경에 맞게 '덮어쓰기(override)' 합니다.
+###########################################################################
+
+###########################################################################
+# 🐍 Python 실행 환경 설정 (집)
+###########################################################################
+python:
+
+  # ✅ Python 실행 파일 경로 - 집 PC 기준
+  # - Windows 기본 설치 경로
+  # - pip 패키지도 이 환경에 설치되어 있어야 함
+  executable:
+    path: C:/Users/User/AppData/Local/Programs/Python/Python310/python.exe
+
+  # ✅ MyBaseLinkV2 프로젝트의 루트 경로(집)
+  # - python script 는 이 경로 기반으로 실행됨
+  root:
+    path: C:/LocBootProject/workspace/MyBaseLinkV2
+
+  # ✅ Python 스크립트 경로 설정
+  # - 자식 설정들은 root.path 를 기반으로 관리
+  working:
+    dir: "${python.root.path}/python"  # python 폴더 기준 실행
+  update_stock_listing:
+    path: "${python.root.path}/python/stock/py/update_stock_listing.py"
+  stock:
+    stock_listing:
+      path: "${python.root.path}/python/stock/stock_list/stock_listing.json"
+
+
+###########################################################################
+# 🐘 PostgreSQL DB 접속 설정 (집)
+# - DB 주소 및 계정 비밀정보가 위치
+###########################################################################
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mybaselink_db
+    username: mybaseuser
+    password: mybaseuser1234
+

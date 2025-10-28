@@ -1,0 +1,136 @@
+/* ===============================================
+   commonTable.css
+   테이블, 모달, 폼 스타일
+=============================================== */
+.table-container {
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th, td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+th { background: #f9fafb; font-weight: 600; color: #374151; }
+td a { color: #2563eb; cursor: pointer; text-decoration: underline; }
+
+/* 모달 */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  padding: 2rem 1rem;
+}
+
+.elegant-modal {
+  background: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  max-width: 480px;
+  margin: 3rem auto;
+  max-height: 80vh;
+  animation: fadeInUp 0.25s ease;
+  overflow-y: auto;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.elegant-header {
+  background: linear-gradient(145deg, #e5e7eb, #f3f4f6);
+  padding: 0.7rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.elegant-header h3 { margin: 0; font-weight: 600; font-size: 1rem; color: #111827; }
+
+.close-btn { font-size: 1.3rem; cursor: pointer; color: #6b7280; transition: color 0.2s; }
+.close-btn:hover { color: #111827; }
+
+.elegant-body {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.8rem;
+}
+
+.form-group {
+  width: 100%;
+  max-width: 90%;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  color: #374151;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.55rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: white;
+  box-sizing: border-box;
+}
+
+.option-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.option-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.option-group input[type="radio"],
+.option-group input[type="checkbox"] {
+  accent-color: #2563eb;
+  width: 16px;
+  height: 16px;
+}
+
+.modal-footer.elegant-footer {
+  background: #f3f4f6;
+  border-top: 1px solid #d1d5db;
+  padding: 0.8rem 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}

@@ -1,0 +1,107 @@
+/* ===============================================
+   commonSearch.css
+   검색, 툴바, 버튼 스타일
+=============================================== */
+.toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.search-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 900px;
+  flex-wrap: nowrap;
+}
+
+.search-group input {
+  flex: 1 1 auto;
+  min-width: 120px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+  background: #fff;
+  transition: border-color 0.3s, box-shadow 0.2s;
+}
+
+.search-group input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+
+.search-group .btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 36px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.search-group .btn:hover { background: #1e40af; }
+
+.list-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #4b5563;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  transition: background 0.2s;
+}
+
+.btn i { font-size: 0.9rem; }
+.btn:hover { background: #1e40af; }
+.btn.red { background: #dc2626; }
+.btn.red:hover { background: #b91c1c; }
+.btn.gray { background: #6b7280; }
+
+.btn.excel {
+  background: #1d6f42;
+  border: 1px solid #145a32;
+}
+.btn.excel:hover { background: #145a32; }
+.btn.excel i { color: #fff; font-size: 1rem; }
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+  .toolbar { margin-bottom: 0.4rem; }
+  .list-info { margin-bottom: 0.3rem; }
+  .search-group input { font-size: 0.85rem; padding: 0.4rem 0.6rem; }
+  .search-group .btn { height: 32px; min-width: 34px; }
+}
