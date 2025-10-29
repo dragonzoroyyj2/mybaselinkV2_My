@@ -171,30 +171,29 @@
     const data = await safeFetchJSON(url);
 
     // ✅ LOCKED 상태에서도 퍼센트 동기화
-    if(data.status==="LOCKED"){
-      const r = data.result||{};
-      const runner = r.runner || data.runner || "알 수 없음";
-      const pct = Math.round(r.progress||0);
-      $hint.innerHTML = `<span style="color:#dc2626;font-weight:700;">🚫 ${runner}님 실행 중 (${pct}%)</span>`;
-      disableAllUI();
+    if(data.status === "LOCKED"){
+    	  const r = data.result || {};
+    	  const runner = r.runner || data.runner || "알 수 없음";
+    	  const pct = Math.round(r.progress || 0);
+    	  $hint.innerHTML = `<span style="color:#dc2626;font-weight:700;">🚫 ${runner}님 실행 중 (${pct}%)</span>`;
+    	  disableAllUI();
 
-      // 🔥 진행률 표시
-      setBar($barTotal,$pctTotal,pct);
+    	  // ✅ 진행률 바도 계속 갱신되도록 return 제거
+    	  setBar($barTotal, $pctTotal, pct);
+    	  if (r.krxTotal > 0 && r.krxSaved >= 0) {
+    	    const p2 = Math.round((r.krxSaved / r.krxTotal) * 100);
+    	    setBar($barKrx, $pctKrx, p2);
+    	    $badgeKrx.textContent = `${r.krxSaved}/${r.krxTotal}`;
+    	  }
+    	  if (r.dataTotal > 0 && r.dataSaved >= 0) {
+    	    const p3 = Math.round((r.dataSaved / r.dataTotal) * 100);
+    	    setBar($barData, $pctData, p3);
+    	    $badgeData.textContent = `${r.dataSaved}/${r.dataTotal}`;
+    	  }
 
-      if (r.krxTotal > 0 && r.krxSaved >= 0) {
-        const p2 = Math.round((r.krxSaved / r.krxTotal) * 100);
-        setBar($barKrx, $pctKrx, p2);
-        $badgeKrx.textContent = `${r.krxSaved}/${r.krxTotal}`;
-      }
+    	  // 🔥 더 이상 return 안 함
+    	}
 
-      if (r.dataTotal > 0 && r.dataSaved >= 0) {
-        const p3 = Math.round((r.dataSaved / r.dataTotal) * 100);
-        setBar($barData, $pctData, p3);
-        $badgeData.textContent = `${r.dataSaved}/${r.dataTotal}`;
-      }
-
-      return;
-    }
 
     if(data.status==="NOT_FOUND"){
       resetAll();

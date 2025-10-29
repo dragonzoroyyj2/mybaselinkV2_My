@@ -198,11 +198,14 @@ public class StockBatchService {
 
         // 잠금 중인데 다른 사용자가 조회
         if (s == null && activeLock.get()) {
+            ProgressState st = progressStates.get(currentTaskId);
             double progress = 0.0;
-            TaskStatusService.TaskStatus ts = (currentTaskId != null) ? taskStatusService.getTaskStatus(currentTaskId) : null;
-            if (ts != null && ts.getResult() != null) {
-                Object p = ts.getResult().get("progress");
-                if (p instanceof Number) progress = ((Number) p).doubleValue();
+
+            // ✅ 진행률 계산 개선
+            if (st != null) {
+                double krxRate = (st.krxTotal > 0 ? (st.krxSaved / (double) st.krxTotal) * 30.0 : 0.0);
+                double dataRate = (st.dataTotal > 0 ? (st.dataSaved / (double) st.dataTotal) * 70.0 : 0.0);
+                progress = Math.min(100.0, krxRate + dataRate);
             }
 
             body.put("status", "LOCKED");
@@ -210,10 +213,15 @@ public class StockBatchService {
             body.put("runner", currentRunner != null ? currentRunner : "알 수 없음");
             body.put("result", Map.of(
                     "progress", progress,
+                    "krxSaved", st != null ? st.krxSaved : 0,
+                    "krxTotal", st != null ? st.krxTotal : 0,
+                    "dataSaved", st != null ? st.dataSaved : 0,
+                    "dataTotal", st != null ? st.dataTotal : 0,
                     "runner", currentRunner != null ? currentRunner : "알 수 없음"
             ));
             return body;
         }
+
 
         if (s == null) {
             body.put("status", "NOT_FOUND");
