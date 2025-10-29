@@ -35,6 +35,7 @@
         <a href="#"><i class="fas fa-chart-line"></i><span>Job</span></a>
         <ul class="submenu">
           <li><a href="/pages/stock/stockBatch">Stock Batch</a></li>
+          <li><a href="/pages/stock/stockBatchBoard">Stock Batch Board</a></li>
         </ul>
       </li>
 
@@ -42,7 +43,8 @@
         <a href="#"><i class="fas fa-chart-line"></i><span>stock</span></a>
         <ul class="submenu">
           <li><a href="/pages/stock/stockList">종목 리스트</a></li>
-          <li><a href="/pages/stock/chart_lastCloseDownward">계단하락 종목 차트</a></li>
+          <li><a href="/pages/stock/stockLastCloseDownward">계단하락 종목 차트</a></li>
+          <li><a href="/pages/stock/similar-advanced-new">similar-advanced-new</a></li>
           <li><a href="/pages/stock/chart_pattern">chart_pattern 리스트</a></li>
         </ul>
       </li>
@@ -65,9 +67,11 @@
           <li><a href="#">권한 설정</a></li>
         </ul>
       </li>
-
     </ul>
   </nav>
+
+  <!-- ✅ 화면 전체를 제대로 가리는 overlay -->
+  <div id="sidebarOverlay"></div>
 
   <style>
     .sidebar {
@@ -81,9 +85,24 @@
       overflow-y: auto;
       transform: translateX(-240px);
       transition: transform 0.3s ease;
-      z-index: 3000;
+      z-index: 3001; /* ✅ 메뉴가 항상 overlay 위 */
     }
     .sidebar.open { transform: translateX(0); }
+
+    #sidebarOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 3000; /* ✅ overlay가 메뉴보다 아래 */
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #sidebarOverlay.active {
+      display: block;
+      opacity: 1;
+    }
+
     .sidebar ul { list-style: none; margin: 0; padding: 0; }
     .sidebar li { border-bottom: 1px solid #e5e7eb; }
     .sidebar li a {
@@ -95,7 +114,10 @@
       text-decoration: none;
       transition: background 0.2s, color 0.2s;
     }
-    .sidebar li a:hover { background: #e5e7eb; color: #111827; }
+    .sidebar li a:hover {
+      background: #e5e7eb;
+      color: #111827;
+    }
 
     .has-submenu > a::after {
       content: "▾";

@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -23,70 +25,75 @@ public class StockBatchService {
     private final ObjectMapper mapper = new ObjectMapper();
     private final TaskStatusService taskStatusService;
 
-    // Python 실행 환경
-    // ✅ @Value 어노테이션으로 프로퍼티 값 주입
     @Value("${python.executable.path:}")
     private String pythonExe;
-    
     @Value("${python.update_stock_listing.path:}")
     private String stockUpdateScriptPath;
-    
     @Value("${python.working.dir:}")
     private String pythonWorkingDir;
 
-    // 단일 선점
     private final AtomicBoolean activeLock = new AtomicBoolean(false);
     private final ConcurrentMap<String, Process> runningProcesses = new ConcurrentHashMap<>();
-
-    // 로그 버퍼
     private final ConcurrentMap<String, List<LogLine>> taskLogs = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ProgressState> progressStates = new ConcurrentHashMap<>();
     private static final int MAX_LOG_LINES = 5000;
 
-    // 진행 상태
-    private final ConcurrentMap<String, ProgressState> progressStates = new ConcurrentHashMap<>();
+    private volatile String currentRunner = null;
+    private volatile String currentTaskId = null;
 
     public StockBatchService(TaskStatusService taskStatusService) {
         this.taskStatusService = taskStatusService;
     }
 
     private static final class ProgressState {
-        volatile double krxPct = 0.0; // 0~100
+        volatile double krxPct = 0.0;
         volatile int dataSaved = 0;
         volatile int dataTotal = 0;
+        volatile int krxTotal = 0;
+        volatile int krxSaved = 0;
     }
 
+    // ============================================================
+    // ✅ 업데이트 시작
+    // ============================================================
     @Async
     public void startUpdate(String taskId, boolean force, int workers) {
-        // ✅ 선점 실패는 곧바로 예외 → 컨트롤러에서 409로 보냄
-        if (!activeLock.compareAndSet(false, true)) {
-            throw new IllegalStateException("다른 사용자가 업데이트 중입니다. 잠시 후 다시 시도하세요.");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String runner = (auth != null && auth.isAuthenticated()) ? auth.getName() : "알 수 없음";
+
+        // ✅ 이미 락이 잡혀 있을 경우 같은 사용자면 허용, 아니면 차단
+        if (activeLock.get()) {
+            if (!runner.equals(currentRunner)) {
+                throw new IllegalStateException("다른 사용자가 업데이트 중입니다. 잠시 후 다시 시도하세요.");
+            } else {
+                log.info("같은 사용자가 재시도: {}", runner);
+            }
+        } else {
+            activeLock.set(true);
         }
 
+        currentRunner = runner;
+        currentTaskId = taskId;
         Process process = null;
+
         try {
             taskLogs.put(taskId, new CopyOnWriteArrayList<>());
             ProgressState state = new ProgressState();
             progressStates.put(taskId, state);
 
-            Map<String, Object> first = new HashMap<>();
-            first.put("progress", 0);
-            first.put("message", "업데이트 시작 중...");
-            first.put("krxPct", state.krxPct);
-            first.put("dataSaved", state.dataSaved);
-            first.put("dataTotal", state.dataTotal);
-            taskStatusService.setTaskStatus(taskId, new TaskStatusService.TaskStatus("IN_PROGRESS", first, null));
+            taskStatusService.setTaskStatus(taskId,
+                    new TaskStatusService.TaskStatus("IN_PROGRESS",
+                            Map.of("progress", 0, "runner", runner, "message", "업데이트 시작 중..."), null));
 
-            // Python 명령어
             List<String> cmd = new ArrayList<>();
             cmd.add(pythonExe);
-            cmd.add("-u"); // 무버퍼
+            cmd.add("-u");
             cmd.add(stockUpdateScriptPath);
             cmd.add("--workers");
             cmd.add(String.valueOf(workers));
             if (force) cmd.add("--force");
 
             log.info("[{}] Python 실행: {}", taskId, cmd);
-
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.directory(new File(pythonWorkingDir));
             pb.redirectErrorStream(true);
@@ -97,12 +104,14 @@ public class StockBatchService {
             runningProcesses.put(taskId, process);
 
             Pattern pProg = Pattern.compile("\\[PROGRESS\\]\\s*([0-9]+(?:\\.[0-9]+)?)\\s*(.*)");
-            Pattern pLog  = Pattern.compile("\\[LOG\\]\\s*(.*)");
-            Pattern pCnt  = Pattern.compile("종목\\s*저장\\s*(\\d+)\\s*/\\s*(\\d+)");
+            Pattern pLog = Pattern.compile("\\[LOG\\]\\s*(.*)");
+            Pattern pCnt = Pattern.compile(".*?(\\d+)\\s*/\\s*(\\d+).*");
+            Pattern pKrxTotal = Pattern.compile("\\[KRX_TOTAL]\\s*(\\d+)");
+            Pattern pKrxSaved = Pattern.compile("\\[KRX_SAVED]\\s*(\\d+)");
 
-            // ✅ 실시간 읽기 스레드
             final Process pRef = process;
             ExecutorService ioPool = Executors.newSingleThreadExecutor();
+
             ioPool.submit(() -> {
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(pRef.getInputStream(), StandardCharsets.UTF_8))) {
@@ -112,8 +121,15 @@ public class StockBatchService {
                         log.info("[PYTHON][{}] {}", taskId, L);
 
                         Matcher mLog = pLog.matcher(L);
-                        if (mLog.find()) {
-                            appendLog(taskId, mLog.group(1));
+                        if (mLog.find()) appendLog(taskId, mLog.group(1));
+
+                        Matcher mKtot = pKrxTotal.matcher(L);
+                        if (mKtot.find()) state.krxTotal = Integer.parseInt(mKtot.group(1));
+
+                        Matcher mKsav = pKrxSaved.matcher(L);
+                        if (mKsav.find()) {
+                            state.krxSaved = Integer.parseInt(mKsav.group(1));
+                            state.krxPct = 100.0;
                         }
 
                         Matcher mProg = pProg.matcher(L);
@@ -121,30 +137,22 @@ public class StockBatchService {
                             double pct = Double.parseDouble(mProg.group(1));
                             String msg = mProg.group(2);
 
-                            // KRX 단계 캐치
-                            if (msg.contains("KRX") && msg.contains("다운로드")) {
-                                state.krxPct = Math.max(state.krxPct, 30.0);
-                            } else if (msg.contains("KRX") && (msg.contains("로드됨") || msg.contains("저장 완료") || msg.contains("완료"))) {
-                                state.krxPct = 100.0;
+                            Matcher mCnt2 = pCnt.matcher(msg);
+                            if (mCnt2.find()) {
+                                state.dataSaved = Integer.parseInt(mCnt2.group(1));
+                                state.dataTotal = Integer.parseInt(mCnt2.group(2));
                             }
 
-                            // 종목 카운트 캐치
-                            Matcher mCnt = pCnt.matcher(msg);
-                            if (mCnt.find()) {
-                                try {
-                                    state.dataSaved = Integer.parseInt(mCnt.group(1));
-                                    state.dataTotal = Integer.parseInt(mCnt.group(2));
-                                } catch (Exception ignore) {}
-                            }
-
-                            Map<String, Object> res = new HashMap<>();
-                            res.put("progress", pct);
-                            res.put("message", msg);
-                            res.put("krxPct", state.krxPct);
-                            res.put("dataSaved", state.dataSaved);
-                            res.put("dataTotal", state.dataTotal);
-
-                            taskStatusService.setTaskStatus(taskId, new TaskStatusService.TaskStatus("IN_PROGRESS", res, null));
+                            taskStatusService.setTaskStatus(taskId,
+                                    new TaskStatusService.TaskStatus("IN_PROGRESS",
+                                            Map.of("progress", pct, "runner", runner,
+                                                    "dataSaved", state.dataSaved,
+                                                    "dataTotal", state.dataTotal,
+                                                    "krxSaved", state.krxSaved,
+                                                    "krxTotal", state.krxTotal,
+                                                    "krxPct", state.krxPct,
+                                                    "message", msg),
+                                            null));
                         }
                     }
                 } catch (IOException e) {
@@ -152,7 +160,6 @@ public class StockBatchService {
                 }
             });
 
-            // 타임아웃 60분
             boolean finished = process.waitFor(Duration.ofMinutes(60).toSeconds(), TimeUnit.SECONDS);
             ioPool.shutdownNow();
 
@@ -168,7 +175,7 @@ public class StockBatchService {
                 return;
             }
 
-            setCompleted(taskId);
+            setCompleted(taskId, runner);
 
         } catch (Exception e) {
             log.error("[{}] StockBatch 실행 중 오류", taskId, e);
@@ -180,7 +187,69 @@ public class StockBatchService {
             runningProcesses.remove(taskId);
             activeLock.set(false);
             log.info("[{}] 🔓 Lock 해제 완료", taskId);
+            currentRunner = null;
+            currentTaskId = null;
         }
+    }
+
+    // ============================================================
+    // ✅ 상태 조회
+    // ============================================================
+    public Map<String, Object> getStatusWithLogs(String taskId) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        String lookupId = (taskId == null || !progressStates.containsKey(taskId))
+                ? currentTaskId : taskId;
+        TaskStatusService.TaskStatus s = taskStatusService.getTaskStatus(lookupId);
+
+        if (activeLock.get() && lookupId != null) {
+            ProgressState st = progressStates.getOrDefault(lookupId, new ProgressState());
+            double progress = (st.dataTotal > 0)
+                    ? (st.dataSaved / (double) st.dataTotal) * 100.0
+                    : (st.krxTotal > 0 ? (st.krxSaved / (double) st.krxTotal) * 30.0 : 0.0);
+
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("progress", progress);
+            result.put("runner", currentRunner != null ? currentRunner : "알 수 없음");
+            result.put("dataSaved", st.dataSaved);
+            result.put("dataTotal", st.dataTotal);
+            result.put("krxSaved", st.krxSaved);
+            result.put("krxTotal", st.krxTotal);
+            result.put("krxPct", st.krxPct);
+
+            body.put("status", (s != null ? s.getStatus() : "LOCKED"));
+            body.put("runner", currentRunner);
+            body.put("result", result);
+            body.put("logs", taskLogs.getOrDefault(lookupId, Collections.emptyList()));
+
+            if (s != null && ("COMPLETED".equals(s.getStatus()) || "CANCELLED".equals(s.getStatus()))) {
+                body.put("reset", true);
+            }
+            return body;
+        }
+
+        body.put("status", "NOT_FOUND");
+        body.put("message", "현재 실행 중인 작업이 없습니다.");
+        return body;
+    }
+
+    // ============================================================
+    // ✅ 취소 처리
+    // ============================================================
+    public void cancelTask(String taskId) {
+        String lookupId = (taskId == null) ? currentTaskId : taskId;
+        Process p = runningProcesses.get(lookupId);
+        if (p != null && p.isAlive()) {
+            log.warn("[{}] 사용자 요청으로 프로세스 종료", lookupId);
+            try { p.destroyForcibly(); } catch (Exception ignore) {}
+            appendLog(lookupId, "⏹ 사용자 요청으로 취소됨");
+            taskStatusService.setTaskStatus(lookupId,
+                    new TaskStatusService.TaskStatus("CANCELLED",
+                            Map.of("reset", true, "message", "⏹ 취소됨", "runner", currentRunner),
+                            null));
+        }
+        activeLock.set(false);
+        currentRunner = null;
+        currentTaskId = null;
     }
 
     private void appendLog(String taskId, String line) {
@@ -189,81 +258,24 @@ public class StockBatchService {
         if (list.size() > MAX_LOG_LINES) list.remove(0);
     }
 
-    private void setCompleted(String taskId) {
-        ProgressState st = progressStates.getOrDefault(taskId, new ProgressState());
-        st.krxPct = 100.0;
-        Map<String, Object> res = new HashMap<>();
-        res.put("progress", 100);
-        res.put("message", "✅ 전체 완료");
-        res.put("krxPct", st.krxPct);
-        res.put("dataSaved", st.dataSaved);
-        res.put("dataTotal", st.dataTotal);
-        taskStatusService.setTaskStatus(taskId, new TaskStatusService.TaskStatus("COMPLETED", res, null));
-        appendLog(taskId, "[PROGRESS] 100.0 ✅ 전체 완료");
+    private void setCompleted(String taskId, String runner) {
         appendLog(taskId, "✅ 업데이트 완료");
+        taskStatusService.setTaskStatus(taskId,
+                new TaskStatusService.TaskStatus("COMPLETED",
+                        Map.of("reset", true, "progress", 100, "runner", runner,
+                                "message", "✅ 전체 완료"),
+                        null));
     }
 
     private void setFailed(String taskId, String err) {
-        taskStatusService.setTaskStatus(taskId, new TaskStatusService.TaskStatus("FAILED", null, err));
+        taskStatusService.setTaskStatus(taskId,
+                new TaskStatusService.TaskStatus("FAILED", null, err));
         appendLog(taskId, "❌ 실패: " + err);
     }
 
-    /** ✅ 상태 조회 */
-    public Map<String, Object> getStatusWithLogs(String taskId) {
-        TaskStatusService.TaskStatus s = taskStatusService.getTaskStatus(taskId);
-        Map<String, Object> body = new LinkedHashMap<>();
-
-        // 작업이 없는데 lock 중이면 → "다른 사용자가 업데이트 중입니다."
-        if (s == null) {
-            if (activeLock.get()) {
-                body.put("status", "FAILED");
-                body.put("message", "다른 사용자가 업데이트 중입니다. 잠시 후 다시 시도하세요.");
-            } else {
-                body.put("status", "NOT_FOUND");
-                body.put("message", "작업을 찾을 수 없습니다.");
-            }
-            return body;
-        }
-
-        body.put("status", s.getStatus());
-        Map<String, Object> result = new HashMap<>();
-        if (s.getResult() != null) result.putAll(s.getResult());
-
-        ProgressState st = progressStates.get(taskId);
-        if (st != null) {
-            result.put("krxPct", st.krxPct);
-            result.put("dataSaved", st.dataSaved);
-            result.put("dataTotal", st.dataTotal);
-        }
-
-        body.put("result", result);
-        if (s.getErrorMessage() != null)
-            body.put("errorMessage", s.getErrorMessage());
-        body.put("logs", taskLogs.getOrDefault(taskId, Collections.emptyList()));
-
-        return body;
-    }
-
-    public void cancelTask(String taskId) {
-        Process p = runningProcesses.get(taskId);
-        if (p != null && p.isAlive()) {
-            log.warn("[{}] 사용자 요청으로 프로세스 종료", taskId);
-            try { p.destroyForcibly(); } catch (Exception ignore) {}
-            appendLog(taskId, "⏹ 사용자 요청으로 취소됨");
-            ProgressState st = progressStates.getOrDefault(taskId, new ProgressState());
-            Map<String, Object> res = new HashMap<>();
-            res.put("progress", 0);
-            res.put("message", "취소됨");
-            res.put("krxPct", st.krxPct);
-            res.put("dataSaved", st.dataSaved);
-            res.put("dataTotal", st.dataTotal);
-            taskStatusService.setTaskStatus(taskId, new TaskStatusService.TaskStatus("CANCELLED", res, "사용자 취소"));
-        } else {
-            taskStatusService.setTaskStatus(taskId, new TaskStatusService.TaskStatus("CANCELLED",
-                    Map.of("message", "취소됨"), "실행 중인 작업이 없습니다."));
-        }
-        activeLock.set(false);
-    }
+    public boolean isLocked() { return activeLock.get(); }
+    public String getCurrentTaskId() { return currentTaskId; }
+    public String getCurrentRunner() { return currentRunner; }
 
     public record LogLine(int seq, String line) {}
 }

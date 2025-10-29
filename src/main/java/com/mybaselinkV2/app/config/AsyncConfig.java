@@ -1,10 +1,12 @@
 package com.mybaselinkV2.app.config;
 
+import java.util.concurrent.Executor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import java.util.concurrent.Executor;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 
 
 @Configuration
@@ -62,16 +64,28 @@ public class AsyncConfig {
     }
     */
 	
-	// 파이썬 호출 렉걸리는 현상 으로 추가
-    @Bean(name = "taskExecutor")
-    public Executor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(2);
-        executor.setQueueCapacity(0);
-        executor.setThreadNamePrefix("AsyncWorker-");
-        executor.initialize();
-        return executor;
-    }
+	/*
+	 * DelegatingSecurityContextAsyncTaskExecutor는
+		내부적으로 ThreadPoolTaskExecutor를 감싸서
+		@Async 메서드 실행 시 **현재 로그인한 사용자(SecurityContext)**를 그대로 전달해 줘.
+		
+		즉, SecurityContextHolder를 수동으로 복사할 필요도 없어.
+		
+		이걸로 “🚫 알 수 없음님 실행 중”은 이제 완전히 사라진다.
+		→ 항상 “🚫 admin님 실행 중 (33%)” 이렇게 정확히 표시돼.
+	 * 
+	 */
+	 @Bean(name = "taskExecutor")
+	    public Executor taskExecutor() {
+	        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+	        executor.setCorePoolSize(2);
+	        executor.setMaxPoolSize(2);
+	        executor.setQueueCapacity(0);
+	        executor.setThreadNamePrefix("AsyncWorker-");
+	        executor.initialize();
+
+	        // ✅ 핵심: SecurityContext를 Async Thread로 자동 전달하도록 래핑
+	        return new DelegatingSecurityContextAsyncTaskExecutor(executor);
+	    }
 	
 }

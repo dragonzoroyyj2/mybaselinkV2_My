@@ -8,22 +8,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title th:text="${title} ?: 'MyBaseLink'">MyBaseLink</title>
 
-  <!-- CSRF Token -->
+  <!-- ✅ CSRF Token: 전역(레이아웃)에만 둔다 -->
   <th:block th:if="${_csrf} != null">
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
   </th:block>
 
-  <!-- Font Awesome -->
+  <!-- ✅ 아이콘/폰트 -->
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- Common CSS -->
+  <!-- ✅ 공통 CSS (여기서만 로드) -->
   <link rel="stylesheet" href="/css/commonLayout.css">
   <link rel="stylesheet" href="/css/commonPagination.css">
   <link rel="stylesheet" href="/css/commonSearch.css">
   <link rel="stylesheet" href="/css/commonTable.css">
 
+  <!-- ✅ 레이아웃 보정 -->
+  <style>
+    /* 상단바(50px) 아래로 컨텐츠 밀기 */
+    main .content {
+      margin-top: 60px !important;
+      padding: 1rem;
+      box-sizing: border-box;
+      min-height: calc(100vh - 110px);
+      position: relative;
+      z-index: 1;
+    }
+    /* 오버레이는 상단바(50px) 바로 아래에서 시작 */
+    #sidebarOverlay {
+      top: 50px !important;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 50px);
+      background: rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+      position: fixed;
+      z-index: 3500;
+    }
+    #sidebarOverlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
 </head>
 
 <body>
@@ -31,27 +60,26 @@
   <!-- ✅ 상단바 -->
   <header th:replace="~{fragments/top :: topFragment}"></header>
 
-  <!-- ✅ 오버레이(전역 한 개만 존재해야 함) -->
+  <!-- ✅ 오버레이(전역: 1개만) -->
   <div id="sidebarOverlay"></div>
 
   <!-- ✅ 왼쪽 메뉴 -->
   <div th:replace="~{fragments/left :: leftFragment}"></div>
 
-  <!-- ✅ 메인 컨텐츠 -->
+  <!-- ✅ 메인 콘텐츠 (페이지가 여기에 끼워넣어짐) -->
   <main>
-    <div class="content" layout:fragment="content">
-      <!-- 페이지 본문 -->
-    </div>
+    <div class="content" layout:fragment="content"></div>
   </main>
 
   <!-- ✅ 하단 -->
   <footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
 
-  <!-- ✅ 사이드바 토글 글로벌 스크립트 -->
+  <!-- ✅ 전역 사이드바 토글: 여기서만 정의 -->
   <script>
     window.toggleSidebar = () => {
       const sidebar = document.querySelector(".sidebar");
       const overlay = document.getElementById("sidebarOverlay");
+      if (!sidebar || !overlay) return;
 
       const isOpen = sidebar.classList.contains("open");
       sidebar.classList.toggle("open", !isOpen);
@@ -61,13 +89,13 @@
     document.getElementById("sidebarOverlay").addEventListener("click", () => {
       const sidebar = document.querySelector(".sidebar");
       const overlay = document.getElementById("sidebarOverlay");
-
+      if (!sidebar || !overlay) return;
       sidebar.classList.remove("open");
       overlay.classList.remove("active");
     });
   </script>
 
-  <!-- ✅ 페이지별 스크립트 -->
+  <!-- ✅ 페이지별 스크립트 주입 자리 -->
   <th:block layout:fragment="pageScript"></th:block>
 
 </body>

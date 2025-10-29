@@ -26,6 +26,8 @@ python:
     dir: "${python.root.path}/python"  # python 폴더 기준 실행
   update_stock_listing:
     path: "${python.root.path}/python/stock/py/update_stock_listing.py"
+  find_last_close_downward:
+    path: "${python.root.path}/python/stock/stock_list/find_last_close_downward.py"
   stock:
     stock_listing:
       path: "${python.root.path}/python/stock/stock_list/stock_listing.json"

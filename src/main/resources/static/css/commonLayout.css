@@ -2,6 +2,9 @@
    commonLayout.css
    전체 톤 & 기본 설정 / 페이지 컨테이너
 =============================================== */
+html, body {
+  height: 100%;
+}
 body {
   font-family: "Segoe UI", "Noto Sans KR", Arial, sans-serif;
   font-size: 0.95rem;
@@ -10,6 +13,7 @@ body {
   color: #111827;
 }
 
+/* 제목 기본 */
 h2 {
   margin-top: 0;
   margin-bottom: 0.6rem;
@@ -19,6 +23,7 @@ h2 {
   color: #111827;
 }
 
+/* 페이지 컨텐츠 컨테이너 */
 .content-container {
   width: 100%;
   max-width: 1600px;
