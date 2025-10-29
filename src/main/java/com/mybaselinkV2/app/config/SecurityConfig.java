@@ -51,10 +51,14 @@ public class SecurityConfig {
                 .requestMatchers("/pages/**").authenticated()
                 // KRX는 공개
                 .requestMatchers("/api/krx/**").permitAll()
-                // 상태 조회는 모두 허용
-                .requestMatchers("/api/stock/batch/status/**").permitAll()
-                // 업데이트/취소는 인증자만 가능
+                
+                // ✅ 상태 조회는 모두 허용
+                .requestMatchers("/api/stock/batch/active", "/api/stock/batch/status/**").permitAll()
+
+                // ✅ 업데이트/취소는 인증자만 가능
                 .requestMatchers("/api/stock/batch/update/**", "/api/stock/batch/cancel/**").authenticated()
+                
+                
                 // 나머지는 모두 인증 필요
                 .anyRequest().authenticated()
             )
