@@ -1,6 +1,7 @@
 package com.mybaselinkV2.app.controller;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -94,23 +95,35 @@ public class StockBatchController {
 
     // 활성 상태 조회(페이지 진입시)
     @GetMapping("/active")
-    public ResponseEntity<?> active() {
-        boolean active = stockBatchService.isLocked();
-        String tid = stockBatchService.getCurrentTaskId();
-        String runner = stockBatchService.getCurrentRunner();
-        double progress = 0.0;
-        if (tid != null) {
-            TaskStatusService.TaskStatus ts = taskStatusService.getTaskStatus(tid);
-            if (ts != null && ts.getResult() != null) {
-                Object p = ts.getResult().get("progress");
-                if (p instanceof Number) progress = ((Number)p).doubleValue();
+    public ResponseEntity<Map<String, Object>> active() {
+        Map<String, Object> body = new HashMap<>();
+        try {
+            boolean locked = stockBatchService.isLocked();
+            body.put("active", locked);
+            body.put("taskId", stockBatchService.getCurrentTaskId());
+            body.put("runner", stockBatchService.getCurrentRunner());
+
+            // ✅ 진행률 상태도 있으면 같이 반환
+            if (locked) {
+                var taskId = stockBatchService.getCurrentTaskId();
+                var s = taskStatusService.getTaskStatus(taskId);
+                if (s != null && s.getResult() != null) {
+                    Object progress = s.getResult().getOrDefault("progress", 0);
+                    body.put("progress", progress);
+                } else {
+                    body.put("progress", 0);
+                }
+            } else {
+                body.put("progress", 0);
             }
+
+            return ResponseEntity.ok(body);
+        } catch (Exception e) {
+            log.error("active() 조회 중 오류", e);
+            body.put("active", false);
+            body.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
         }
-        return ResponseEntity.ok(Map.of(
-                "active", active,
-                "taskId", tid,
-                "runner", runner == null ? "알 수 없음" : runner,
-                "progress", progress
-        ));
     }
+
 }
