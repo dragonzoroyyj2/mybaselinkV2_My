@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mybaselinkV2.app.entity.JwtTokenEntity;
-import com.mybaselinkV2.app.respsitory.JwtTokenRepository;
+import com.mybaselinkV2.app.repository.JwtTokenRepository;
 
 /**
  * 🔑 JwtService

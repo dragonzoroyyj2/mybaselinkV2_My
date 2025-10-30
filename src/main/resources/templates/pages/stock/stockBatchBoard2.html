@@ -9,136 +9,29 @@
 <title>📊 Stock Batch Dashboard</title>
 
 <style>
-  .content-container {
-    width: 100%;
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 1rem 2%;
-    box-sizing: border-box;
-  }
-  h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 0.4rem;
-    color: #111827;
-  }
-
-  .card-box, .dashboard-cards, .log-wrapper {
-    background: #fff;
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    margin-top: 14px;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #fff;
-    min-width: 110px;
-    text-align: center;
-  }
-  .btn-start { background:#2563eb; }
-  .btn-cancel { background:#dc2626; }
-  .btn:disabled { opacity:0.5; cursor:not-allowed; }
-
-  .controls {
-    display: flex;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  input[type=number] {
-    width:90px;
-    padding:0.45rem 0.6rem;
-    border:1px solid #bbb;
-    border-radius:6px;
-  }
-
-  .dashboard-cards {
-    display:flex;
-    flex-wrap:wrap;
-    gap:14px;
-  }
-  .card {
-   flex:1 1 300px;
-    background:#fff;
-    border-radius:12px;
-    padding:16px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    display:flex;
-    flex-direction:column;
-  }
-  .card-header {
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-size:0.95rem;
-    font-weight:600;
-    margin-bottom:6px;
-  }
-  .card-header i { color:#2563eb; }
-  .card-header .right {
-    margin-left:auto;
-    font-weight:600;
-    font-size:0.9rem;
-  }
-
-  .progress-bar {
-    width:100%;
-    background:#e5e7eb;
-    height:14px;
-    border-radius:7px;
-    margin-top:10px;
-    overflow:hidden;
-  }
-  .progress-bar div { height:100%; width:0%; transition:width .3s; }
-  .bar-total div { background:#2563eb; }
-  .bar-krx div { background:#10b981; }
-  .bar-data div { background:#f59e0b; }
-
-  .status { display:none; }
-  .msg { display:none; }
-
-  .log-wrapper h3 {
-    margin:0;
-    font-size:1rem;
-    font-weight:600;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-  }
-  .copy-btn {
-    font-size:0.9rem;
-    cursor:pointer;
-    color:#007bff;
-    margin-left:8px;
-  }
-  .copy-btn:hover {
-    color:#0056b3;
-    text-decoration:underline;
-  }
-
-  .log-box {
-    background:#111;
-    color:#eee;
-    font-family:Consolas, monospace;
-    font-size:13px;
-    padding:10px;
-    border-radius:10px;
-    height:350px;
-    overflow-y:auto;
-    white-space:pre-wrap;
-    border:1px solid #333;
-    margin-top:6px;
-  }
+  .content-container{width:100%;max-width:1600px;margin:0 auto;padding:1rem 2%;box-sizing:border-box;}
+  h2{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;color:#111827;}
+  .card-box,.dashboard-cards,.log-wrapper{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,.05);margin-top:14px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-size:.9rem;font-weight:600;color:#fff;min-width:110px;text-align:center;}
+  .btn-start{background:#2563eb;}
+  .btn-cancel{background:#dc2626;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .controls{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;}
+  input[type=number]{width:90px;padding:.45rem .6rem;border:1px solid #bbb;border-radius:6px;}
+  .dashboard-cards{display:flex;flex-wrap:wrap;gap:14px;}
+  .card{flex:1 1 300px;background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,.05);display:flex;flex-direction:column;}
+  .card-header{display:flex;align-items:center;gap:6px;font-size:.95rem;font-weight:600;margin-bottom:6px;}
+  .card-header i{color:#2563eb;}
+  .card-header .right{margin-left:auto;font-weight:600;font-size:.9rem;}
+  .progress-bar{width:100%;background:#e5e7eb;height:14px;border-radius:7px;margin-top:10px;overflow:hidden;}
+  .progress-bar div{height:100%;width:0%;transition:width .3s;}
+  .bar-total div{background:#2563eb;}
+  .bar-krx div{background:#10b981;}
+  .bar-data div{background:#f59e0b;}
+  .log-wrapper h3{display:flex;align-items:center;justify-content:space-between;margin:0;font-size:1rem;}
+  .copy-btn{font-size:.9rem;cursor:pointer;user-select:none;margin-left:10px;color:#444;opacity:.7;}
+  .copy-btn:hover{opacity:1;text-decoration:none;}
+  .log-box{background:#111;color:#eee;font-family:Consolas,mono;font-size:13px;padding:10px;border-radius:10px;height:350px;overflow-y:auto;white-space:pre-wrap;margin-top:6px;}
 </style>
 </head>
 
@@ -146,7 +39,7 @@
 <div layout:fragment="content">
   <div class="content-container">
     <h2>📊 종목 일괄 업데이트 Dashboard</h2>
-    <p>진행상황 + 실시간 로그 확인 가능합니다.</p>
+    <p>진행상황 + 실시간 로그 확인 가능</p>
 
     <div class="card-box">
       <div class="controls">
@@ -165,8 +58,8 @@
     <div class="dashboard-cards">
       <div class="card">
         <div class="card-header">
-          <i class="fas fa-layer-group"></i>전체 진행률 
-          <span class="right" id="badgeTotal">진행중</span>
+          <i class="fas fa-layer-group"></i>전체 진행률
+          <span class="right" id="badgeTotal">-</span>
         </div>
         <strong id="pctTotal">0%</strong>
         <div class="progress-bar bar-total"><div id="barTotal"></div></div>
@@ -194,9 +87,9 @@
     <div class="log-wrapper">
       <h3>
         실시간 로그
-        <span class="copy-btn" id="copyLogBtn">📋 로그복사</span>
+        <span class="copy-btn" id="copyLogBtn">📄</span>
       </h3>
-      <div id="logBox" class="log-box">로그가 표시됩니다...</div>
+      <div id="logBox" class="log-box">로그 대기중...</div>
     </div>
   </div>
 </div>
@@ -207,7 +100,9 @@
   const API = {
     start:(w,f)=>`/api/stock/batch/update?workers=${w}${f?"&force=true":""}`,
     status:(id)=>`/api/stock/batch/status/${id}`,
-    cancel:(id)=>`/api/stock/batch/cancel/${id}`
+    statusCurrent:()=>`/api/stock/batch/status/current`,
+    cancel:(id)=>`/api/stock/batch/cancel/${id}`,
+    active:()=>`/api/stock/batch/active`
   };
 
   const $workers=document.getElementById("workers"),
@@ -220,151 +115,207 @@
         $pctTotal=document.getElementById("pctTotal"),
         $pctKrx=document.getElementById("pctKrx"),
         $pctData=document.getElementById("pctData"),
-        $log=document.getElementById("logBox"),
         $badgeTotal=document.getElementById("badgeTotal"),
         $badgeKrx=document.getElementById("badgeKrx"),
         $badgeData=document.getElementById("badgeData"),
         $hint=document.getElementById("adminHint"),
-        $copyLogBtn=document.getElementById("copyLogBtn");
+        $log=document.getElementById("logBox"),
+        $copy=document.getElementById("copyLogBtn");
 
-  let taskId=null, poll=null, lastLogSeq=0, polling=false;
+  let taskId=null, poll=null, lastSeq=0, isOwner=false;
 
-  function setBar(bar,pct,v){
-    v=Math.max(0,Math.min(100,Math.round(v||0)));
+  function setBar(bar,pct,val){
+    const v=Math.min(100,Math.max(0,Number.isFinite(val)?Math.round(val):0));
     bar.style.width=v+"%"; pct.textContent=v+"%";
   }
-
-  function disableUI(dis){
-    $btnStart.disabled=dis;
-    $btnCancel.disabled=!dis;
-    $workers.disabled=dis;
-    $force.disabled=dis;
+  function disableInputs(dis){ $workers.disabled=dis; $force.disabled=dis; }
+  function enableOwnerUI(){ $btnStart.disabled=true; $btnCancel.disabled=false; disableInputs(true); }
+  function disableAllUI(){ $btnStart.disabled=true; $btnCancel.disabled=true; disableInputs(true); }
+  function enableIdleUI(){ $btnStart.disabled=false; $btnCancel.disabled=true; disableInputs(false); }
+  function appendLog(line){
+    if(!$log) return;
+    if($log.textContent.includes("대기중")) $log.textContent="";
+    $log.textContent += (line||"") + "\n";
+    $log.scrollTop = $log.scrollHeight;
   }
-
   function resetAll(){
+    taskId=null; isOwner=false; lastSeq=0;
     setBar($barTotal,$pctTotal,0);
     setBar($barKrx,$pctKrx,0);
     setBar($barData,$pctData,0);
-    $log.textContent="";
-    $badgeTotal.textContent="진행중";
-    $badgeKrx.textContent="";
-    $badgeData.textContent="";
-    lastLogSeq=0;
-    if(poll){clearInterval(poll);poll=null;}
-    polling=false;
+    $badgeTotal.textContent="-"; $badgeKrx.textContent=""; $badgeData.textContent="";
+    $log.textContent="로그 대기중...";
     $hint.innerHTML="※ 관리자만 실행 가능";
+    if(poll){clearInterval(poll); poll=null;}
+    enableIdleUI();
   }
 
-  function applyProgress(data){
-    const st=data?.result ?? {};
-
-    if(typeof st.progress==="number") setBar($barTotal,$pctTotal,st.progress);
-
-    if(st.dataTotal>0){
-      const ds=Number(st.dataSaved||0), dt=Number(st.dataTotal||0);
-      const p=Math.round((ds/dt)*100);
-      setBar($barData,$pctData,p);
-      if(ds>=dt) $badgeData.textContent=`✅ 완료 ${dt}/${dt}`;
-      else $badgeData.textContent=`${ds}/${dt}`;
-    }
-
-    if(typeof st.krxPct==="number"){
-      const ks=Number(st.krxSaved||0), kt=Number(st.krxTotal||0);
-      setBar($barKrx,$pctKrx,Math.round(st.krxPct));
-      if(kt>0){
-        if(ks>=kt) $badgeKrx.textContent=`✅ 완료 ${kt}/${kt}`;
-        else $badgeKrx.textContent=`${ks}/${kt}`;
-      }
-    }
-
-    if(data.status==="COMPLETED"){
-      setBar($barKrx,$pctKrx,100);
-      setBar($barData,$pctData,100);
-      setBar($barTotal,$pctTotal,100);
-      $badgeTotal.textContent="✅ 업데이트 완료";
-      disableUI(false);
+  async function safeFetchJSON(url, options){
+    try{
+      const res = await fetch(url, {
+        ...options,
+        credentials: 'include' // ✅ JWT 쿠키 포함
+      });
+      if(!res.ok) return {};
+      const ct = res.headers.get("content-type")||"";
+      if(!ct.includes("application/json")) return {};
+      return await res.json();
+    }catch(e){
+      console.warn("fetch 오류:", e);
+      return {};
     }
   }
 
   async function pollStatus(){
-    if(polling||!taskId)return; polling=true;
-    try{
-      const res=await fetch(API.status(taskId),{
-        headers:{ "Accept":"application/json" },credentials:"include"
-      });
-      if(!res.ok){polling=false;return;}
-      const data=await res.json();
-      applyProgress(data);
+    const url = isOwner && taskId ? API.status(taskId) : API.statusCurrent();
+    const data = await safeFetchJSON(url);
 
-      if(data.logs){
-        let latest=data.logs[data.logs.length-1];
-        if(latest && latest.seq > lastLogSeq){
-          if($log.textContent.trim()==="" || $log.textContent.includes("로그"))
-            $log.textContent=latest.line;
-          else
-            $log.textContent+="\n"+latest.line;
-          lastLogSeq=latest.seq;
-          $log.scrollTop=$log.scrollHeight;
-        }
+    // ✅ LOCKED 상태에서도 퍼센트 동기화
+    if(data.status === "LOCKED"){
+    	  const r = data.result || {};
+    	  const runner = r.runner || data.runner || "알 수 없음";
+    	  const pct = Math.round(r.progress || 0);
+    	  $hint.innerHTML = `<span style="color:#dc2626;font-weight:700;">🚫 ${runner}님 실행 중 (${pct}%)</span>`;
+    	  disableAllUI();
+
+    	  // ✅ 진행률 바도 계속 갱신되도록 return 제거
+    	  setBar($barTotal, $pctTotal, pct);
+    	  if (r.krxTotal > 0 && r.krxSaved >= 0) {
+    	    const p2 = Math.round((r.krxSaved / r.krxTotal) * 100);
+    	    setBar($barKrx, $pctKrx, p2);
+    	    $badgeKrx.textContent = `${r.krxSaved}/${r.krxTotal}`;
+    	  }
+    	  if (r.dataTotal > 0 && r.dataSaved >= 0) {
+    	    const p3 = Math.round((r.dataSaved / r.dataTotal) * 100);
+    	    setBar($barData, $pctData, p3);
+    	    $badgeData.textContent = `${r.dataSaved}/${r.dataTotal}`;
+    	  }
+
+    	  // 🔥 더 이상 return 안 함
+    	}
+
+
+    if(data.status==="NOT_FOUND"){
+      resetAll();
+      return;
+    }
+
+    const r = data.result||{};
+
+    if(isOwner){
+      if(r.progress!=null) setBar($barTotal,$pctTotal,r.progress);
+      if(r.dataTotal>0){
+        const ds=+r.dataSaved||0, dt=+r.dataTotal||0;
+        const p = dt>0 ? Math.round(ds*100/dt) : 0;
+        setBar($barData,$pctData,p);
+        $badgeData.textContent = (dt>0 && ds>=dt) ? `✅ 완료 ${dt}/${dt}` : `${ds}/${dt}`;
+      }
+      if(r.krxTotal>0){
+        const ks=+r.krxSaved||0, kt=+r.krxTotal||0;
+        const p = kt>0 ? Math.round(ks*100/kt) : 0;
+        setBar($barKrx,$pctKrx,p);
+        $badgeKrx.textContent = (kt>0 && ks>=kt) ? `✅ 완료 ${kt}/${kt}` : `${ks}/${kt}`;
+      }
+      if(r.runner){
+        $hint.innerHTML = `<span style="color:#2563eb;font-weight:700;">⚙️ ${r.runner}님 실행 중 (${Math.round(r.progress||0)}%)</span>`;
       }
 
-      if(["COMPLETED","FAILED","CANCELLED"].includes(data.status)){
-        clearInterval(poll);poll=null;disableUI(false);
-        if(data.status==="CANCELLED"){
-          $hint.innerHTML=`※ 관리자만 실행 가능 <span style="color:#dc2626;font-weight:600;margin-left:6px;">⏹ 취소되었습니다.</span>`;
-          if($log.textContent.trim()==="" || $log.textContent.includes("로그"))
-            $log.textContent="⏹ 사용자 요청으로 취소됨";
-          else
-            $log.textContent+="\n⏹ 사용자 요청으로 취소됨";
-          $log.scrollTop=$log.scrollHeight;
-        }
+      const logs = data.logs||[];
+      if(logs.length > lastSeq){
+        logs.slice(lastSeq).forEach(l => appendLog(l.line));
+        lastSeq = logs.length;
       }
 
-    }catch(e){console.error(e);}
-    polling=false;
+      if(data.status==="COMPLETED"){
+        setBar($barKrx,$pctKrx,100);
+        setBar($barData,$pctData,100);
+        setBar($barTotal,$pctTotal,100);
+        $badgeTotal.textContent="✅ 업데이트 완료";
+        if(poll){clearInterval(poll); poll=null;}
+        enableIdleUI();
+        return;
+      }
+      if(data.status==="CANCELLED"){
+        appendLog("⏹ 취소됨");
+        if(poll){clearInterval(poll); poll=null;}
+        enableIdleUI();
+        return;
+      }
+    } else {
+      if(data.status==="COMPLETED" || data.status==="CANCELLED"){
+        resetAll();
+        return;
+      }
+      disableAllUI();
+    }
   }
 
-  $btnStart.onclick=async()=>{
-    resetAll(); disableUI(true);
+  // ✅ 페이지 진입시 현재 상태 확인 (403 방지 포함)
+  (async function bootstrap(){
+    resetAll();
+    const info = await safeFetchJSON(API.active());
+    if(info.active && info.taskId){
+      taskId = null;
+      isOwner = false;
+      const runner = info.runner || "알 수 없음";
+      const pct = Math.round(info.progress||0);
+      $hint.innerHTML = `<span style="color:#dc2626;font-weight:700;">🚫 ${runner}님 실행 중 (${pct}%)</span>`;
+      disableAllUI();
+      poll = setInterval(pollStatus, 800);
+    } else {
+      enableIdleUI();
+    }
+  })();
+
+  // ✅ 시작 버튼
+  $btnStart.onclick = async ()=>{
+    resetAll();
+    enableOwnerUI();
     const w=+$workers.value||8, f=$force.checked;
-    try{
-      const res=await fetch(API.start(w,f),{
-        method:"POST",headers:{ "Accept":"application/json" },credentials:"include"
-      });
-      const data=await res.json();
-      if(!res.ok){disableUI(false);return;}
-      taskId=data.taskId;
-      poll=setInterval(pollStatus,700);
-    }catch(e){console.error(e);disableUI(false);}
+    const res = await fetch(API.start(w,f),{method:"POST", credentials:'include'}); // ✅ 쿠키포함
+    if(res.status===409){
+      const d = await safeFetchJSON(API.active());
+      const runner = d.runner || "알 수 없음";
+      const pct = Math.round(d.progress||0);
+      $hint.innerHTML = `<span style="color:#dc2626;font-weight:700;">🚫 ${runner}님 실행 중 (${pct}%)</span>`;
+      disableAllUI();
+      poll = setInterval(pollStatus, 1000);
+      return;
+    }
+    if(!res.ok){
+      enableIdleUI();
+      return;
+    }
+    const d=await res.json();
+    taskId=d.taskId;
+    isOwner=true;
+    enableOwnerUI();
+    poll = setInterval(pollStatus, 700);
   };
 
-  $btnCancel.onclick=async()=>{
-    if(!taskId)return;
-    $btnCancel.disabled=true;
-    await fetch(API.cancel(taskId),{ method:"POST", credentials:"include" });
-
-    clearInterval(poll);
-    poll=null;
-    taskId=null;
-    disableUI(false);
-
-    $hint.innerHTML=`※ 관리자만 실행 가능 <span style="color:#dc2626;font-weight:600;margin-left:6px;">⏹ 취소되었습니다.</span>`;
-    if($log.textContent.trim()==="" || $log.textContent.includes("로그"))
-      $log.textContent="⏹ 사용자 요청으로 취소됨";
-    else
-      $log.textContent+="\n⏹ 사용자 요청으로 취소됨";
-    $log.scrollTop=$log.scrollHeight;
+  // ✅ 취소 (소유자만)
+  $btnCancel.onclick = async ()=>{
+    if(!isOwner || !taskId) return;
+    const res = await fetch(API.cancel(taskId),{method:"POST", credentials:'include'});
+    if(res.status===403){
+      appendLog("⛔ 취소 권한이 없습니다.");
+      return;
+    }
+    appendLog("⏹ 사용자 요청으로 취소됨");
+    if(poll){clearInterval(poll); poll=null;}
+    enableIdleUI();
   };
 
-  $copyLogBtn.onclick=()=>{
-    navigator.clipboard.writeText($log.textContent).then(()=>{
-      $copyLogBtn.textContent="✅ 복사됨";
-      setTimeout(()=> $copyLogBtn.textContent="📋 복사",1000);
-    });
+  // ✅ 로그 복사
+  $copy.onclick = ()=>{
+    navigator.clipboard.writeText($log.textContent||"");
+    const prev=$copy.textContent; $copy.textContent="✅"; setTimeout(()=>{$copy.textContent=prev;},900);
   };
 
 })();
 </script>
+
+
 </th:block>
 
 </body>

@@ -1,7 +1,8 @@
 package com.mybaselinkV2.app.jwt;
 
 import com.mybaselinkV2.app.entity.JwtTokenEntity;
-import com.mybaselinkV2.app.respsitory.JwtTokenRepository;
+import com.mybaselinkV2.app.repository.JwtTokenRepository;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

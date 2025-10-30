@@ -2,8 +2,9 @@ package com.mybaselinkV2.app.service;
 
 import com.mybaselinkV2.app.entity.LoginUserEntity;
 import com.mybaselinkV2.app.entity.UserEntity;
-import com.mybaselinkV2.app.respsitory.LoginUserRepository;
-import com.mybaselinkV2.app.respsitory.UserRepository;
+import com.mybaselinkV2.app.repository.LoginUserRepository;
+import com.mybaselinkV2.app.repository.UserRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

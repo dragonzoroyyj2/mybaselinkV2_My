@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mybaselinkV2.app.respsitory.JwtTokenRepository;
+import com.mybaselinkV2.app.repository.JwtTokenRepository;
 
 /**
  * ⏰ JwtTokenCleanupScheduler

@@ -32,13 +32,19 @@ python:
     stock_listing:
       path: "${python.root.path}/python/stock/stock_list/stock_listing.json"
 
-
 ###########################################################################
-# 🐘 PostgreSQL DB 접속 설정 (집)
-# - DB 주소 및 계정 비밀정보가 위치
+# ✅ DataSource (PostgreSQL 접속)
+# - 반드시 url/username/password 지정해야 연결됨
+# - driver-class-name은 명시적으로 지정
 ###########################################################################
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/mybaselink_db
-    username: mybaseuser
-    password: mybaseuser1234
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/mybaselink_db    # ✅ DB URL(집)
+    username: mybaseuser                                   # ✅ DB 사용자(집)
+    password: mybaseuser1234                               # ✅ DB 비밀번호(집)
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

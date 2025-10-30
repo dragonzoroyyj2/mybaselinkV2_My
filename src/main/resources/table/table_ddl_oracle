@@ -1,0 +1,271 @@
+--------------------------------------------------------------------------------
+-- Oracle 11g (SID=orcl)용 스키마 스크립트 (소유자: 현재 접속한 사용자 = MYBASELINK 가정)
+-- 주의: 필요 시 다른 스키마에서 실행하면 테이블/시퀀스/트리거 명 앞에 스키마 접두사 추가
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- 0) 안전한 DROP (기존 객체가 있을 수 있으므로 에러 무시 처리)
+--------------------------------------------------------------------------------
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE users CASCADE CONSTRAINTS PURGE'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE roles CASCADE CONSTRAINTS PURGE'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE user_roles CASCADE CONSTRAINTS PURGE'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE login_users CASCADE CONSTRAINTS PURGE'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE jwt_tokens CASCADE CONSTRAINTS PURGE'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF; END;
+/
+-- 시퀀스
+BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE users_seq'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -2289 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE roles_seq'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -2289 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE user_roles_id_seq'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -2289 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE login_users_seq'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -2289 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE jwt_tokens_seq'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -2289 THEN RAISE; END IF; END;
+/
+-- 트리거
+BEGIN EXECUTE IMMEDIATE 'DROP TRIGGER users_bi'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -4080 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TRIGGER roles_bi'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -4080 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TRIGGER user_roles_bi'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -4080 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TRIGGER login_users_bi'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -4080 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TRIGGER jwt_tokens_bi'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -4080 THEN RAISE; END IF; END;
+/
+
+--------------------------------------------------------------------------------
+-- 1) ROLES
+--------------------------------------------------------------------------------
+CREATE TABLE roles (
+    id           NUMBER(19)            NOT NULL,
+    "name"       VARCHAR2(50 CHAR)     NOT NULL,
+    description  CLOB                  NULL,
+    CONSTRAINT roles_pkey      PRIMARY KEY (id),
+    CONSTRAINT roles_name_key  UNIQUE ("name")
+);
+
+CREATE SEQUENCE roles_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER roles_bi
+BEFORE INSERT ON roles
+FOR EACH ROW
+BEGIN
+    IF :NEW.id IS NULL THEN
+        SELECT roles_seq.NEXTVAL INTO :NEW.id FROM dual;
+    END IF;
+END;
+/
+SHOW ERRORS
+
+--------------------------------------------------------------------------------
+-- 2) USERS
+--------------------------------------------------------------------------------
+CREATE TABLE users (
+    id           NUMBER(19)                            NOT NULL,
+    username     VARCHAR2(50 CHAR)                     NOT NULL,
+    "password"   VARCHAR2(255 CHAR)                    NOT NULL,
+    email        VARCHAR2(100 CHAR),
+    full_name    VARCHAR2(100 CHAR),
+    phone        VARCHAR2(20 CHAR),
+    "role"       VARCHAR2(50 CHAR)  DEFAULT 'USER',
+    status       VARCHAR2(10 CHAR)  DEFAULT 'active',
+    last_login   TIMESTAMP(6) WITH TIME ZONE,
+    created_at   TIMESTAMP(6) WITH TIME ZONE DEFAULT SYSTIMESTAMP,
+    updated_at   TIMESTAMP(6) WITH TIME ZONE DEFAULT SYSTIMESTAMP,
+    CONSTRAINT users_pkey          PRIMARY KEY (id),
+    CONSTRAINT users_username_key  UNIQUE (username),
+    CONSTRAINT users_email_key     UNIQUE (email)
+);
+
+CREATE SEQUENCE users_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER users_bi
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+    IF :NEW.id IS NULL THEN
+        SELECT users_seq.NEXTVAL INTO :NEW.id FROM dual;
+    END IF;
+
+    IF :NEW.created_at IS NULL THEN
+        :NEW.created_at := SYSTIMESTAMP;
+    END IF;
+
+    IF :NEW.updated_at IS NULL THEN
+        :NEW.updated_at := SYSTIMESTAMP;
+    END IF;
+END;
+/
+SHOW ERRORS
+
+--------------------------------------------------------------------------------
+-- 3) LOGIN_USERS
+--------------------------------------------------------------------------------
+CREATE TABLE login_users (
+    id         NUMBER(19)            NOT NULL,
+    email      VARCHAR2(100 CHAR),
+    "name"     VARCHAR2(50 CHAR),
+    "password" VARCHAR2(100 CHAR)    NOT NULL,
+    "role"     VARCHAR2(20 CHAR)     NOT NULL,
+    username   VARCHAR2(50 CHAR)     NOT NULL,
+    CONSTRAINT login_users_pkey PRIMARY KEY (id),
+    CONSTRAINT ukniit304xfekfcto33il61l7ok UNIQUE (username)
+);
+
+CREATE SEQUENCE login_users_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER login_users_bi
+BEFORE INSERT ON login_users
+FOR EACH ROW
+BEGIN
+    IF :NEW.id IS NULL THEN
+        SELECT login_users_seq.NEXTVAL INTO :NEW.id FROM dual;
+    END IF;
+END;
+/
+SHOW ERRORS
+
+--------------------------------------------------------------------------------
+-- 4) JWT_TOKENS
+--------------------------------------------------------------------------------
+CREATE TABLE jwt_tokens (
+    id          NUMBER(19)                            NOT NULL,
+    username    VARCHAR2(255 CHAR)                    NOT NULL,
+    "token"     VARCHAR2(512 CHAR)                    NOT NULL,
+    created_at  TIMESTAMP(6) WITH TIME ZONE DEFAULT SYSTIMESTAMP,
+    issued_at   TIMESTAMP(6) WITH TIME ZONE,
+    expires_at  TIMESTAMP(6) WITH TIME ZONE,
+    revoked     NUMBER(1) DEFAULT 0                   NULL,
+    CONSTRAINT jwt_tokens_pkey      PRIMARY KEY (id),
+    CONSTRAINT jwt_tokens_token_uk  UNIQUE ("token"),
+    CONSTRAINT jwt_tokens_revoked_ck CHECK (revoked IN (0,1))
+);
+
+CREATE SEQUENCE jwt_tokens_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER jwt_tokens_bi
+BEFORE INSERT ON jwt_tokens
+FOR EACH ROW
+BEGIN
+    IF :NEW.id IS NULL THEN
+        SELECT jwt_tokens_seq.NEXTVAL INTO :NEW.id FROM dual;
+    END IF;
+    IF :NEW.created_at IS NULL THEN
+        :NEW.created_at := SYSTIMESTAMP;
+    END IF;
+END;
+/
+SHOW ERRORS
+
+-- 인덱스 (요청사항 반영: token, username)
+CREATE INDEX idx_jwt_token_token   ON jwt_tokens ("token");
+CREATE INDEX idx_jwt_token_username ON jwt_tokens (username);
+
+--------------------------------------------------------------------------------
+-- 5) USER_ROLES (복합 PK + 개별 식별자 ID 컬럼 유지)
+--------------------------------------------------------------------------------
+CREATE TABLE user_roles (
+    user_id  NUMBER(19) NOT NULL,
+    role_id  NUMBER(19) NOT NULL,
+    id       NUMBER(19) NOT NULL,
+    CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role_id)
+);
+
+-- 개별 ID용 시퀀스/트리거 (원문에 ID 컬럼 존재하므로 유지)
+CREATE SEQUENCE user_roles_id_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER user_roles_bi
+BEFORE INSERT ON user_roles
+FOR EACH ROW
+BEGIN
+    IF :NEW.id IS NULL THEN
+        SELECT user_roles_id_seq.NEXTVAL INTO :NEW.id FROM dual;
+    END IF;
+END;
+/
+SHOW ERRORS
+
+-- 외래키
+ALTER TABLE user_roles ADD CONSTRAINT user_roles_user_id_fkey
+  FOREIGN KEY (user_id) REFERENCES users(id);
+
+ALTER TABLE user_roles ADD CONSTRAINT user_roles_role_id_fkey
+  FOREIGN KEY (role_id) REFERENCES roles(id);
+
+--------------------------------------------------------------------------------
+-- 6) 초기 데이터 (요청된 USERS 2건, bcrypt 해시 유지)
+--    비밀번호 해시: $2a$10$h3rLfhczAHiiKNGjMfYytO5snHTtwY3QlFUptOS0Upu6DYFhnBK/q
+--    created_at/updated_at: 2025-10-11 16:35:53.467 +0900
+--------------------------------------------------------------------------------
+-- 타임존 포함 호환 포맷 사용
+-- TO_TIMESTAMP_TZ('YYYY-MM-DD HH24:MI:SS.FF TZH:TZM')
+INSERT INTO users (id, username, "password", email, full_name, phone, "role", status, last_login, created_at, updated_at)
+VALUES (
+    1,
+    'admin',
+    '$2a$10$h3rLfhczAHiiKNGjMfYytO5snHTtwY3QlFUptOS0Upu6DYFhnBK/q',
+    'admin@example.com',
+    '관리자',
+    '010-0000-0000',
+    'ADMIN',
+    'active',
+    NULL,
+    TO_TIMESTAMP_TZ('2025-10-11 16:35:53.467 +09:00','YYYY-MM-DD HH24:MI:SS.FF TZH:TZM'),
+    TO_TIMESTAMP_TZ('2025-10-11 16:35:53.467 +09:00','YYYY-MM-DD HH24:MI:SS.FF TZH:TZM')
+);
+
+INSERT INTO users (id, username, "password", email, full_name, phone, "role", status, last_login, created_at, updated_at)
+VALUES (
+    2,
+    'test',
+    '$2a$10$h3rLfhczAHiiKNGjMfYytO5snHTtwY3QlFUptOS0Upu6DYFhnBK/q',
+    'test@example.com',
+    'test',
+    '010-0000-0000',
+    'ADMIN',
+    'active',
+    NULL,
+    TO_TIMESTAMP_TZ('2025-10-11 16:35:53.467 +09:00','YYYY-MM-DD HH24:MI:SS.FF TZH:TZM'),
+    TO_TIMESTAMP_TZ('2025-10-11 16:35:53.467 +09:00','YYYY-MM-DD HH24:MI:SS.FF TZH:TZM')
+);
+
+COMMIT;
+
+--------------------------------------------------------------------------------
+-- 7) 시퀀스 동기화 (수동 ID 삽입(1,2) 이후 다음 INSERT 충돌 방지)
+--    각 시퀀스를 해당 테이블의 MAX(id)+1 로 맞춤
+--------------------------------------------------------------------------------
+DECLARE
+    v_max NUMBER;
+    v_curr NUMBER;
+    PROCEDURE sync_seq(p_seq VARCHAR2, p_table VARCHAR2, p_col VARCHAR2) IS
+    BEGIN
+        EXECUTE IMMEDIATE 'SELECT NVL(MAX('||p_col||'),0) + 1 FROM '||p_table INTO v_max;
+        EXECUTE IMMEDIATE 'SELECT '||p_seq||'.NEXTVAL FROM dual' INTO v_curr; -- currval을 얻기 위해 1회 증가
+        IF v_curr < v_max THEN
+            EXECUTE IMMEDIATE 'ALTER SEQUENCE '||p_seq||' INCREMENT BY '||(v_max - v_curr);
+            EXECUTE IMMEDIATE 'SELECT '||p_seq||'.NEXTVAL FROM dual' INTO v_curr;
+            EXECUTE IMMEDIATE 'ALTER SEQUENCE '||p_seq||' INCREMENT BY 1';
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE;
+    END;
+BEGIN
+    sync_seq('USERS_SEQ',       'USERS',       'ID');
+    sync_seq('ROLES_SEQ',       'ROLES',       'ID');
+    sync_seq('LOGIN_USERS_SEQ', 'LOGIN_USERS', 'ID');
+    sync_seq('JWT_TOKENS_SEQ',  'JWT_TOKENS',  'ID');
+    sync_seq('USER_ROLES_ID_SEQ','USER_ROLES', 'ID');
+END;
+/
+COMMIT;
+
+--------------------------------------------------------------------------------
+-- 끝
+--------------------------------------------------------------------------------

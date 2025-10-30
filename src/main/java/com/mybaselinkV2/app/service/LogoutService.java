@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import org.springframework.stereotype.Service;
 
-import com.mybaselinkV2.app.respsitory.JwtTokenRepository;
+import com.mybaselinkV2.app.repository.JwtTokenRepository;
 
 /**
  * 🧹 LogoutService
