@@ -8,6 +8,15 @@
 <meta charset="UTF-8">
 <title>📊 Stock Batch Dashboard</title>
 
+<!-- ===============================================================
+📊 MyBaseLinkV2 - stockBatchBoard 안정판 v1.0 (2025-11-01)
+---------------------------------------------------------------
+✅ 로그 DOM 누적 제거 (버퍼 + 롤링 + 200ms Flush)
+✅ 새로고침 반복/다중 SSE 연결 시 렉 완전 제거
+✅ 버튼/퍼센트/상태 완전 일치
+---------------------------------------------------------------
+🚀 안정 기준 버전 — 이후 변경 시 반드시 이 버전을 백업할 것
+=============================================================== -->
 <style>
   .content-container{width:100%;max-width:1600px;margin:0 auto;padding:1rem 2%;box-sizing:border-box;}
   h2{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;color:#111827;}
@@ -94,6 +103,7 @@
   </div>
 </div>
 
+
 <th:block layout:fragment="pageScript">
 <script>
 (function(){
@@ -114,12 +124,54 @@
         $log=document.getElementById("logBox"),
         $copy=document.getElementById("copyLogBtn");
 
-  let isOwner=false, currentTaskId=null, es=null;
+  let isOwner=false, currentTaskId=null, es=null, connected=false;
+
+  // ====== 로그 성능 최적화: 버퍼 + 롤링 제한 ======
+  const MAX_LOG_LINES = 500;          // 최대 유지 줄 수 (최근 500줄만 최대1000 근데 렉발생은 낮으면 좋음)
+  const FLUSH_INTERVAL = 200;         // DOM 반영 주기(ms)
+  let logLines = [];                  // 화면에 유지되는 전체 로그(최근 MAX_LOG_LINES)
+  let pendingLogs = [];               // 아직 DOM에 반영하지 않은 신규 로그
+  let flushTimer = null;
+
+  function scheduleFlush(){
+    if(flushTimer!=null) return;
+    flushTimer = setTimeout(()=>{
+      flushTimer=null;
+      if(pendingLogs.length===0) return;
+
+      // 1) 메모리 배열(logLines)에 신규 줄 합치고 롤링
+      for(const line of pendingLogs){
+        logLines.push(line);
+      }
+      pendingLogs.length = 0;
+      if(logLines.length>MAX_LOG_LINES){
+        logLines = logLines.slice(logLines.length - MAX_LOG_LINES);
+      }
+
+      // 2) DOM 갱신은 텍스트 통으로 교체(리플로우 최소화)
+      //    너무 자주 reflow되지 않도록 위에서 간격 제어
+      $log.textContent = logLines.join("\n");
+      $log.scrollTop = $log.scrollHeight;
+    }, FLUSH_INTERVAL);
+  }
+
+  function appendLog(msg){
+    if(!msg) return;
+    if($log.textContent.includes("대기중")) {
+      // 초기 문구 제거 및 초기화
+      $log.textContent="";
+      logLines.length = 0;
+      pendingLogs.length = 0;
+    }
+    pendingLogs.push(msg);
+    scheduleFlush();
+  }
 
   function setBar(bar,pct,val){
     const v=Math.min(100,Math.max(0,Math.round(val||0)));
     bar.style.width=v+"%"; pct.textContent=v+"%";
   }
+
   function resetUI(){
     isOwner=false; currentTaskId=null;
     setBar($barTotal,$pctTotal,0);
@@ -128,21 +180,56 @@
     $badgeTotal.textContent="-"; $badgeKrx.textContent=""; $badgeData.textContent="";
     $hint.innerHTML="※ 관리자만 실행 가능";
     $btnStart.disabled=false; $btnCancel.disabled=true;
+
+    // 로그 박스 초기화(메모리+DOM)
+    logLines.length = 0;
+    pendingLogs.length = 0;
+    if(flushTimer){ clearTimeout(flushTimer); flushTimer=null; }
     $log.textContent="로그 대기중...";
   }
+
   function lockUI(){
     $btnStart.disabled=true;
     $btnCancel.disabled=!isOwner;
   }
-  function appendLog(msg){
-    if(!msg) return;
-    if($log.textContent.includes("대기중")) $log.textContent="";
-    $log.textContent += msg + "\n";
-    $log.scrollTop = $log.scrollHeight;
+
+  // 상태 복원 (SSE 연결 안정 후)
+  async function restoreStatus(){
+    try {
+      const res = await fetch("/api/stock/batch/status/current",{credentials:"include"});
+      if(!res.ok) return;
+      const d = await res.json();
+      if(!d || !d.status) return;
+
+      if(d.status==="IN_PROGRESS"){
+        if(d.currentUser===d.runner){
+          isOwner=true;
+          $hint.innerHTML=`⚙️ ${d.runner}님 실행 중 (${Math.round(d.progress||0)}%)`;
+          $btnStart.disabled=true;
+          $btnCancel.disabled=false;
+        } else {
+          isOwner=false;
+          $hint.innerHTML=`🚫 ${d.runner}님 실행 중 (${Math.round(d.progress||0)}%)`;
+          $btnStart.disabled=true;
+          $btnCancel.disabled=true;
+        }
+        const p = (typeof d.progress==="number")? d.progress : (d.result && typeof d.result.progress==="number" ? d.result.progress : 0);
+        setBar($barTotal,$pctTotal,p||0);
+      } else {
+        resetUI();
+      }
+    } catch(e){
+      console.warn("복원 실패",e);
+    }
   }
 
+  // SSE 연결 (중복 연결 방지 + 자동 재연결)
   function connect(){
-    if(es){ try{es.close();}catch(_){} }
+    if(connected){ return; }
+    connected=true;
+
+    if(es){ try{es.close();}catch(_){} es=null; }
+
     es = new EventSource("/api/stock/batch/sse",{withCredentials:true});
 
     es.addEventListener("status", e=>{
@@ -150,7 +237,7 @@
 
       if(d.status==="IDLE"){ resetUI(); return; }
 
-      // 퍼센트 계산
+      // 퍼센트
       if(d.dataTotal>0){
         setBar($barData,$pctData,(d.dataSaved*100/d.dataTotal));
         $badgeData.textContent=`${d.dataSaved}/${d.dataTotal}`;
@@ -163,17 +250,23 @@
         setBar($barTotal,$pctTotal,d.progress);
       }
 
-      // 실행자 표시
+      // 실행자/버튼
       if(d.runner){
-        if(d.owner){ isOwner=true;
+        if(d.owner){
+          isOwner=true;
           $hint.innerHTML=`⚙️ ${d.runner}님 실행 중 (${Math.round(d.progress||0)}%)`;
-        }else{
+          $btnStart.disabled=true;
+          $btnCancel.disabled=false;
+        } else {
           isOwner=false;
           $hint.innerHTML=`🚫 ${d.runner}님 실행 중 (${Math.round(d.progress||0)}%)`;
+          $btnStart.disabled=true;
+          $btnCancel.disabled=true;
         }
       }
 
-      if(Array.isArray(d.logs)){ d.logs.forEach(l=>appendLog(l)); }
+      // 로그(여기서 절대 DOM에 직접 누적하지 말고 버퍼링만)
+      if(Array.isArray(d.logs)){ for(const l of d.logs){ appendLog(l); } }
 
       if(d.status==="START" || d.status==="IN_PROGRESS"){ lockUI(); }
 
@@ -187,9 +280,23 @@
       if(d.status==="CANCELLED" || d.status==="FAILED"){ resetUI(); }
     });
 
-    es.onerror = ()=>{ try{es.close();}catch(_){};
-      setTimeout(connect, 1000);
+    es.addEventListener("ping", ()=>{ /* heartbeat */ });
+
+    es.onerror = ()=>{
+      // 재연결 시 기존 연결을 즉시 닫아 리소스 누수 방지
+      try{es.close();}catch(_){}
+      es=null;
+      connected=false;
+      setTimeout(connect, 1500);
     };
+
+    // 탭 닫기/새로고침 시 연결 정리
+    window.addEventListener("beforeunload",()=>{
+      if(es){ try{es.close();}catch(_){ } es=null; connected=false; }
+    });
+
+    // SSE 안정화 후 상태 복원
+    setTimeout(restoreStatus, 800);
   }
 
   // 시작
@@ -214,15 +321,15 @@
 
   // 로그 복사
   $copy.onclick=()=>{
-    navigator.clipboard.writeText($log.textContent||"");
+    // 현재 메모리에 있는 최근 MAX_LOG_LINES 기준으로 복사
+    const text = logLines.length>0 ? logLines.join("\n") : ($log.textContent||"");
+    navigator.clipboard.writeText(text);
     $copy.textContent="✅"; setTimeout(()=>{$copy.textContent="📄";},900);
   };
 
   connect();
 })();
 </script>
-
-
 </th:block>
 
 

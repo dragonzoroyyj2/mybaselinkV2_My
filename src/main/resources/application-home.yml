@@ -44,7 +44,25 @@ spring:
     username: mybaseuser                                   # ✅ DB 사용자(집)
     password: mybaseuser1234                               # ✅ DB 비밀번호(집)
 
+    #######################################################################
+    # ⚙ HikariCP 커넥션 풀 공통 설정 (표준 경로)
+    #######################################################################
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      validation-timeout: 5000
+      leak-detection-threshold: 0
+
+  #########################################################################
+  # ✅ JPA + Hibernate (Home 환경에서 dialect 지정)
+  #########################################################################
   jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

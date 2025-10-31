@@ -133,4 +133,13 @@ public class TaskStatusService {
     public List<LogLine> getLogs(String taskId) {
         return logsMap.getOrDefault(taskId, List.of());
     }
+    
+    
+    /** ✅ 전체 상태 초기화 (재시작 시 100% 깜빡임 방지용) */
+    public void reset(String taskId) {
+        statusMap.remove(taskId);
+        logsMap.remove(taskId);
+        logSeqMap.remove(taskId);
+    }
+
 }

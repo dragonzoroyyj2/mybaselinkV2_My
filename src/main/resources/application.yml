@@ -7,10 +7,6 @@ spring:
   profiles:
     active: home   # ✅ 기본 환경: 집(PostgreSQL)
 
-###########################################################################
-# 🧩 [공통] Spring Boot 애플리케이션 설정 (집/회사 공통 적용)
-# - 절대 'spring:' 키를 중복 선언하지 않음
-###########################################################################
   #########################################################################
   # ✅ 애플리케이션 정보
   #########################################################################
@@ -26,30 +22,6 @@ spring:
     cache: false              # 개발: false / 운영시 true 권장
     mode: HTML
     encoding: UTF-8
-
-  #########################################################################
-  # ✅ JPA + Hibernate (공통 정책)
-  # - DB 종류별 설정(dialect)은 각 프로필 파일에서 적용
-  # - ddl-auto는 개발 편의: update → 운영 배포 시 none 권장
-  #########################################################################
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    properties:
-      hibernate:
-
-    #######################################################################
-    # ⚙ HikariCP 커넥션 풀 공통 설정
-    #######################################################################
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      validation-timeout: 5000
-      leak-detection-threshold: 0
 
   #########################################################################
   # ✅ 정적 리소스 제공 경로
@@ -68,11 +40,13 @@ spring:
       max-request-size: 20MB
 
   #########################################################################
-  # ✅ DevTools 자동 리로드 설정
+  # ✅ DevTools 자동 리로드 설정 (재기동 속도 향상)
   #########################################################################
   devtools:
     restart:
       enabled: true
+      poll-interval: 1000     # 파일 변경 감지 주기(ms) 기본 4000 → 1000 (1초)
+      quiet-period: 500       # 변경 후 대기시간(ms) 기본 4000 → 500 (0.5초)
     livereload:
       enabled: true
 
@@ -100,7 +74,12 @@ jwt:
 ###########################################################################
 logging:
   level:
-    org.hibernate.SQL: ERROR
-    org.hibernate.type.descriptor.sql.BasicBinder: ERROR
-    com.mybaselink: DEBUG
-    org.springframework: INFO
+    '[org.hibernate.SQL]': ERROR
+    '[org.hibernate.type.descriptor.sql.BasicBinder]': ERROR
+    '[com.mybaselink]': DEBUG
+    '[org.springframework]': INFO
+
+    # ✅ [추가] SSE 연결 종료 등 불필요한 Tomcat IOException 억제
+    '[org.apache.catalina.connector.CoyoteAdapter]': ERROR
+    '[org.apache.coyote.http11.Http11Processor]': ERROR
+    '[org.apache.catalina.connector.OutputBuffer]': ERROR

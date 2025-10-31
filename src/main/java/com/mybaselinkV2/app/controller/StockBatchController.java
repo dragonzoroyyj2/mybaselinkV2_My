@@ -22,7 +22,6 @@ import java.util.UUID;
 public class StockBatchController {
 
     private static final Logger log = LoggerFactory.getLogger(StockBatchController.class);
-
     private final StockBatchService batchService;
     private final TaskStatusService taskStatusService;
 
@@ -31,26 +30,20 @@ public class StockBatchController {
         this.taskStatusService = taskStatusService;
     }
 
-    /**
-     * ✅ 활성 상태 확인
-     * - 현재 누가 선점 중인지, 진행률은 몇 %인지
-     * - 페이지 최초 진입 시 호출
-     */
+    /** ✅ 활성 상태 확인 */
     @GetMapping("/active")
     public ResponseEntity<Map<String, Object>> active() {
         boolean locked = batchService.isLocked();
         String taskId = batchService.getCurrentTaskId();
         String runner = batchService.getCurrentRunner();
 
-        if (!locked || taskId == null) {
+        if (!locked || taskId == null)
             return ResponseEntity.ok(Map.of("active", false));
-        }
 
         Map<String, Object> snap = taskStatusService.snapshot(taskId);
         Object progress = 0;
-        if (snap != null && snap.get("result") instanceof Map r && r.get("progress") instanceof Number p) {
+        if (snap != null && snap.get("result") instanceof Map r && r.get("progress") instanceof Number p)
             progress = p;
-        }
 
         return ResponseEntity.ok(Map.of(
                 "active", true,
@@ -60,30 +53,27 @@ public class StockBatchController {
         ));
     }
 
-    /**
-     * ✅ 상태 조회 (폴백 용)
-     */
+    /** ✅ 상태 조회 */
     @GetMapping("/status/{taskId}")
     public ResponseEntity<Map<String, Object>> status(@PathVariable String taskId) {
         return ResponseEntity.ok(taskStatusService.snapshot(taskId));
     }
 
-    /**
-     * ✅ 현재 진행 상태 (두 번째 사용자 락 확인용)
-     */
+    /** ✅ 현재 진행 상태 (프런트 복원용) */
     @GetMapping("/status/current")
-    public ResponseEntity<Map<String, Object>> statusCurrent() {
+    public ResponseEntity<Map<String, Object>> statusCurrent(Authentication auth) {
         String taskId = batchService.getCurrentTaskId();
-        if (taskId == null) {
-            return ResponseEntity.ok(Map.of("status", "IDLE"));
-        }
-        return ResponseEntity.ok(taskStatusService.snapshot(taskId));
+        String currentUser = (auth != null ? auth.getName() : "anonymous");
+
+        if (taskId == null)
+            return ResponseEntity.ok(Map.of("status", "IDLE", "currentUser", currentUser));
+
+        Map<String, Object> snap = taskStatusService.snapshot(taskId);
+        snap.put("currentUser", currentUser);  // ✅ 현재 로그인 사용자 포함
+        return ResponseEntity.ok(snap);
     }
 
-    /**
-     * ✅ 업데이트 시작
-     * - 이미 다른 사용자가 선점 중이면 409 반환
-     */
+    /** ✅ 업데이트 시작 */
     @PostMapping("/update")
     public ResponseEntity<?> start(@RequestParam(defaultValue = "8") int workers,
                                    @RequestParam(defaultValue = "false") boolean force,
@@ -100,10 +90,8 @@ public class StockBatchController {
                         "active", true
                 ));
             }
-
             batchService.startUpdate(taskId, force, workers);
             return ResponseEntity.accepted().body(Map.of("taskId", taskId, "runner", user));
-
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
                     "error", e.getMessage(),
@@ -118,15 +106,12 @@ public class StockBatchController {
         }
     }
 
-    /**
-     * ✅ 취소
-     * - 오너만 가능 (프론트에서 버튼 비활성화 처리)
-     */
+    /** ✅ 취소 */
     @PostMapping("/cancel/{taskId}")
     public ResponseEntity<?> cancel(@PathVariable String taskId, Authentication auth) {
         String user = (auth != null) ? auth.getName() : "anonymous";
         log.warn("⏹ [{}] {}님 취소 요청", taskId, user);
         batchService.cancelTask(taskId, user);
-        return ResponseEntity.ok(Map.of("status", "CANCEL_REQUESTED"));
+        return ResponseEntity.ok(Map.of("status", "CANCEL_REQUESTED", "currentUser", user));
     }
 }

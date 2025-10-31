@@ -106,24 +106,6 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
-<dependency>
-    <groupId>com.oracle.database.jdbc</groupId>
-    <artifactId>ojdbc8</artifactId>
-    <version>19.3.0.0</version>
-    <scope>system</scope>
-    <systemPath>D:/project/dev_boot_project/workspace/MyBaseLinkV2/lib/ojdbc8.jar</systemPath>
-</dependency>
-
-<dependency>
-    <groupId>com.oracle.database.jdbc</groupId>
-    <artifactId>orai18n</artifactId>
-    <version>19.3.0.0</version>
-    <scope>system</scope>
-    <systemPath>D:/project/dev_boot_project/workspace/MyBaseLinkV2/lib/orai18n.jar</systemPath>
-</dependency>
-
-
-
         <!-- ✅ Parquet + Hadoop + 로깅 정리 -->
         <dependency>
             <groupId>org.apache.parquet</groupId>
@@ -178,11 +160,12 @@
         </dependency>
 
         <!-- ✅ DevTools -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-devtools</artifactId>
+		    <optional>true</optional>
+		</dependency>
+
 
         <!-- ✅ Test -->
         <dependency>
