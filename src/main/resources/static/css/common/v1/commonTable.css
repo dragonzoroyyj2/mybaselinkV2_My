@@ -83,3 +83,13 @@ td a { color: #2563eb; cursor: pointer; text-decoration: underline; }
   background: #f3f4f6; border-top: 1px solid #d1d5db;
   padding: 0.8rem 1rem; display: flex; justify-content: flex-end; gap: 0.6rem;
 }
+
+/* 테이블 안 링크를 기본 텍스트 톤으로 */
+.table-container a.detail-link {
+  color: inherit;
+  text-decoration: none;
+}
+.table-container a.detail-link:hover {
+  text-decoration: underline;
+}
+

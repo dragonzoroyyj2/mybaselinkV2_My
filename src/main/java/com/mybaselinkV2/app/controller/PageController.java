@@ -1,5 +1,6 @@
 package com.mybaselinkV2.app.controller;
 
+import com.mybaselinkV2.app.service.PageService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,13 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class PageController {
 
+    // ✅ PageService 주입 (페이지 타이틀 및 경로 관리용)
+    private final PageService pageService;
+
+    public PageController(PageService pageService) {
+        this.pageService = pageService;
+    }
+
     // ================================
     // 1️⃣ 로그인 페이지
     // ================================
@@ -24,7 +32,6 @@ public class PageController {
      * URL: /login
      * 뷰: templates/login.html
      */
-
     @GetMapping("/login")
     public String loginPage(Model model) {
         model.addAttribute("pageTitle", "로그인");
@@ -78,7 +85,8 @@ public class PageController {
      * 1. HttpServletRequest로 요청 URI를 가져옴
      * 2. 맨 앞 '/' 제거 후 templatePath 생성
      * 3. model에 requestedPath 전달 (404 페이지에서 활용 가능)
-     * 4. templatePath 반환 → Thymeleaf가 해당 경로의 HTML 렌더링
+     * 4. PageService를 통해 타이틀 및 경로 정보를 자동 주입
+     * 5. templatePath 반환 → Thymeleaf가 해당 경로의 HTML 렌더링
      */
     @GetMapping("/pages/**")
     public String commonPage(HttpServletRequest request, Model model) {
@@ -90,6 +98,11 @@ public class PageController {
 
         // 뷰 이름 전달, 404 페이지에서 활용 가능
         model.addAttribute("requestedPath", templatePath);
+
+        // ✅ PageService를 통해 페이지 타이틀 및 경로 자동 설정
+        String[] meta = pageService.getMeta(templatePath);
+        model.addAttribute("pageTitle", meta[0]);
+        model.addAttribute("breadcrumb", meta[1]);
 
         // 반환: templates/pages/... 경로로 렌더링
         return templatePath;

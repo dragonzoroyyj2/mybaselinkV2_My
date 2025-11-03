@@ -12,15 +12,7 @@
 <body>
 <div layout:fragment="content">
   <div class="content-container">
-		<div class="page-header">
-		  <div class="page-title">
-		    <h2 th:text="${pageTitle} ?: '📄 기본 페이지 제목'">📄 기본 페이지 제목</h2>
-		  </div>
-		  <div class="breadcrumb">
-		    <i class="fas fa-folder-open"></i>
-		    <span th:text="${breadcrumb} ?: '시스템 / 기본 경로'">시스템 / 기본 경로</span>
-		  </div>
-		</div>    
+    <h2>P01A05 서버 리스트</h2>
 
     <!-- 🔍 검색 툴바 -->
     <div class="toolbar">
@@ -52,9 +44,6 @@
           <th>제목</th>
           <th>담당자</th>
           <th>등록일</th>
-          <th>서버 상태</th>
-          <th>기능 옵션</th>
-          <th>비고</th>
         </tr>
         </thead>
         <tbody id="dataTable"></tbody>
@@ -73,22 +62,25 @@
         <span data-close="addModal" class="close-btn">&times;</span>
       </div>
       <div class="elegant-body">
-        <div class="form-group"><label>제목</label><input id="titleInput" name="title" /></div>
-        <div class="form-group"><label>담당자</label><input id="ownerInput" name="owner" /></div>
-        <div class="form-group"><label>서버 상태</label>
-          <select id="serverStatusInput" name="serverStatus">
-            <option value="정상">정상</option>
-            <option value="점검중">점검중</option>
-          </select>
+        <div class="form-group"><label>제목</label><input id="titleInput" /></div>
+        <div class="form-group"><label>담당자</label><input id="ownerInput" /></div>
+        <div class="form-group"><label>서버 종류</label>
+          <select id="serverType"><option>웹 서버</option><option>DB 서버</option><option>API 서버</option></select>
+        </div>
+        <div class="form-group"><label>운영 상태</label>
+          <div class="option-group">
+            <label><input type="radio" name="status" value="active" checked>운영</label>
+            <label><input type="radio" name="status" value="pause">중지</label>
+          </div>
         </div>
         <div class="form-group"><label>기능 옵션</label>
           <div class="option-group">
-            <label><input type="checkbox" name="featureOption" value="백업 활성화"> 백업 활성화</label>
-            <label><input type="checkbox" name="featureOption" value="자동 모니터링"> 자동 모니터링</label>
+            <label><input type="checkbox">백업 활성화</label>
+            <label><input type="checkbox">자동 모니터링</label>
           </div>
         </div>
-        <div class="form-group"><label>등록일</label><input type="date" id="regDateInput" name="regDate" /></div>
-        <div class="form-group"><label>비고</label><textarea id="remarkInput" name="remark" rows="3"></textarea></div>
+        <div class="form-group"><label>등록일</label><input type="date" id="regDateInput" /></div>
+        <div class="form-group"><label>비고</label><textarea id="noteInput" rows="3"></textarea></div>
       </div>
       <div class="modal-footer elegant-footer">
         <button id="saveBtn" class="btn">저장</button>
@@ -105,23 +97,20 @@
         <span data-close="detailModal" class="close-btn">&times;</span>
       </div>
       <div class="elegant-body">
-        <div class="form-group"><label>No</label><input id="detailId" name="id" readonly /></div>
-        <div class="form-group"><label>제목</label><input id="detailTitle" name="title" /></div>
-        <div class="form-group"><label>담당자</label><input id="detailOwner" name="owner" /></div>
-        <div class="form-group"><label>등록일</label><input id="detailRegDate" name="regDate" readonly /></div>
+        <div class="form-group"><label>No</label><input id="detailId" readonly /></div>
+        <div class="form-group"><label>제목</label><input id="detailTitle" /></div>
+        <div class="form-group"><label>담당자</label><input id="detailOwner" /></div>
+        <div class="form-group"><label>등록일</label><input id="detailRegDate" readonly /></div>
         <div class="form-group"><label>서버 상태</label>
-          <select id="detailServerStatus" name="serverStatus">
-            <option value="정상">정상</option>
-            <option value="점검중">점검중</option>
-          </select>
+          <select><option>정상</option><option>점검중</option></select>
         </div>
         <div class="form-group"><label>기능 옵션</label>
           <div class="option-group">
-            <label><input type="checkbox" name="featureOption" value="백업 활성화"> 백업 활성화</label>
-            <label><input type="checkbox" name="featureOption" value="자동 모니터링"> 자동 모니터링</label>
+            <label><input type="checkbox">백업 활성화</label>
+            <label><input type="checkbox">자동 모니터링</label>
           </div>
         </div>
-        <div class="form-group"><label>비고</label><textarea id="detailRemark" name="remark" rows="3"></textarea></div>
+        <div class="form-group"><label>비고</label><textarea id="detailNote" rows="3"></textarea></div>
       </div>
       <div class="modal-footer elegant-footer">
         <button id="updateBtn" class="btn">수정</button>
@@ -135,10 +124,20 @@
 <th:block layout:fragment="pageScript">
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+
+  function getPageGroupSize() {
+    const w = window.innerWidth;
+    if (w < 480) return 3;
+    if (w < 768) return 5;
+    if (w < 1024) return 10;
+    return 20;
+  }
+  let pageGroupSize = getPageGroupSize();
+
   initUnifiedList({
-    mode: "client", // server or client
-    pagination: false,
-    apiUrl: "/api/p01a05List",
+    mode: "server",
+    pagination: true,
+    apiUrl: "/api/p01a05",
     tableBodySelector: "#dataTable",
     paginationSelector: "#pagination",
     searchInputSelector: "#searchInput",
@@ -150,27 +149,23 @@ document.addEventListener("DOMContentLoaded", () => {
     checkAllSelector: "#checkAll",
     deleteSelectedBtnSelector: "#deleteSelectedBtn",
     detailModalId: "#detailModal",
+    detailFields: {
+      id: "#detailId",
+      title: "#detailTitle",
+      owner: "#detailOwner",
+      regDate: "#detailRegDate"
+    },
     updateBtnSelector: "#updateBtn",
     excelBtnSelector: "#excelBtn",
-
-    excelFileName: "P01A05_서버리스트.xlsx",
-    
     columns: [
-  	  // 체크박스 있는 테이블{ checkbox: true } 사용
-  	  // 체크박스 없는 테이블checkbox 컬럼 자체 삭제
-    	
-    	  { key: "checkbox", label: "", checkbox: true }, 
       { key: "id", label: "No" },
       { key: "title", label: "제목", isDetailLink: true, required: true },
-      { key: "owner", label: "담당자", isDetailLink: true, required: true },
-      { key: "regDate", label: "등록일" },
-      { key: "serverStatus", label: "서버 상태" },
-      { key: "featureOption", label: "기능 옵션" },
-      { key: "remark", label: "비고" }
+      { key: "owner", label: "담당자", required: true },
+      { key: "regDate", label: "등록일" }
     ],
     pageSize: 10,
-    pageGroupSize: window.pageGroupSize, <!-- ✅ 이제 전역변수로부터 자동 주입 -->
-    enableRowClickDetail: false,
+    pageGroupSize: pageGroupSize,
+    enableRowClickDetail: true,
     enableDetailView: true,
     buttons: {
       search: true,
@@ -182,34 +177,21 @@ document.addEventListener("DOMContentLoaded", () => {
     detailViewButtons: {
       update: true,
       delete: false
-    },
-    onAddModalOpen: () => console.log("➕ Add Modal Open"),
-    onDetailModalOpen: (id) => console.log("🔍 Detail Modal Open:", id),
-    onDeleteSuccess: (ids) => console.log("🗑️ Deleted:", ids)
+    }
   });
 
   const searchInput = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
-  searchInput.addEventListener("keydown", e => {
-	  if (e.key === "Enter") searchBtn.click(); 
-  });
-  
-  
-  // ✅ 3. 페이지별 커스텀 기능 예시 (원하면 확장 가능)
-  const addUserBtn = document.getElementById("addUserBtn");
-  if (addUserBtn) {
-    addUserBtn.addEventListener("click", () => {
-      alert("👤 사용자 추가 모달 여는 커스텀 로직 실행");
-    });
-  }
+  searchInput.addEventListener("keydown", e => { if (e.key === "Enter") searchBtn.click(); });
 
-  const customFilterBtn = document.getElementById("customFilterBtn");
-  if (customFilterBtn) {
-    customFilterBtn.addEventListener("click", () => {
-      alert("🎯 커스텀 필터 실행");
-      unifiedListManager.loadList(0, "web", "filter=active");
-    });
-  }
+  window.addEventListener("resize", () => {
+    const newGroup = getPageGroupSize();
+    if (newGroup !== pageGroupSize) {
+      pageGroupSize = newGroup;
+      const event = new Event("resizePagination");
+      document.dispatchEvent(event);
+    }
+  });
 });
 </script>
 </th:block>

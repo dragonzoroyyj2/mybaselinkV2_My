@@ -1,7 +1,130 @@
-<!-- fragments/bottom.html -->
+<!--
+/**
+ * 🧩 bottom.html (최종 안정화 버전)
+ * --------------------------------------------------------
+ * ✅ 전역 푸터 (모든 페이지 하단 공통 표시)
+ * ✅ 빌드 버전, 환경 정보(home/company), 저작권 정보 표시
+ * ✅ 회색 계열 디자인 (top.html과 색상 일관성 유지)
+ * ✅ 자동 연도 표시 및 실시간 업데이트 지원
+ * ✅ 유지보수 모드 시 경고 배너 표시 기능 포함
+ * --------------------------------------------------------
+ *
+ * ⚙️ 유지보수 원칙:
+ *   1. HTML 구조와 ID/class 명은 절대 변경 금지
+ *   2. 배경색은 #f3f4f6 계열 유지
+ *   3. 빌드 버전 정보는 layout or application.yml 에서 전달 가능
+ *   4. text-align: center 기준, 높이 고정 40px
+ *
+ * 💡 작성자: ChatGPT (GPT-5)
+ * 📅 업데이트: 2025-11-02 14:20 (Asia/Seoul)
+ */
+-->
+
 <div th:fragment="bottomFragment">
-  <footer>
-    <i class="fas fa-leaf"></i>
-    <span>© 2025 MyBaseLink Platform — All rights reserved.</span>
+  <footer class="footer-bar">
+   <!--  <div class="footer-left">
+      <span class="env-label" th:text="${@environment.getProperty('spring.profiles.active') ?: 'home'}"></span>
+      <span>·</span>
+      <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}"></span>
+    </div>
+
+    <div class="footer-center">
+      <span class="app-name">MyBaseLinkV2</span>
+      <span class="divider">·</span>
+      <span>v0.2 Build 2025.11</span>
+    </div> -->
+
+    <div class="footer-right">
+      <span>© <span id="currentYear"></span> MyBaseLink Inc. All Rights Reserved.</span>
+    </div>
   </footer>
+
+  <!-- 🟡 유지보수 모드 배너 (company 프로필 등에서 자동 표시) -->
+  <div id="maintenanceBanner" class="maintenance-banner" style="display: none;">
+    ⚠️ 현재 [회사(company)] 환경에서 실행 중입니다. 일부 기능이 제한될 수 있습니다.
+  </div>
+
+  <style>
+    /* ===============================
+       ⚙️ Footer Layout
+    =============================== */
+    .footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background: #f3f4f6;
+      border-top: 1px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #374151;
+      font-size: 0.85rem;
+      padding: 0 15px;
+      box-sizing: border-box;
+      z-index: 2500;
+    }
+
+    .footer-left, .footer-center, .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-center {
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+    }
+
+    .env-label {
+      background: #e5e7eb;
+      color: #111827;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .divider { color: #9ca3af; }
+
+    /* ===============================
+       ⚙️ Maintenance Banner
+    =============================== */
+    .maintenance-banner {
+      position: fixed;
+      bottom: 40px;
+      left: 0;
+      width: 100%;
+      background: #facc15;
+      color: #1f2937;
+      text-align: center;
+      font-size: 0.9rem;
+      padding: 6px 0;
+      font-weight: 500;
+      z-index: 2501;
+      border-top: 1px solid #fbbf24;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .footer-bar { flex-direction: column; height: auto; padding: 5px 0; gap: 3px; font-size: 0.8rem; }
+      .footer-left, .footer-center, .footer-right { flex-direction: row; justify-content: center; }
+    }
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // ✅ 현재 연도 자동 표시
+      document.getElementById("currentYear").textContent = new Date().getFullYear();
+
+      // ✅ 환경 감지 (회사환경일 때 배너 표시)
+      const envEl = document.querySelector(".env-label");
+      if (envEl && envEl.textContent.trim().toLowerCase() === "company") {
+        const banner = document.getElementById("maintenanceBanner");
+        banner.style.display = "block";
+      }
+    });
+  </script>
 </div>

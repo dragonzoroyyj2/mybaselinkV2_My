@@ -12,17 +12,7 @@
 <body>
 <div layout:fragment="content">
   <div class="content-container">
-    
-    <!-- 📄 페이지 헤더 (타이틀 + 경로 표시 - 반응형 완전형) -->
-    <div class="page-header">
-      <div class="page-title">
-        <h2 th:text="${pageTitle} ?: '📊 주식 종목 리스트'">📊 주식 종목 리스트</h2>
-      </div>
-      <div class="breadcrumb">
-        <i class="fas fa-folder-open"></i>
-        <span th:text="${breadcrumb} ?: 'Stock 관리 / 종목 리스트'">Stock 관리 / 종목 리스트</span>
-      </div>
-    </div>
+    <h2>📊 주식 종목 리스트</h2>
 
     <!-- 🔍 검색 영역 -->
     <div class="toolbar">
@@ -115,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ✅ 컬럼 구성 (체크박스 포함)
     columns: [
+    	
     	  // 체크박스 있는 테이블{ checkbox: true } 사용
     	  // 체크박스 없는 테이블checkbox 컬럼 자체 삭제
      /*  { key: "checkbox", label: "", checkbox: false }, */ 
@@ -132,6 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
 
     onLoadComplete: (data) => {
+    		console.log(data);
       if (data.warning) {
         Toast.show("⚠️ " + data.warning, "warning");
       }
@@ -150,6 +142,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 </th:block>
-
 </body>
 </html>

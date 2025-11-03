@@ -15,6 +15,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * ✅ MyBaseLinkV2 - SecurityConfig (2025-11 최종 버전)
+ * --------------------------------------------------------
+ * - Spring Boot 3.5.x / Spring Security 6.x 대응
+ * - JWT 기반 인증 (STATELESS)
+ * - /api/stockList/**, /api/p01a05/** : 로그인 없이 접근 가능
+ * - 그 외 API : JWT 인증 필요
+ * --------------------------------------------------------
+ */
 @Configuration
 @EnableAsync
 public class SecurityConfig {
@@ -37,40 +46,66 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+            // ✅ JWT 사용이므로 CSRF 비활성화
             .csrf(csrf -> csrf.disable())
+
+            // ✅ 접근 정책 정의
             .authorizeHttpRequests(auth -> auth
-                // 정적 리소스
+
+                // 정적 리소스 완전 허용
                 .requestMatchers(
-                        "/favicon.ico", "/favicon/**", "/manifest.json",
-                        "/css/**", "/js/**", "/images/**", "/common/**"
+                        "/favicon.ico",
+                        "/favicon/**",
+                        "/manifest.json",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/webjars/**",
+                        "/common/**"
                 ).permitAll()
-                // 인증 불필요
+
+                // 로그인/인증 관련 엔드포인트 허용
                 .requestMatchers("/", "/login", "/auth/**").permitAll()
-                // 페이지는 인증 필요
+
+                // 공개 API 허용 (SSE, KRX 등)
+                .requestMatchers(
+                        "/api/stock/batch/events",
+                        "/api/stock/batch/active/**",
+                        "/api/stock/batch/status/**",
+                        "/api/stock/batch/sse",
+                        "/api/krx/**"
+                ).permitAll()
+
+                // ✅ 새로 추가된 공개 API
+                .requestMatchers("/api/stockList/**").permitAll()
+                .requestMatchers("/api/p01a05List/**").permitAll()
+
+                // ✅ 특정 API는 인증 필요
+                .requestMatchers(
+                        "/api/stock/batch/update/**",
+                        "/api/stock/batch/cancel/**"
+                ).authenticated()
+
+                // ✅ 페이지 접근은 로그인 필요
                 .requestMatchers("/pages/**").authenticated()
 
-                // ====== 여기 추가: SSE/상태는 모두 허용(읽기 전용) ======
-                .requestMatchers("/api/stock/batch/events").permitAll()
-                .requestMatchers("/api/stock/batch/active/**").permitAll()
-                .requestMatchers("/api/stock/batch/status/**").permitAll()
-                	
-                 // ✅ SSE 허용
-                .requestMatchers("/api/stock/batch/sse").permitAll()
-
-                // 업데이트/취소는 인증 필요
-                .requestMatchers("/api/stock/batch/update/**", "/api/stock/batch/cancel/**").authenticated()
-
-                // KRX 공개
-                .requestMatchers("/api/krx/**").permitAll()
-
+                // ✅ 나머지 모든 요청은 인증 필요
                 .anyRequest().authenticated()
             )
+
+            // ✅ 세션 미사용 (JWT 기반)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+            // ✅ 사용자 인증 서비스
             .userDetailsService(userDetailsService)
+
+            // ✅ 로그아웃 핸들러
             .logout(logout -> logout
                     .logoutUrl("/logout")
                     .addLogoutHandler(customLogoutHandler)
             )
+
+            // ✅ JWT 필터 등록
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

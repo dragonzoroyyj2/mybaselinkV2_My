@@ -8,83 +8,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title th:text="${title} ?: 'MyBaseLink'">MyBaseLink</title>
 
-  <!-- ✅ CSRF Token: 전역(레이아웃)에만 둔다 -->
+  <!-- ✅ CSRF Token -->
   <th:block th:if="${_csrf} != null">
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
   </th:block>
 
-  <!-- ✅ 아이콘/폰트 -->
-  <link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-	
-	<!-- Favicon -->
-	<link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
-	<link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
-	<link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
-	<link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
-	<link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
-	<link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
-	<link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
-	<link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
-	<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
-	<link rel="icon" type="image/png" sizes="192x192" href="/favicon/android-icon-192x192.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
-	<link rel="manifest" href="/favicon/manifest.json">
-	<meta name="msapplication-TileColor" content="#ffffff">
-	<meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
-	<meta name="theme-color" content="#ffffff">        
+  <!-- ✅ 폰트 및 아이콘 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- ✅ 공통 CSS (여기서만 로드) -->
-  <link rel="stylesheet" href="/css/commonLayout.css">
-  <link rel="stylesheet" href="/css/commonPagination.css">
-  <link rel="stylesheet" href="/css/commonSearch.css">
-  <link rel="stylesheet" href="/css/commonTable.css">
+  <!-- ✅ 파비콘 (모든 플랫폼 대응) -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
 
-  <!-- ✅ 레이아웃 보정 -->
-  <style>
-    /* 상단바(50px) 아래로 컨텐츠 밀기 */
-    main .content {
-      margin-top: 60px !important;
-      padding: 1rem;
-      box-sizing: border-box;
-      min-height: calc(100vh - 110px);
-      position: relative;
-      z-index: 1;
-    }
-    /* 오버레이는 상단바(50px) 바로 아래에서 시작 */
-    #sidebarOverlay {
-      top: 50px !important;
-      left: 0;
-      width: 100%;
-      height: calc(100% - 50px);
-      background: rgba(0, 0, 0, 0.35);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.25s ease, visibility 0.25s ease;
-      position: fixed;
-      z-index: 3500;
-    }
-    #sidebarOverlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-  </style>
+  <!-- ✅ 공통 CSS 로드 순서 (v12.6 기준) -->
+  <link rel="stylesheet" href="/css/common/commonLayout.css">      <!-- ① 전체 레이아웃 / 버튼 / 모달 -->
+  <link rel="stylesheet" href="/css/common/commonTable.css">       <!-- ② 테이블 / 로딩오버레이 / 체크박스 -->
+  <link rel="stylesheet" href="/css/common/commonSearch.css">      <!-- ③ 검색창 / 필터 전용 -->
+  <link rel="stylesheet" href="/css/common/commonPagination.css">  <!-- ④ 페이징 버튼 전용 -->
 </head>
 
 <body>
 
-  <!-- ✅ 상단바 -->
-  <header th:replace="~{fragments/top :: topFragment}"></header>
+  <!-- ✅ 상단 -->
+  <th:block th:replace="~{fragments/top :: topFragment}"></th:block>
 
-  <!-- ✅ 오버레이(전역: 1개만) -->
+  <!-- ✅ 오버레이 -->
   <div id="sidebarOverlay"></div>
 
   <!-- ✅ 왼쪽 메뉴 -->
   <div th:replace="~{fragments/left :: leftFragment}"></div>
 
-  <!-- ✅ 메인 콘텐츠 (페이지가 여기에 끼워넣어짐) -->
+  <!-- ✅ 메인 콘텐츠 -->
   <main>
     <div class="content" layout:fragment="content"></div>
   </main>
@@ -92,29 +62,68 @@
   <!-- ✅ 하단 -->
   <footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
 
-  <!-- ✅ 전역 사이드바 토글: 여기서만 정의 -->
+  <!-- ✅ 전역 사이드바 토글 -->
   <script>
-    window.toggleSidebar = () => {
+  /*
+    | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적               		|
+	| ----------- 	| ------------------- | ------------------------- | -------------------- 				|
+	| **초소형폰**  | `max-width: 360px`  | iPhone SE, Galaxy A10e    | 최소 대응 (기본 텍스트/버튼 축소) |
+	| **소형폰**    | `max-width: 480px`  | Galaxy S8, iPhone 12 mini | 모바일 세로 모드 기준         	|
+	| **중형폰**    | `max-width: 768px`  | 대부분 스마트폰, 세로     | 레이아웃 여백, 폰트 자동조정     |
+	| **태블릿**    | `max-width: 1024px` | iPad, Galaxy Tab 세로     | 리스트/폼 폭 조절           		|
+	| **데스크탑 기본** | `> 1024px`      | 노트북/PC             	 | 기본 레이아웃 유지           		|
+
+  */
+    document.addEventListener("DOMContentLoaded", () => {
       const sidebar = document.querySelector(".sidebar");
       const overlay = document.getElementById("sidebarOverlay");
-      if (!sidebar || !overlay) return;
 
-      const isOpen = sidebar.classList.contains("open");
-      sidebar.classList.toggle("open", !isOpen);
-      overlay.classList.toggle("active", !isOpen);
-    };
+      window.toggleSidebar = () => {
+        if (!sidebar || !overlay) return;
+        const isOpen = sidebar.classList.contains("open");
+        sidebar.classList.toggle("open", !isOpen);
+        overlay.classList.toggle("active", !isOpen);
+        overlay.style.display = !isOpen ? "block" : "none";
+      };
 
-    document.getElementById("sidebarOverlay").addEventListener("click", () => {
-      const sidebar = document.querySelector(".sidebar");
-      const overlay = document.getElementById("sidebarOverlay");
-      if (!sidebar || !overlay) return;
-      sidebar.classList.remove("open");
-      overlay.classList.remove("active");
+      overlay?.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        overlay.classList.remove("active");
+        overlay.style.display = "none";
+      });
+
+      overlay.style.display = "none";
     });
   </script>
 
-  <!-- ✅ 페이지별 스크립트 주입 자리 -->
+  <!-- ✅ 공용 스크립트 -->
+  <script src="/js/common/commonLoading_op.js"></script>
+  <script src="/js/common/commonNotify.js"></script>
+  <script src="/js/common/commonPagination_op.js"></script>
+  <script src="/js/common/commonModal_op.js"></script>
+  <script src="/js/common/commonUnifiedList_op.js"></script>
+
+  <!-- ✅ 페이지별 스크립트 주입 -->
   <th:block layout:fragment="pageScript"></th:block>
+
+  <!-- ✅ 자동 헤더 높이 반영 스크립트 -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const header = document.querySelector(".top-bar");
+      const main = document.querySelector("main");
+
+      function adjustMainMargin() {
+        if (header && main) {
+          const h = header.offsetHeight || 0;
+          main.style.marginTop = `${h}px`;
+        }
+      }
+
+      // 초기 설정 및 리사이즈 대응
+      adjustMainMargin();
+      window.addEventListener("resize", adjustMainMargin);
+    });
+  </script>
 
 </body>
 </html>
