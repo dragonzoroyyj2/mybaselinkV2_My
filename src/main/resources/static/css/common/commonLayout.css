@@ -1,29 +1,40 @@
 /* ===============================================================
-   ✅ commonLayout.css (v2.3 - 2025.11 완전 안정판)
+   ✅ commonLayout.css (v1.0 - 2025.11 경량 안정판)
    ---------------------------------------------------------------
-   - 페이지 레이아웃 / 버튼 / 폼 / 모달 / 헤더 통합
-   - 리스트 상단 줄 좌우 고정 + breadcrumb 한 줄 완전 고정
+   - 페이지 기본 / 헤더 / 검색바 / 리스트 정보줄 / 버튼 / 폼 공통
+   - Pretendard + Noto Sans KR 폰트 지정
+   - ✅ breadcrumb 2단계 고정, 3단계부터 줄바꿈
+   - ✅ 리스트 상단 좌/우 고정 반응형 완전 대응
+   - ⚙️ 모달 관련 스타일은 commonModal.css 로 분리됨
 ================================================================ */
 
-/* 🔤 기본 설정 */
+/* 🔤 전역 */
 html, body {
-  font-family:
-    "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo",
-    "Malgun Gothic", "맑은 고딕", "돋움", sans-serif;
+  font-family: "Pretendard","Noto Sans KR","Apple SD Gothic Neo",
+    "Malgun Gothic","맑은 고딕","돋움",sans-serif;
   font-size: 14px;
   color: #111827;
   line-height: 1.5;
-  background-color: #f9fafb;
+  background: #f9fafb;
   -webkit-font-smoothing: antialiased;
+  margin: 0;
 }
 
-/* 🔸 컨텐츠 기본 */
+/* ===============================================================
+   ✅ 기본 레이아웃
+================================================================ */
 .content-container {
   padding: 20px 25px;
   background: #f9fafb;
   min-height: calc(100vh - 100px);
   box-sizing: border-box;
-  margin-top: 50px; /* ✅ 상단바 고정 보정 */
+  margin-top: 50px;
+}
+.main-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2%;
+  box-sizing: border-box;
 }
 
 /* ===============================================================
@@ -38,8 +49,11 @@ html, body {
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 4px;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* 제목 */
 .page-header .page-title h2 {
   font-size: 16px;
   font-weight: 600;
@@ -51,61 +65,70 @@ html, body {
   white-space: nowrap;
 }
 
+/* 오른쪽 경로 (breadcrumb) */
 .page-header .breadcrumb {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   color: #6b7280;
-  font-size: 11.5px; /* ✅ 더 작게 */
-  line-height: 1.3;
-  flex-shrink: 0;
-  white-space: nowrap; /* ✅ 2단계일 땐 절대 줄바꿈 금지 */
+  font-size: 12.5px;       /* ✅ 더 작게 */
+  line-height: 1.4;
+  text-align: right;
+  justify-content: flex-end;
+  max-width: 100%;
+  white-space: nowrap;      /* ✅ 2단계까지 1줄 고정 */
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .page-header .breadcrumb i {
-  font-size: 11px;
+  font-size: 12px;
   color: #9ca3af;
 }
-
-/* ✅ 3단계 이상일 경우 (class="breadcrumb long") */
-.page-header .breadcrumb.long {
+/* ✅ 3단계 이상부터 줄바꿈 허용 */
+.page-header .breadcrumb.multiline {
   white-space: normal;
-  line-height: 1.3;
-  text-align: right;
+  line-height: 1.5;
   word-break: keep-all;
 }
 
+/* 반응형 breadcrumb 크기 자동조정 */
+@media (max-width: 768px) {
+  .page-header .breadcrumb { font-size: 11.5px; }
+}
+@media (max-width: 480px) {
+  .page-header .breadcrumb { font-size: 11px; }
+}
+
 /* ===============================================================
-   ✅ 리스트 상단 (총건수 + 버튼) 좌우 고정
+   ✅ 검색 바 / 툴바
 ================================================================ */
-.list-info {
+.toolbar {
   display: flex;
-  justify-content: space-between; /* ✅ 좌우 정렬 고정 */
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  font-size: 13.5px;
-  color: #374151;
-  flex-wrap: nowrap; /* ✅ 줄바꿈 절대 금지 */
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
-
-.list-info span#totalCount {
-  flex-shrink: 0;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.list-info .action-buttons {
+.search-group {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
+}
+.search-group input[type="text"] {
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  outline: none;
+  width: 180px;
+  font-size: 14px;
+}
+.search-group input[type="text"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
 }
 
 /* ===============================================================
-   ✅ 버튼
+   ✅ 버튼 공통
 ================================================================ */
 .btn {
   display: inline-flex;
@@ -121,58 +144,122 @@ html, body {
   font-size: 13px;
   transition: 0.15s;
 }
-
 .btn:hover { background: #1d4ed8; }
-
 .btn.gray { background: #6b7280; }
 .btn.red { background: #dc2626; }
 .btn.excel { background: #16a34a; }
-
 .btn.gray:hover { background: #4b5563; }
 .btn.red:hover { background: #b91c1c; }
 .btn.excel:hover { background: #15803d; }
 
 /* ===============================================================
-   ✅ 반응형 (핵심 breakpoint 수정)
+   ✅ 리스트 상단 정보줄 (총건수 + 엑셀 등)
+================================================================ */
+.list-info {
+  display: flex;
+  justify-content: space-between;  /* ✅ 항상 좌우 고정 */
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #374151;
+  width: 100%;
+}
+.list-info span#totalCount {
+  flex-shrink: 0;
+  text-align: left;
+}
+.list-info .action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ===============================================================
+   ✅ 폼 공통
+================================================================ */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.form-group label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 13px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 14px;
+  outline: none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+}
+.input-error {
+  border-color: #dc2626 !important;
+  background: #fef2f2;
+}
+.option-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ===============================================================
+   ⚙️ 모달 관련 스타일은 별도 파일로 분리 (commonModal.css 참조)
 ================================================================ */
 
-/* 📱 480px 이하 */
+/* ===============================================================
+   ✅ 반응형 세분화 (완전 대응)
+================================================================ */
+@media (max-width: 360px) {
+  html, body { font-size: 12px; }
+  .page-header .page-title h2 { font-size: 13px; }
+  .page-header .breadcrumb { font-size: 11.5px; }
+  .btn { padding: 4px 8px; font-size: 12px; }
+  .search-group input { font-size: 12px; padding: 6px 8px; }
+}
+
 @media (max-width: 480px) {
   html, body { font-size: 13px; }
   .content-container { padding: 10px 14px; }
-
-  /* ✅ 타이틀 + 경로도 한 줄 고정 (400px 이상까지 유지) */
-  .page-header {
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-between;
-  }
+  .page-header { margin-bottom: 6px; }
   .page-header .page-title h2 { font-size: 14px; }
-  .page-header .breadcrumb { font-size: 11px; white-space: nowrap; }
-  .page-header .breadcrumb.long { white-space: normal; } /* ✅ 3단계만 줄바꿈 */
-
-  /* ✅ 리스트 상단도 고정 */
-  .list-info {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: nowrap;
-  }
-
+  .page-header .breadcrumb { font-size: 11px; }
   .btn { padding: 5px 10px; font-size: 12.5px; }
   .toolbar { flex-direction: column; align-items: stretch; gap: 6px; }
   .search-group { width: 100%; }
+  .list-info { flex-direction: column; align-items: stretch; gap: 4px; }
 }
 
-/* 💻 1024px 이하 (태블릿) */
+@media (max-width: 768px) {
+  .content-container { padding: 15px 18px; }
+  .page-header .page-title h2 { font-size: 15px; }
+  .list-info { flex-direction: row; justify-content: space-between; }
+  .btn { font-size: 13px; padding: 6px 11px; }
+}
+
 @media (max-width: 1024px) {
   .content-container { padding: 18px 20px; }
   .page-header .page-title h2 { font-size: 16px; }
   .page-header .breadcrumb { font-size: 12px; }
 }
 
-/* 🖥️ 기본 (데스크탑) */
 @media (min-width: 1025px) {
+  .content-container { padding: 20px 25px; }
   .page-header .page-title h2 { font-size: 17px; }
-  .page-header .breadcrumb { font-size: 12px; }
+  .page-header .breadcrumb { font-size: 12.5px; }
 }

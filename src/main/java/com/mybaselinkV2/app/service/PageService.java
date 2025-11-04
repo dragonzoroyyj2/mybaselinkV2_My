@@ -17,9 +17,17 @@ public class PageService {
 
     /** ✅ 페이지별 메타정보 (title, breadcrumb) */
     private static final Map<String, String[]> PAGE_META = new HashMap<>() {{
-        put("pages/stock/stockList", new String[]{"📊 주식 종목 리스트", "Stock 관리 / 종목 리스트"});
-        put("pages/stock/stockBatchList", new String[]{"⚙️ 종목 일괄 업데이트", "Stock 관리 / 일괄 업데이트"});
-        put("pages/p01/p01a05/p01a05List", new String[]{"🖥️ 서버 리스트", "서버 관리 / 서버 리스트"});
+    	
+   		// (예: pages/stock/stockList)
+    	
+    		put("pages/p01/p01a05/p01a05List", new String[]{"🖥️ 서버 리스트", 					"리포트 관리 / 서버 리스트"});    
+    		
+    		put("pages/stock/stockBatchBoard", new String[]{"📋 종목 일괄 업데이트", 			"Stock 관리 / 일괄 업데이트"});
+    	
+    		put("pages/stock/stockList", new String[]{"📊 주식 종목 리스트", 					"Stock 관리 / 종목 리스트"});
+    		put("pages/stock/stockLastCloseDownward", new String[]{"📉 연속 하락 종목 분석", 	"Stock 관리 / 연속 하락 종목 분석"});
+        
+        put("pages/sy/syusr/syusr01List", new String[]{"⚙️ 설정", 							"사용자 관리 / 사용자 리스트"});
         // 👉 필요 시 여기에 계속 추가 가능
     }};
 

@@ -1,0 +1,32 @@
+###########################################################################
+# 🏢 Prod (운영/회사) 환경 전용 설정 파일
+# - HTTPS + 보안 모드 (SameSite=Strict)
+###########################################################################
+
+app:
+  cookie:
+    same-site: Strict
+    secure: true
+
+###########################################################################
+# ✅ DataSource (운영 PostgreSQL)
+###########################################################################
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://192.168.10.10:5432/mybaselink_prod
+    username: prod_user
+    password: prod_secure_pw
+
+###########################################################################
+# 🐍 Python 실행 환경 (운영)
+###########################################################################
+python:
+  executable:
+    path: /usr/bin/python3
+  root:
+    path: /opt/MyBaseLinkV2
+  working:
+    dir: "${python.root.path}/python/stock/py"
+  find_last_close_downward:
+    path: "${python.root.path}/python/stock/py/find_last_close_downward.py"

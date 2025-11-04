@@ -39,12 +39,16 @@ except ModuleNotFoundError as e:
     sys.exit(1)
 
 # ==============================
-# 1️⃣ 경로 설정
+# 1️⃣ 경로 설정 (절대경로 고정)
 # ==============================
-ROOT_DIR = Path.cwd()
-LOG_DIR = ROOT_DIR / "log"
-DATA_DIR = ROOT_DIR / "stock_data"
-LISTING_FILE = ROOT_DIR / "stock" / "stock_list" / "stock_listing.json"
+# 현재 파일: /MyBaseLinkV2/python/stock/py/update_stock_listing.py
+# → 상위 2단계로 올라가면 /MyBaseLinkV2/python
+BASE_DIR = Path(__file__).resolve().parents[2]  # ✅ /MyBaseLinkV2/python
+ROOT_DIR = BASE_DIR  # 유지
+
+LOG_DIR = BASE_DIR / "log"
+DATA_DIR = BASE_DIR / "data" / "stock_data"
+LISTING_FILE = BASE_DIR / "data" / "stock_list" / "stock_listing.json"
 LOG_FILE = LOG_DIR / "update_stock_listing.log"
 
 # ==============================

@@ -1,11 +1,11 @@
 ###########################################################################
-# 🎯 어떤 환경을 기본으로 실행할지 결정 (집=home / 회사=company)
-# - 기본은 'home'으로 실행되도록 함
-# - 회사에서 실행 시: VM옵션에  -Dspring.profiles.active=company  지정
+# 🎯 어떤 환경을 기본으로 실행할지 결정 (local / prod)
+# - 기본은 'local'로 실행되도록 함
+# - 운영 시: VM옵션에  -Dspring.profiles.active=prod  지정
 ###########################################################################
 spring:
   profiles:
-    active: home   # ✅ 기본 환경: 집(PostgreSQL)
+    active: local   # ✅ 기본 환경: 로컬(집)
 
   #########################################################################
   # ✅ 애플리케이션 정보
@@ -19,7 +19,7 @@ spring:
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
-    cache: false              # 개발: false / 운영시 true 권장
+    cache: false
     mode: HTML
     encoding: UTF-8
 
@@ -40,13 +40,13 @@ spring:
       max-request-size: 20MB
 
   #########################################################################
-  # ✅ DevTools 자동 리로드 설정 (재기동 속도 향상)
+  # ✅ DevTools 자동 리로드 설정
   #########################################################################
   devtools:
     restart:
       enabled: true
-      poll-interval: 1000     # 파일 변경 감지 주기(ms) 기본 4000 → 1000 (1초)
-      quiet-period: 500       # 변경 후 대기시간(ms) 기본 4000 → 500 (0.5초)
+      poll-interval: 1000
+      quiet-period: 500
     livereload:
       enabled: true
 
@@ -62,12 +62,23 @@ server:
       enabled: false
 
 ###########################################################################
-# 🔐 JWT 토큰 설정 (공통)
+# 🔐 JWT 토큰 설정 (공통) - 토큰 설정과 시큐리티 설정은 분리해야 관리가 쉽다
 ###########################################################################
 jwt:
   secret: MyNovaSecretKeyChangeThisToSomethingStrong123!
   expiration: 3600000
-  #expiration: 305000
+
+###########################################################################
+# 🔐 Security (JWT) 예외 경로 설정
+###########################################################################
+security:
+  jwt:
+    ignore-paths:
+      - /api/stock/lastCloseDownward/chart/**
+      - /api/stock/lastCloseDownward/sse
+      - /api/stock/batch/sse
+      - /api/stock/similar-advanced/chart/**
+      - /api/stock/similar-advanced/sse
 
 ###########################################################################
 # 🧠 로깅 레벨 (공통)
@@ -78,8 +89,6 @@ logging:
     '[org.hibernate.type.descriptor.sql.BasicBinder]': ERROR
     '[com.mybaselink]': DEBUG
     '[org.springframework]': INFO
-
-    # ✅ [추가] SSE 연결 종료 등 불필요한 Tomcat IOException 억제
     '[org.apache.catalina.connector.CoyoteAdapter]': ERROR
     '[org.apache.coyote.http11.Http11Processor]': ERROR
     '[org.apache.catalina.connector.OutputBuffer]': ERROR

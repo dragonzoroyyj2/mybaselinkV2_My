@@ -1,0 +1,62 @@
+###########################################################################
+# 🏠 Local 환경 전용 설정 파일 (집 PC)
+# - 공통(application.yml)을 상속받고, 아래 값들만 덮어씀
+###########################################################################
+
+###########################################################################
+# 🍪 로컬 쿠키 정책 (SameSite=None, secure=false)
+###########################################################################
+app:
+  cookie:
+    same-site: None
+    secure: false
+
+###########################################################################
+# 🐍 Python 실행 환경 설정 (집)
+###########################################################################
+python:
+
+  executable:
+    path: C:/Users/dragon/AppData/Local/Programs/Python/Python310/python.exe
+
+  root:
+    path: D:/project/dev_boot_project/workspace/MyBaseLinkV2
+
+  working:
+    dir: "${python.root.path}/python/stock/py"
+
+  update_stock_listing:
+    path: "${python.root.path}/python/stock/py/update_stock_listing.py"
+
+  find_last_close_downward:
+    path: "${python.root.path}/python/stock/py/find_last_close_downward.py"
+
+  stock:
+    stock_listing:
+      path: "${python.root.path}/python/data/stock_list/stock_listing.json"
+
+###########################################################################
+# ✅ DataSource (PostgreSQL 접속)
+###########################################################################
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/mybaselink_db
+    username: mybaseuser
+    password: mybaseuser1234
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      validation-timeout: 5000
+      leak-detection-threshold: 0
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

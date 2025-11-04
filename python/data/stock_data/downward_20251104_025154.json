@@ -1,0 +1,2632 @@
+[
+  {
+    "ticker": "032830",
+    "name": "삼성생명",
+    "streak": 5
+  },
+  {
+    "ticker": "138040",
+    "name": "메리츠금융지주",
+    "streak": 5
+  },
+  {
+    "ticker": "005830",
+    "name": "DB손해보험",
+    "streak": 5
+  },
+  {
+    "ticker": "035250",
+    "name": "강원랜드",
+    "streak": 5
+  },
+  {
+    "ticker": "097950",
+    "name": "CJ제일제당",
+    "streak": 5
+  },
+  {
+    "ticker": "017800",
+    "name": "현대엘리베이터",
+    "streak": 5
+  },
+  {
+    "ticker": "026960",
+    "name": "동서",
+    "streak": 5
+  },
+  {
+    "ticker": "088350",
+    "name": "한화생명",
+    "streak": 5
+  },
+  {
+    "ticker": "439260",
+    "name": "대한조선",
+    "streak": 5
+  },
+  {
+    "ticker": "489790",
+    "name": "한화비전",
+    "streak": 5
+  },
+  {
+    "ticker": "001450",
+    "name": "현대해상",
+    "streak": 5
+  },
+  {
+    "ticker": "383220",
+    "name": "F&F",
+    "streak": 5
+  },
+  {
+    "ticker": "003690",
+    "name": "코리안리",
+    "streak": 5
+  },
+  {
+    "ticker": "028670",
+    "name": "팬오션",
+    "streak": 5
+  },
+  {
+    "ticker": "017960",
+    "name": "한국카본",
+    "streak": 5
+  },
+  {
+    "ticker": "064760",
+    "name": "티씨케이",
+    "streak": 5
+  },
+  {
+    "ticker": "023530",
+    "name": "롯데쇼핑",
+    "streak": 5
+  },
+  {
+    "ticker": "020560",
+    "name": "아시아나항공",
+    "streak": 5
+  },
+  {
+    "ticker": "003570",
+    "name": "SNT다이내믹스",
+    "streak": 5
+  },
+  {
+    "ticker": "007070",
+    "name": "GS리테일",
+    "streak": 5
+  },
+  {
+    "ticker": "096530",
+    "name": "씨젠",
+    "streak": 5
+  },
+  {
+    "ticker": "075580",
+    "name": "세진중공업",
+    "streak": 5
+  },
+  {
+    "ticker": "300720",
+    "name": "한일시멘트",
+    "streak": 5
+  },
+  {
+    "ticker": "001800",
+    "name": "오리온홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "004000",
+    "name": "롯데정밀화학",
+    "streak": 5
+  },
+  {
+    "ticker": "137310",
+    "name": "에스디바이오센서",
+    "streak": 5
+  },
+  {
+    "ticker": "317450",
+    "name": "명인제약",
+    "streak": 5
+  },
+  {
+    "ticker": "365550",
+    "name": "ESR켄달스퀘어리츠",
+    "streak": 5
+  },
+  {
+    "ticker": "089860",
+    "name": "롯데렌탈",
+    "streak": 5
+  },
+  {
+    "ticker": "114090",
+    "name": "GKL",
+    "streak": 5
+  },
+  {
+    "ticker": "036830",
+    "name": "솔브레인홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "298020",
+    "name": "효성티앤씨",
+    "streak": 5
+  },
+  {
+    "ticker": "003240",
+    "name": "태광산업",
+    "streak": 5
+  },
+  {
+    "ticker": "014820",
+    "name": "동원시스템즈",
+    "streak": 5
+  },
+  {
+    "ticker": "086450",
+    "name": "동국제약",
+    "streak": 5
+  },
+  {
+    "ticker": "069260",
+    "name": "TKG휴켐스",
+    "streak": 5
+  },
+  {
+    "ticker": "001680",
+    "name": "대상",
+    "streak": 5
+  },
+  {
+    "ticker": "025980",
+    "name": "아난티",
+    "streak": 5
+  },
+  {
+    "ticker": "214320",
+    "name": "이노션",
+    "streak": 5
+  },
+  {
+    "ticker": "007700",
+    "name": "F&F홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "476060",
+    "name": "온코닉테라퓨틱스",
+    "streak": 5
+  },
+  {
+    "ticker": "484590",
+    "name": "삼양컴텍",
+    "streak": 5
+  },
+  {
+    "ticker": "000400",
+    "name": "롯데손해보험",
+    "streak": 5
+  },
+  {
+    "ticker": "348950",
+    "name": "제이알글로벌리츠",
+    "streak": 5
+  },
+  {
+    "ticker": "010780",
+    "name": "아이에스동서",
+    "streak": 5
+  },
+  {
+    "ticker": "064260",
+    "name": "다날",
+    "streak": 5
+  },
+  {
+    "ticker": "016380",
+    "name": "KG스틸",
+    "streak": 5
+  },
+  {
+    "ticker": "093050",
+    "name": "LF",
+    "streak": 5
+  },
+  {
+    "ticker": "284740",
+    "name": "쿠쿠홈시스",
+    "streak": 5
+  },
+  {
+    "ticker": "352480",
+    "name": "씨앤씨인터내셔널",
+    "streak": 5
+  },
+  {
+    "ticker": "048410",
+    "name": "현대바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "004690",
+    "name": "삼천리",
+    "streak": 5
+  },
+  {
+    "ticker": "006220",
+    "name": "제주은행",
+    "streak": 5
+  },
+  {
+    "ticker": "450140",
+    "name": "코오롱모빌리티그룹",
+    "streak": 5
+  },
+  {
+    "ticker": "009410",
+    "name": "태영건설",
+    "streak": 5
+  },
+  {
+    "ticker": "183190",
+    "name": "아세아시멘트",
+    "streak": 5
+  },
+  {
+    "ticker": "014830",
+    "name": "유니드",
+    "streak": 5
+  },
+  {
+    "ticker": "206650",
+    "name": "유바이오로직스",
+    "streak": 5
+  },
+  {
+    "ticker": "089590",
+    "name": "제주항공",
+    "streak": 5
+  },
+  {
+    "ticker": "215200",
+    "name": "메가스터디교육",
+    "streak": 5
+  },
+  {
+    "ticker": "041960",
+    "name": "코미팜",
+    "streak": 5
+  },
+  {
+    "ticker": "448730",
+    "name": "삼성FN리츠",
+    "streak": 5
+  },
+  {
+    "ticker": "344820",
+    "name": "KCC글라스",
+    "streak": 5
+  },
+  {
+    "ticker": "078130",
+    "name": "국일제지",
+    "streak": 5
+  },
+  {
+    "ticker": "200130",
+    "name": "콜마비앤에이치",
+    "streak": 5
+  },
+  {
+    "ticker": "051980",
+    "name": "중앙첨단소재",
+    "streak": 5
+  },
+  {
+    "ticker": "024720",
+    "name": "콜마홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "018250",
+    "name": "애경산업",
+    "streak": 5
+  },
+  {
+    "ticker": "215000",
+    "name": "골프존",
+    "streak": 5
+  },
+  {
+    "ticker": "017860",
+    "name": "DS단석",
+    "streak": 5
+  },
+  {
+    "ticker": "294570",
+    "name": "쿠콘",
+    "streak": 5
+  },
+  {
+    "ticker": "001530",
+    "name": "DI동일",
+    "streak": 5
+  },
+  {
+    "ticker": "003960",
+    "name": "사조대림",
+    "streak": 5
+  },
+  {
+    "ticker": "001390",
+    "name": "KG케미칼",
+    "streak": 5
+  },
+  {
+    "ticker": "042520",
+    "name": "한스바이오메드",
+    "streak": 5
+  },
+  {
+    "ticker": "309710",
+    "name": "아이티켐",
+    "streak": 5
+  },
+  {
+    "ticker": "900140",
+    "name": "엘브이엠씨홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "005090",
+    "name": "SGC에너지",
+    "streak": 5
+  },
+  {
+    "ticker": "206640",
+    "name": "바디텍메드",
+    "streak": 5
+  },
+  {
+    "ticker": "025860",
+    "name": "남해화학",
+    "streak": 5
+  },
+  {
+    "ticker": "003920",
+    "name": "남양유업",
+    "streak": 5
+  },
+  {
+    "ticker": "016880",
+    "name": "웅진",
+    "streak": 5
+  },
+  {
+    "ticker": "136480",
+    "name": "하림",
+    "streak": 5
+  },
+  {
+    "ticker": "092790",
+    "name": "넥스틸",
+    "streak": 5
+  },
+  {
+    "ticker": "114840",
+    "name": "아이패밀리에스씨",
+    "streak": 5
+  },
+  {
+    "ticker": "241590",
+    "name": "화승엔터프라이즈",
+    "streak": 5
+  },
+  {
+    "ticker": "009290",
+    "name": "광동제약",
+    "streak": 5
+  },
+  {
+    "ticker": "025770",
+    "name": "한국정보통신",
+    "streak": 5
+  },
+  {
+    "ticker": "003220",
+    "name": "대원제약",
+    "streak": 5
+  },
+  {
+    "ticker": "950170",
+    "name": "JTC",
+    "streak": 5
+  },
+  {
+    "ticker": "035600",
+    "name": "KG이니시스",
+    "streak": 5
+  },
+  {
+    "ticker": "011760",
+    "name": "현대코퍼레이션",
+    "streak": 5
+  },
+  {
+    "ticker": "045390",
+    "name": "대아티아이",
+    "streak": 5
+  },
+  {
+    "ticker": "418550",
+    "name": "제이오",
+    "streak": 5
+  },
+  {
+    "ticker": "005500",
+    "name": "삼진제약",
+    "streak": 5
+  },
+  {
+    "ticker": "005950",
+    "name": "이수화학",
+    "streak": 5
+  },
+  {
+    "ticker": "084850",
+    "name": "아이티엠반도체",
+    "streak": 5
+  },
+  {
+    "ticker": "010580",
+    "name": "에스엠벡셀",
+    "streak": 5
+  },
+  {
+    "ticker": "393890",
+    "name": "더블유씨피",
+    "streak": 5
+  },
+  {
+    "ticker": "267980",
+    "name": "매일유업",
+    "streak": 5
+  },
+  {
+    "ticker": "033790",
+    "name": "피노",
+    "streak": 5
+  },
+  {
+    "ticker": "151860",
+    "name": "KG에코솔루션",
+    "streak": 5
+  },
+  {
+    "ticker": "024850",
+    "name": "HLB이노베이션",
+    "streak": 5
+  },
+  {
+    "ticker": "023410",
+    "name": "유진기업",
+    "streak": 5
+  },
+  {
+    "ticker": "027360",
+    "name": "아주IB투자",
+    "streak": 5
+  },
+  {
+    "ticker": "108670",
+    "name": "LX하우시스",
+    "streak": 5
+  },
+  {
+    "ticker": "035810",
+    "name": "이지홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "136490",
+    "name": "선진",
+    "streak": 5
+  },
+  {
+    "ticker": "000540",
+    "name": "흥국화재",
+    "streak": 5
+  },
+  {
+    "ticker": "025000",
+    "name": "KPX케미칼",
+    "streak": 5
+  },
+  {
+    "ticker": "001130",
+    "name": "대한제분",
+    "streak": 5
+  },
+  {
+    "ticker": "005010",
+    "name": "휴스틸",
+    "streak": 5
+  },
+  {
+    "ticker": "371950",
+    "name": "풍원정밀",
+    "streak": 5
+  },
+  {
+    "ticker": "005710",
+    "name": "대원산업",
+    "streak": 5
+  },
+  {
+    "ticker": "004430",
+    "name": "송원산업",
+    "streak": 5
+  },
+  {
+    "ticker": "000140",
+    "name": "하이트진로홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "098120",
+    "name": "마이크로컨텍솔",
+    "streak": 5
+  },
+  {
+    "ticker": "272550",
+    "name": "삼양패키징",
+    "streak": 5
+  },
+  {
+    "ticker": "048870",
+    "name": "시너지이노베이션",
+    "streak": 5
+  },
+  {
+    "ticker": "377450",
+    "name": "리파인",
+    "streak": 5
+  },
+  {
+    "ticker": "271980",
+    "name": "제일약품",
+    "streak": 5
+  },
+  {
+    "ticker": "148150",
+    "name": "세경하이테크",
+    "streak": 5
+  },
+  {
+    "ticker": "101970",
+    "name": "우양에이치씨",
+    "streak": 5
+  },
+  {
+    "ticker": "293480",
+    "name": "하나제약",
+    "streak": 5
+  },
+  {
+    "ticker": "001520",
+    "name": "동양",
+    "streak": 5
+  },
+  {
+    "ticker": "001250",
+    "name": "GS글로벌",
+    "streak": 5
+  },
+  {
+    "ticker": "092130",
+    "name": "이크레더블",
+    "streak": 5
+  },
+  {
+    "ticker": "001780",
+    "name": "알루코",
+    "streak": 5
+  },
+  {
+    "ticker": "017890",
+    "name": "한국알콜",
+    "streak": 5
+  },
+  {
+    "ticker": "081000",
+    "name": "일진다이아",
+    "streak": 5
+  },
+  {
+    "ticker": "095570",
+    "name": "AJ네트웍스",
+    "streak": 5
+  },
+  {
+    "ticker": "086890",
+    "name": "이수앱지스",
+    "streak": 5
+  },
+  {
+    "ticker": "353810",
+    "name": "이지바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "060150",
+    "name": "인선이엔티",
+    "streak": 5
+  },
+  {
+    "ticker": "042600",
+    "name": "새로닉스",
+    "streak": 5
+  },
+  {
+    "ticker": "028100",
+    "name": "동아지질",
+    "streak": 5
+  },
+  {
+    "ticker": "037560",
+    "name": "LG헬로비전",
+    "streak": 5
+  },
+  {
+    "ticker": "038390",
+    "name": "레드캡투어",
+    "streak": 5
+  },
+  {
+    "ticker": "156100",
+    "name": "엘앤케이바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "036220",
+    "name": "오상헬스케어",
+    "streak": 5
+  },
+  {
+    "ticker": "101530",
+    "name": "해태제과식품",
+    "streak": 5
+  },
+  {
+    "ticker": "100120",
+    "name": "뷰웍스",
+    "streak": 5
+  },
+  {
+    "ticker": "002100",
+    "name": "경농",
+    "streak": 5
+  },
+  {
+    "ticker": "036420",
+    "name": "콘텐트리중앙",
+    "streak": 5
+  },
+  {
+    "ticker": "108230",
+    "name": "톱텍",
+    "streak": 5
+  },
+  {
+    "ticker": "458650",
+    "name": "성우",
+    "streak": 5
+  },
+  {
+    "ticker": "126600",
+    "name": "BGF에코머티리얼즈",
+    "streak": 5
+  },
+  {
+    "ticker": "263720",
+    "name": "디앤씨미디어",
+    "streak": 5
+  },
+  {
+    "ticker": "011040",
+    "name": "경동제약",
+    "streak": 5
+  },
+  {
+    "ticker": "010955",
+    "name": "S-Oil우",
+    "streak": 5
+  },
+  {
+    "ticker": "217820",
+    "name": "원익피앤이",
+    "streak": 5
+  },
+  {
+    "ticker": "019210",
+    "name": "와이지-원",
+    "streak": 5
+  },
+  {
+    "ticker": "035080",
+    "name": "그래디언트",
+    "streak": 5
+  },
+  {
+    "ticker": "260870",
+    "name": "SK시그넷",
+    "streak": 5
+  },
+  {
+    "ticker": "092040",
+    "name": "아미코젠",
+    "streak": 5
+  },
+  {
+    "ticker": "018470",
+    "name": "조일알미늄",
+    "streak": 5
+  },
+  {
+    "ticker": "090350",
+    "name": "노루페인트",
+    "streak": 5
+  },
+  {
+    "ticker": "019680",
+    "name": "대교",
+    "streak": 5
+  },
+  {
+    "ticker": "365330",
+    "name": "에스와이스틸텍",
+    "streak": 5
+  },
+  {
+    "ticker": "070960",
+    "name": "모나용평",
+    "streak": 5
+  },
+  {
+    "ticker": "084650",
+    "name": "랩지노믹스",
+    "streak": 5
+  },
+  {
+    "ticker": "095720",
+    "name": "웅진씽크빅",
+    "streak": 5
+  },
+  {
+    "ticker": "014280",
+    "name": "금강공업",
+    "streak": 5
+  },
+  {
+    "ticker": "005160",
+    "name": "동국산업",
+    "streak": 5
+  },
+  {
+    "ticker": "234690",
+    "name": "녹십자웰빙",
+    "streak": 5
+  },
+  {
+    "ticker": "008040",
+    "name": "사조동아원",
+    "streak": 5
+  },
+  {
+    "ticker": "009070",
+    "name": "KCTC",
+    "streak": 5
+  },
+  {
+    "ticker": "091120",
+    "name": "이엠텍",
+    "streak": 5
+  },
+  {
+    "ticker": "009270",
+    "name": "신원",
+    "streak": 5
+  },
+  {
+    "ticker": "003830",
+    "name": "대한화섬",
+    "streak": 5
+  },
+  {
+    "ticker": "000390",
+    "name": "삼화페인트",
+    "streak": 5
+  },
+  {
+    "ticker": "205470",
+    "name": "휴마시스",
+    "streak": 5
+  },
+  {
+    "ticker": "033340",
+    "name": "좋은사람들",
+    "streak": 5
+  },
+  {
+    "ticker": "092220",
+    "name": "KEC",
+    "streak": 5
+  },
+  {
+    "ticker": "086980",
+    "name": "쇼박스",
+    "streak": 5
+  },
+  {
+    "ticker": "143240",
+    "name": "사람인",
+    "streak": 5
+  },
+  {
+    "ticker": "047310",
+    "name": "파워로직스",
+    "streak": 5
+  },
+  {
+    "ticker": "013580",
+    "name": "계룡건설",
+    "streak": 5
+  },
+  {
+    "ticker": "013990",
+    "name": "아가방컴퍼니",
+    "streak": 5
+  },
+  {
+    "ticker": "104480",
+    "name": "티케이케미칼",
+    "streak": 5
+  },
+  {
+    "ticker": "004250",
+    "name": "NPC",
+    "streak": 5
+  },
+  {
+    "ticker": "015890",
+    "name": "태경산업",
+    "streak": 5
+  },
+  {
+    "ticker": "226400",
+    "name": "오스테오닉",
+    "streak": 5
+  },
+  {
+    "ticker": "052420",
+    "name": "오성첨단소재",
+    "streak": 5
+  },
+  {
+    "ticker": "032940",
+    "name": "원익",
+    "streak": 5
+  },
+  {
+    "ticker": "950130",
+    "name": "엑세스바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "105550",
+    "name": "엣지파운드리",
+    "streak": 5
+  },
+  {
+    "ticker": "014710",
+    "name": "사조씨푸드",
+    "streak": 5
+  },
+  {
+    "ticker": "007540",
+    "name": "샘표",
+    "streak": 5
+  },
+  {
+    "ticker": "192440",
+    "name": "슈피겐코리아",
+    "streak": 5
+  },
+  {
+    "ticker": "020120",
+    "name": "키다리스튜디오",
+    "streak": 5
+  },
+  {
+    "ticker": "080420",
+    "name": "모다이노칩",
+    "streak": 5
+  },
+  {
+    "ticker": "068240",
+    "name": "다원시스",
+    "streak": 5
+  },
+  {
+    "ticker": "079810",
+    "name": "디이엔티",
+    "streak": 5
+  },
+  {
+    "ticker": "298540",
+    "name": "더네이쳐홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "079430",
+    "name": "현대리바트",
+    "streak": 5
+  },
+  {
+    "ticker": "008350",
+    "name": "남선알미늄",
+    "streak": 5
+  },
+  {
+    "ticker": "354320",
+    "name": "알멕",
+    "streak": 5
+  },
+  {
+    "ticker": "029480",
+    "name": "광무",
+    "streak": 5
+  },
+  {
+    "ticker": "044820",
+    "name": "코스맥스비티아이",
+    "streak": 5
+  },
+  {
+    "ticker": "063080",
+    "name": "컴투스홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "290670",
+    "name": "대보마그네틱",
+    "streak": 5
+  },
+  {
+    "ticker": "005960",
+    "name": "동부건설",
+    "streak": 5
+  },
+  {
+    "ticker": "007110",
+    "name": "일신석재",
+    "streak": 5
+  },
+  {
+    "ticker": "004140",
+    "name": "동방",
+    "streak": 5
+  },
+  {
+    "ticker": "027710",
+    "name": "팜스토리",
+    "streak": 5
+  },
+  {
+    "ticker": "489500",
+    "name": "엘케이켐",
+    "streak": 5
+  },
+  {
+    "ticker": "014580",
+    "name": "태경비케이",
+    "streak": 5
+  },
+  {
+    "ticker": "267850",
+    "name": "아시아나IDT",
+    "streak": 5
+  },
+  {
+    "ticker": "004080",
+    "name": "신흥",
+    "streak": 5
+  },
+  {
+    "ticker": "047820",
+    "name": "초록뱀미디어",
+    "streak": 5
+  },
+  {
+    "ticker": "363280",
+    "name": "티와이홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "299900",
+    "name": "위지윅스튜디오",
+    "streak": 5
+  },
+  {
+    "ticker": "006840",
+    "name": "AK홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "048550",
+    "name": "SM C&C",
+    "streak": 5
+  },
+  {
+    "ticker": "025950",
+    "name": "동신건설",
+    "streak": 5
+  },
+  {
+    "ticker": "217950",
+    "name": "파마리서치바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "090850",
+    "name": "현대이지웰",
+    "streak": 5
+  },
+  {
+    "ticker": "005860",
+    "name": "한일사료",
+    "streak": 5
+  },
+  {
+    "ticker": "012320",
+    "name": "경동인베스트",
+    "streak": 5
+  },
+  {
+    "ticker": "002990",
+    "name": "금호건설",
+    "streak": 5
+  },
+  {
+    "ticker": "093640",
+    "name": "케이알엠",
+    "streak": 5
+  },
+  {
+    "ticker": "001020",
+    "name": "페이퍼코리아",
+    "streak": 5
+  },
+  {
+    "ticker": "317870",
+    "name": "엔바이오니아",
+    "streak": 5
+  },
+  {
+    "ticker": "004150",
+    "name": "한솔홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "214330",
+    "name": "금호에이치티",
+    "streak": 5
+  },
+  {
+    "ticker": "248170",
+    "name": "샘표식품",
+    "streak": 5
+  },
+  {
+    "ticker": "267290",
+    "name": "경동도시가스",
+    "streak": 5
+  },
+  {
+    "ticker": "139990",
+    "name": "아주스틸",
+    "streak": 5
+  },
+  {
+    "ticker": "089470",
+    "name": "HDC현대EP",
+    "streak": 5
+  },
+  {
+    "ticker": "012610",
+    "name": "경인양행",
+    "streak": 5
+  },
+  {
+    "ticker": "060570",
+    "name": "드림어스컴퍼니",
+    "streak": 5
+  },
+  {
+    "ticker": "206560",
+    "name": "덱스터",
+    "streak": 5
+  },
+  {
+    "ticker": "083790",
+    "name": "CG인바이츠",
+    "streak": 5
+  },
+  {
+    "ticker": "004310",
+    "name": "현대약품",
+    "streak": 5
+  },
+  {
+    "ticker": "034590",
+    "name": "인천도시가스",
+    "streak": 5
+  },
+  {
+    "ticker": "204610",
+    "name": "티쓰리",
+    "streak": 5
+  },
+  {
+    "ticker": "007210",
+    "name": "벽산",
+    "streak": 5
+  },
+  {
+    "ticker": "408920",
+    "name": "메쎄이상",
+    "streak": 5
+  },
+  {
+    "ticker": "134580",
+    "name": "탑코미디어",
+    "streak": 5
+  },
+  {
+    "ticker": "048530",
+    "name": "인트론바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "025620",
+    "name": "제이준코스메틱",
+    "streak": 5
+  },
+  {
+    "ticker": "317770",
+    "name": "엑스페릭스",
+    "streak": 5
+  },
+  {
+    "ticker": "289220",
+    "name": "자이언트스텝",
+    "streak": 5
+  },
+  {
+    "ticker": "019550",
+    "name": "SBI인베스트먼트",
+    "streak": 5
+  },
+  {
+    "ticker": "125210",
+    "name": "아모그린텍",
+    "streak": 5
+  },
+  {
+    "ticker": "023450",
+    "name": "동남합성",
+    "streak": 5
+  },
+  {
+    "ticker": "003060",
+    "name": "에이프로젠바이오로직스",
+    "streak": 5
+  },
+  {
+    "ticker": "124560",
+    "name": "태웅로직스",
+    "streak": 5
+  },
+  {
+    "ticker": "067900",
+    "name": "와이엔텍",
+    "streak": 5
+  },
+  {
+    "ticker": "017550",
+    "name": "수산세보틱스",
+    "streak": 5
+  },
+  {
+    "ticker": "033290",
+    "name": "코웰패션",
+    "streak": 5
+  },
+  {
+    "ticker": "278650",
+    "name": "HLB바이오스텝",
+    "streak": 5
+  },
+  {
+    "ticker": "227840",
+    "name": "현대코퍼레이션홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "065450",
+    "name": "빅텍",
+    "streak": 5
+  },
+  {
+    "ticker": "002450",
+    "name": "삼익악기",
+    "streak": 5
+  },
+  {
+    "ticker": "092190",
+    "name": "서울바이오시스",
+    "streak": 5
+  },
+  {
+    "ticker": "082850",
+    "name": "우리바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "048910",
+    "name": "대원미디어",
+    "streak": 5
+  },
+  {
+    "ticker": "021320",
+    "name": "KCC건설",
+    "streak": 5
+  },
+  {
+    "ticker": "357230",
+    "name": "에이치피오",
+    "streak": 5
+  },
+  {
+    "ticker": "003580",
+    "name": "HLB글로벌",
+    "streak": 5
+  },
+  {
+    "ticker": "126880",
+    "name": "제이엔케이글로벌",
+    "streak": 5
+  },
+  {
+    "ticker": "088390",
+    "name": "이녹스",
+    "streak": 5
+  },
+  {
+    "ticker": "225530",
+    "name": "HC보광산업",
+    "streak": 5
+  },
+  {
+    "ticker": "452400",
+    "name": "이닉스",
+    "streak": 5
+  },
+  {
+    "ticker": "041930",
+    "name": "동아화성",
+    "streak": 5
+  },
+  {
+    "ticker": "005740",
+    "name": "크라운해태홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "067830",
+    "name": "세이브존I&C",
+    "streak": 5
+  },
+  {
+    "ticker": "006890",
+    "name": "태경케미컬",
+    "streak": 5
+  },
+  {
+    "ticker": "073560",
+    "name": "우리손에프앤지",
+    "streak": 5
+  },
+  {
+    "ticker": "044340",
+    "name": "위닉스",
+    "streak": 5
+  },
+  {
+    "ticker": "480370",
+    "name": "씨케이솔루션",
+    "streak": 5
+  },
+  {
+    "ticker": "273640",
+    "name": "와이엠텍",
+    "streak": 5
+  },
+  {
+    "ticker": "299660",
+    "name": "셀리드",
+    "streak": 5
+  },
+  {
+    "ticker": "104040",
+    "name": "대성파인텍",
+    "streak": 5
+  },
+  {
+    "ticker": "039020",
+    "name": "이건홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "011150",
+    "name": "CJ씨푸드",
+    "streak": 5
+  },
+  {
+    "ticker": "047770",
+    "name": "코데즈컴바인",
+    "streak": 5
+  },
+  {
+    "ticker": "014970",
+    "name": "삼륭물산",
+    "streak": 5
+  },
+  {
+    "ticker": "054780",
+    "name": "키이스트",
+    "streak": 5
+  },
+  {
+    "ticker": "065510",
+    "name": "휴비츠",
+    "streak": 5
+  },
+  {
+    "ticker": "054670",
+    "name": "대한뉴팜",
+    "streak": 5
+  },
+  {
+    "ticker": "111710",
+    "name": "남화산업",
+    "streak": 5
+  },
+  {
+    "ticker": "002700",
+    "name": "신일전자",
+    "streak": 5
+  },
+  {
+    "ticker": "950220",
+    "name": "네오이뮨텍",
+    "streak": 5
+  },
+  {
+    "ticker": "296160",
+    "name": "프로젠",
+    "streak": 5
+  },
+  {
+    "ticker": "039610",
+    "name": "화성밸브",
+    "streak": 5
+  },
+  {
+    "ticker": "004840",
+    "name": "DRB동일",
+    "streak": 5
+  },
+  {
+    "ticker": "004650",
+    "name": "창해에탄올",
+    "streak": 5
+  },
+  {
+    "ticker": "014440",
+    "name": "영보화학",
+    "streak": 5
+  },
+  {
+    "ticker": "187420",
+    "name": "HLB제넥스",
+    "streak": 5
+  },
+  {
+    "ticker": "001560",
+    "name": "제일연마",
+    "streak": 5
+  },
+  {
+    "ticker": "010040",
+    "name": "한국내화",
+    "streak": 5
+  },
+  {
+    "ticker": "396300",
+    "name": "세아메카닉스",
+    "streak": 5
+  },
+  {
+    "ticker": "208140",
+    "name": "정다운",
+    "streak": 5
+  },
+  {
+    "ticker": "330350",
+    "name": "위더스제약",
+    "streak": 5
+  },
+  {
+    "ticker": "330730",
+    "name": "스톤브릿지벤처스",
+    "streak": 5
+  },
+  {
+    "ticker": "339950",
+    "name": "아이비김영",
+    "streak": 5
+  },
+  {
+    "ticker": "014470",
+    "name": "부방",
+    "streak": 5
+  },
+  {
+    "ticker": "209640",
+    "name": "와이제이링크",
+    "streak": 5
+  },
+  {
+    "ticker": "187870",
+    "name": "디바이스",
+    "streak": 5
+  },
+  {
+    "ticker": "475430",
+    "name": "키스트론",
+    "streak": 5
+  },
+  {
+    "ticker": "000590",
+    "name": "CS홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "007590",
+    "name": "동방아그로",
+    "streak": 5
+  },
+  {
+    "ticker": "007980",
+    "name": "TP",
+    "streak": 5
+  },
+  {
+    "ticker": "071090",
+    "name": "하이스틸",
+    "streak": 5
+  },
+  {
+    "ticker": "065500",
+    "name": "오리엔트정공",
+    "streak": 5
+  },
+  {
+    "ticker": "009200",
+    "name": "무림페이퍼",
+    "streak": 5
+  },
+  {
+    "ticker": "005670",
+    "name": "푸드웰",
+    "streak": 5
+  },
+  {
+    "ticker": "234100",
+    "name": "폴라리스세원",
+    "streak": 5
+  },
+  {
+    "ticker": "054300",
+    "name": "팬스타엔터프라이즈",
+    "streak": 5
+  },
+  {
+    "ticker": "094850",
+    "name": "참좋은여행",
+    "streak": 5
+  },
+  {
+    "ticker": "159580",
+    "name": "제로투세븐",
+    "streak": 5
+  },
+  {
+    "ticker": "479960",
+    "name": "위너스",
+    "streak": 5
+  },
+  {
+    "ticker": "074430",
+    "name": "아미노로직스",
+    "streak": 5
+  },
+  {
+    "ticker": "078935",
+    "name": "GS우",
+    "streak": 5
+  },
+  {
+    "ticker": "053050",
+    "name": "지에스이",
+    "streak": 5
+  },
+  {
+    "ticker": "011390",
+    "name": "부산산업",
+    "streak": 5
+  },
+  {
+    "ticker": "053260",
+    "name": "금강철강",
+    "streak": 5
+  },
+  {
+    "ticker": "043710",
+    "name": "서울리거",
+    "streak": 5
+  },
+  {
+    "ticker": "032540",
+    "name": "TJ미디어",
+    "streak": 5
+  },
+  {
+    "ticker": "432430",
+    "name": "와이랩",
+    "streak": 5
+  },
+  {
+    "ticker": "078860",
+    "name": "엔에스이엔엠",
+    "streak": 5
+  },
+  {
+    "ticker": "054040",
+    "name": "한국컴퓨터",
+    "streak": 5
+  },
+  {
+    "ticker": "403490",
+    "name": "우듬지팜",
+    "streak": 5
+  },
+  {
+    "ticker": "200350",
+    "name": "아티스트스튜디오",
+    "streak": 5
+  },
+  {
+    "ticker": "081180",
+    "name": "쎄크",
+    "streak": 5
+  },
+  {
+    "ticker": "036120",
+    "name": "서울평가정보",
+    "streak": 5
+  },
+  {
+    "ticker": "145170",
+    "name": "노브랜드",
+    "streak": 5
+  },
+  {
+    "ticker": "001260",
+    "name": "남광토건",
+    "streak": 5
+  },
+  {
+    "ticker": "007720",
+    "name": "소노스퀘어",
+    "streak": 5
+  },
+  {
+    "ticker": "004720",
+    "name": "팜젠사이언스",
+    "streak": 5
+  },
+  {
+    "ticker": "45014K",
+    "name": "코오롱모빌리티그룹우",
+    "streak": 5
+  },
+  {
+    "ticker": "223310",
+    "name": "사토시홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "004100",
+    "name": "태양금속",
+    "streak": 5
+  },
+  {
+    "ticker": "009180",
+    "name": "한솔로지스틱스",
+    "streak": 5
+  },
+  {
+    "ticker": "052220",
+    "name": "iMBC",
+    "streak": 5
+  },
+  {
+    "ticker": "407400",
+    "name": "꿈비",
+    "streak": 5
+  },
+  {
+    "ticker": "137950",
+    "name": "제이씨케미칼",
+    "streak": 5
+  },
+  {
+    "ticker": "333620",
+    "name": "엔시스",
+    "streak": 5
+  },
+  {
+    "ticker": "010470",
+    "name": "오리콤",
+    "streak": 5
+  },
+  {
+    "ticker": "037030",
+    "name": "파워넷",
+    "streak": 5
+  },
+  {
+    "ticker": "308080",
+    "name": "바이젠셀",
+    "streak": 5
+  },
+  {
+    "ticker": "000850",
+    "name": "화천기공",
+    "streak": 5
+  },
+  {
+    "ticker": "012790",
+    "name": "신일제약",
+    "streak": 5
+  },
+  {
+    "ticker": "000910",
+    "name": "유니온",
+    "streak": 5
+  },
+  {
+    "ticker": "037950",
+    "name": "엘컴텍",
+    "streak": 5
+  },
+  {
+    "ticker": "003010",
+    "name": "혜인",
+    "streak": 5
+  },
+  {
+    "ticker": "064090",
+    "name": "인크레더블버즈",
+    "streak": 5
+  },
+  {
+    "ticker": "013360",
+    "name": "일성건설",
+    "streak": 5
+  },
+  {
+    "ticker": "092440",
+    "name": "기신정기",
+    "streak": 5
+  },
+  {
+    "ticker": "198440",
+    "name": "강동씨앤엘",
+    "streak": 5
+  },
+  {
+    "ticker": "004910",
+    "name": "조광페인트",
+    "streak": 5
+  },
+  {
+    "ticker": "038880",
+    "name": "아이에이",
+    "streak": 5
+  },
+  {
+    "ticker": "068330",
+    "name": "일신바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "950200",
+    "name": "소마젠",
+    "streak": 5
+  },
+  {
+    "ticker": "097780",
+    "name": "에코볼트",
+    "streak": 5
+  },
+  {
+    "ticker": "006370",
+    "name": "대구백화점",
+    "streak": 5
+  },
+  {
+    "ticker": "365590",
+    "name": "하이딥",
+    "streak": 5
+  },
+  {
+    "ticker": "016250",
+    "name": "SGC E&C",
+    "streak": 5
+  },
+  {
+    "ticker": "067370",
+    "name": "선바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "348080",
+    "name": "큐라티스",
+    "streak": 5
+  },
+  {
+    "ticker": "212560",
+    "name": "네오오토",
+    "streak": 5
+  },
+  {
+    "ticker": "073570",
+    "name": "리튬포어스",
+    "streak": 5
+  },
+  {
+    "ticker": "104540",
+    "name": "코렌텍",
+    "streak": 5
+  },
+  {
+    "ticker": "218150",
+    "name": "미래생명자원",
+    "streak": 5
+  },
+  {
+    "ticker": "050960",
+    "name": "수산아이앤티",
+    "streak": 5
+  },
+  {
+    "ticker": "014990",
+    "name": "인디에프",
+    "streak": 5
+  },
+  {
+    "ticker": "120115",
+    "name": "코오롱인더우",
+    "streak": 5
+  },
+  {
+    "ticker": "002630",
+    "name": "오리엔트바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "042110",
+    "name": "에스씨디",
+    "streak": 5
+  },
+  {
+    "ticker": "002140",
+    "name": "고려산업",
+    "streak": 5
+  },
+  {
+    "ticker": "066980",
+    "name": "한성크린텍",
+    "streak": 5
+  },
+  {
+    "ticker": "237820",
+    "name": "플레이디",
+    "streak": 5
+  },
+  {
+    "ticker": "002760",
+    "name": "보락",
+    "streak": 5
+  },
+  {
+    "ticker": "089150",
+    "name": "케이씨티",
+    "streak": 5
+  },
+  {
+    "ticker": "023810",
+    "name": "인팩",
+    "streak": 5
+  },
+  {
+    "ticker": "047400",
+    "name": "유니온머티리얼",
+    "streak": 5
+  },
+  {
+    "ticker": "187790",
+    "name": "나노",
+    "streak": 5
+  },
+  {
+    "ticker": "155660",
+    "name": "DSR",
+    "streak": 5
+  },
+  {
+    "ticker": "090410",
+    "name": "덕신이피씨",
+    "streak": 5
+  },
+  {
+    "ticker": "037760",
+    "name": "쎄니트",
+    "streak": 5
+  },
+  {
+    "ticker": "038070",
+    "name": "서린바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "049550",
+    "name": "잉크테크",
+    "streak": 5
+  },
+  {
+    "ticker": "352700",
+    "name": "씨앤투스",
+    "streak": 5
+  },
+  {
+    "ticker": "001550",
+    "name": "조비",
+    "streak": 5
+  },
+  {
+    "ticker": "066130",
+    "name": "하츠",
+    "streak": 5
+  },
+  {
+    "ticker": "064480",
+    "name": "브리지텍",
+    "streak": 5
+  },
+  {
+    "ticker": "105760",
+    "name": "포스뱅크",
+    "streak": 5
+  },
+  {
+    "ticker": "037440",
+    "name": "희림",
+    "streak": 5
+  },
+  {
+    "ticker": "002880",
+    "name": "대유에이텍",
+    "streak": 5
+  },
+  {
+    "ticker": "019175",
+    "name": "신풍제약우",
+    "streak": 5
+  },
+  {
+    "ticker": "024950",
+    "name": "삼천리자전거",
+    "streak": 5
+  },
+  {
+    "ticker": "317850",
+    "name": "대모",
+    "streak": 5
+  },
+  {
+    "ticker": "004770",
+    "name": "써니전자",
+    "streak": 5
+  },
+  {
+    "ticker": "003310",
+    "name": "대주산업",
+    "streak": 5
+  },
+  {
+    "ticker": "021050",
+    "name": "서원",
+    "streak": 5
+  },
+  {
+    "ticker": "090470",
+    "name": "제이스텍",
+    "streak": 5
+  },
+  {
+    "ticker": "033130",
+    "name": "디지틀조선",
+    "streak": 5
+  },
+  {
+    "ticker": "000650",
+    "name": "천일고속",
+    "streak": 5
+  },
+  {
+    "ticker": "291230",
+    "name": "엔피",
+    "streak": 5
+  },
+  {
+    "ticker": "342870",
+    "name": "오아",
+    "streak": 5
+  },
+  {
+    "ticker": "011230",
+    "name": "삼화전자",
+    "streak": 5
+  },
+  {
+    "ticker": "195990",
+    "name": "에이비프로바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "066670",
+    "name": "디티씨",
+    "streak": 5
+  },
+  {
+    "ticker": "273060",
+    "name": "와이즈버즈",
+    "streak": 5
+  },
+  {
+    "ticker": "224110",
+    "name": "에이텍모빌리티",
+    "streak": 5
+  },
+  {
+    "ticker": "462310",
+    "name": "뉴키즈온",
+    "streak": 5
+  },
+  {
+    "ticker": "057030",
+    "name": "YBM넷",
+    "streak": 5
+  },
+  {
+    "ticker": "042940",
+    "name": "상지건설",
+    "streak": 5
+  },
+  {
+    "ticker": "023350",
+    "name": "한국종합기술",
+    "streak": 5
+  },
+  {
+    "ticker": "073110",
+    "name": "엘엠에스",
+    "streak": 5
+  },
+  {
+    "ticker": "465770",
+    "name": "STX그린로지스",
+    "streak": 5
+  },
+  {
+    "ticker": "008250",
+    "name": "이건산업",
+    "streak": 5
+  },
+  {
+    "ticker": "464280",
+    "name": "티디에스팜",
+    "streak": 5
+  },
+  {
+    "ticker": "376180",
+    "name": "피코그램",
+    "streak": 5
+  },
+  {
+    "ticker": "009730",
+    "name": "이렘",
+    "streak": 5
+  },
+  {
+    "ticker": "027580",
+    "name": "상보",
+    "streak": 5
+  },
+  {
+    "ticker": "013720",
+    "name": "THE CUBE&",
+    "streak": 5
+  },
+  {
+    "ticker": "166480",
+    "name": "코아스템켐온",
+    "streak": 5
+  },
+  {
+    "ticker": "065950",
+    "name": "웰크론",
+    "streak": 5
+  },
+  {
+    "ticker": "100660",
+    "name": "서암기계공업",
+    "streak": 5
+  },
+  {
+    "ticker": "134790",
+    "name": "시디즈",
+    "streak": 5
+  },
+  {
+    "ticker": "101240",
+    "name": "씨큐브",
+    "streak": 5
+  },
+  {
+    "ticker": "093240",
+    "name": "형지엘리트",
+    "streak": 5
+  },
+  {
+    "ticker": "318000",
+    "name": "KBG",
+    "streak": 5
+  },
+  {
+    "ticker": "106080",
+    "name": "케이이엠텍",
+    "streak": 5
+  },
+  {
+    "ticker": "016670",
+    "name": "디모아",
+    "streak": 5
+  },
+  {
+    "ticker": "131100",
+    "name": "티엔엔터테인먼트",
+    "streak": 5
+  },
+  {
+    "ticker": "026040",
+    "name": "제이에스티나",
+    "streak": 5
+  },
+  {
+    "ticker": "052860",
+    "name": "아이앤씨",
+    "streak": 5
+  },
+  {
+    "ticker": "331380",
+    "name": "포커스에이아이",
+    "streak": 5
+  },
+  {
+    "ticker": "006050",
+    "name": "국영지앤엠",
+    "streak": 5
+  },
+  {
+    "ticker": "069920",
+    "name": "엑시온그룹",
+    "streak": 5
+  },
+  {
+    "ticker": "033540",
+    "name": "파라텍",
+    "streak": 5
+  },
+  {
+    "ticker": "258610",
+    "name": "케일럼",
+    "streak": 5
+  },
+  {
+    "ticker": "086040",
+    "name": "바이오톡스텍",
+    "streak": 5
+  },
+  {
+    "ticker": "254120",
+    "name": "자비스",
+    "streak": 5
+  },
+  {
+    "ticker": "133750",
+    "name": "메가엠디",
+    "streak": 5
+  },
+  {
+    "ticker": "104200",
+    "name": "NHN벅스",
+    "streak": 5
+  },
+  {
+    "ticker": "038620",
+    "name": "위즈코프",
+    "streak": 5
+  },
+  {
+    "ticker": "001210",
+    "name": "금호전기",
+    "streak": 5
+  },
+  {
+    "ticker": "195500",
+    "name": "마니커에프앤지",
+    "streak": 5
+  },
+  {
+    "ticker": "067170",
+    "name": "오텍",
+    "streak": 5
+  },
+  {
+    "ticker": "002360",
+    "name": "SH에너지화학",
+    "streak": 5
+  },
+  {
+    "ticker": "043100",
+    "name": "알파녹스",
+    "streak": 5
+  },
+  {
+    "ticker": "040160",
+    "name": "누리플렉스",
+    "streak": 5
+  },
+  {
+    "ticker": "032580",
+    "name": "피델릭스",
+    "streak": 5
+  },
+  {
+    "ticker": "022220",
+    "name": "티케이지애강",
+    "streak": 5
+  },
+  {
+    "ticker": "064520",
+    "name": "테크엘",
+    "streak": 5
+  },
+  {
+    "ticker": "013810",
+    "name": "스페코",
+    "streak": 5
+  },
+  {
+    "ticker": "169330",
+    "name": "엠브레인",
+    "streak": 5
+  },
+  {
+    "ticker": "452300",
+    "name": "캡스톤파트너스",
+    "streak": 5
+  },
+  {
+    "ticker": "376980",
+    "name": "원티드랩",
+    "streak": 5
+  },
+  {
+    "ticker": "446440",
+    "name": "에피바이오텍",
+    "streak": 5
+  },
+  {
+    "ticker": "109670",
+    "name": "씨싸이트",
+    "streak": 5
+  },
+  {
+    "ticker": "308100",
+    "name": "형지글로벌",
+    "streak": 5
+  },
+  {
+    "ticker": "246710",
+    "name": "티앤알바이오팹",
+    "streak": 5
+  },
+  {
+    "ticker": "148930",
+    "name": "에이치와이티씨",
+    "streak": 5
+  },
+  {
+    "ticker": "137080",
+    "name": "나래나노텍",
+    "streak": 5
+  },
+  {
+    "ticker": "333050",
+    "name": "모코엠시스",
+    "streak": 5
+  },
+  {
+    "ticker": "457600",
+    "name": "벡트",
+    "streak": 5
+  },
+  {
+    "ticker": "285800",
+    "name": "진영",
+    "streak": 5
+  },
+  {
+    "ticker": "089140",
+    "name": "넥스턴바이오",
+    "streak": 5
+  },
+  {
+    "ticker": "006200",
+    "name": "한국전자홀딩스",
+    "streak": 5
+  },
+  {
+    "ticker": "070590",
+    "name": "한솔인티큐브",
+    "streak": 5
+  },
+  {
+    "ticker": "085810",
+    "name": "알티캐스트",
+    "streak": 5
+  },
+  {
+    "ticker": "005320",
+    "name": "온타이드",
+    "streak": 5
+  },
+  {
+    "ticker": "053290",
+    "name": "NE능률",
+    "streak": 5
+  },
+  {
+    "ticker": "011080",
+    "name": "형지I&C",
+    "streak": 5
+  },
+  {
+    "ticker": "048470",
+    "name": "대동스틸",
+    "streak": 5
+  },
+  {
+    "ticker": "004270",
+    "name": "남성",
+    "streak": 5
+  },
+  {
+    "ticker": "312610",
+    "name": "에이에프더블류",
+    "streak": 5
+  },
+  {
+    "ticker": "016920",
+    "name": "카스",
+    "streak": 5
+  },
+  {
+    "ticker": "335870",
+    "name": "윙스풋",
+    "streak": 5
+  },
+  {
+    "ticker": "318010",
+    "name": "팜스빌",
+    "streak": 5
+  },
+  {
+    "ticker": "084870",
+    "name": "TBH글로벌",
+    "streak": 5
+  },
+  {
+    "ticker": "009620",
+    "name": "삼보산업",
+    "streak": 5
+  },
+  {
+    "ticker": "076080",
+    "name": "웰크론한텍",
+    "streak": 5
+  },
+  {
+    "ticker": "362990",
+    "name": "드림인사이트",
+    "streak": 5
+  },
+  {
+    "ticker": "091340",
+    "name": "S&K폴리텍",
+    "streak": 5
+  },
+  {
+    "ticker": "139670",
+    "name": "키네마스터",
+    "streak": 5
+  },
+  {
+    "ticker": "289010",
+    "name": "아이스크림에듀",
+    "streak": 5
+  },
+  {
+    "ticker": "291650",
+    "name": "압타머사이언스",
+    "streak": 5
+  },
+  {
+    "ticker": "033050",
+    "name": "제이엠아이",
+    "streak": 5
+  },
+  {
+    "ticker": "177350",
+    "name": "베셀",
+    "streak": 5
+  },
+  {
+    "ticker": "050760",
+    "name": "에스폴리텍",
+    "streak": 5
+  },
+  {
+    "ticker": "197140",
+    "name": "디지캡",
+    "streak": 5
+  },
+  {
+    "ticker": "192390",
+    "name": "윈하이텍",
+    "streak": 5
+  },
+  {
+    "ticker": "154030",
+    "name": "아시아종묘",
+    "streak": 5
+  },
+  {
+    "ticker": "098660",
+    "name": "에스티오",
+    "streak": 5
+  },
+  {
+    "ticker": "019685",
+    "name": "대교우B",
+    "streak": 5
+  },
+  {
+    "ticker": "007120",
+    "name": "미래아이앤지",
+    "streak": 5
+  },
+  {
+    "ticker": "045520",
+    "name": "크린앤사이언스",
+    "streak": 5
+  },
+  {
+    "ticker": "012340",
+    "name": "뉴인텍",
+    "streak": 5
+  },
+  {
+    "ticker": "229000",
+    "name": "젠큐릭스",
+    "streak": 5
+  },
+  {
+    "ticker": "115530",
+    "name": "씨엔플러스",
+    "streak": 5
+  },
+  {
+    "ticker": "002680",
+    "name": "한탑",
+    "streak": 5
+  },
+  {
+    "ticker": "005257",
+    "name": "녹십자홀딩스2우",
+    "streak": 5
+  },
+  {
+    "ticker": "009310",
+    "name": "참엔지니어링",
+    "streak": 5
+  },
+  {
+    "ticker": "001770",
+    "name": "SHD",
+    "streak": 5
+  },
+  {
+    "ticker": "130740",
+    "name": "티피씨글로벌",
+    "streak": 5
+  },
+  {
+    "ticker": "054090",
+    "name": "삼진엘앤디",
+    "streak": 5
+  },
+  {
+    "ticker": "083470",
+    "name": "이엠앤아이",
+    "streak": 5
+  },
+  {
+    "ticker": "019570",
+    "name": "플루토스",
+    "streak": 5
+  },
+  {
+    "ticker": "123750",
+    "name": "알톤",
+    "streak": 5
+  },
+  {
+    "ticker": "18064K",
+    "name": "한진칼우",
+    "streak": 5
+  },
+  {
+    "ticker": "060260",
+    "name": "뉴보텍",
+    "streak": 5
+  },
+  {
+    "ticker": "108675",
+    "name": "LX하우시스우",
+    "streak": 5
+  },
+  {
+    "ticker": "026910",
+    "name": "광진실업",
+    "streak": 5
+  },
+  {
+    "ticker": "003075",
+    "name": "코오롱글로벌우",
+    "streak": 5
+  },
+  {
+    "ticker": "079950",
+    "name": "인베니아",
+    "streak": 5
+  },
+  {
+    "ticker": "004105",
+    "name": "태양금속우",
+    "streak": 5
+  },
+  {
+    "ticker": "004835",
+    "name": "덕성우",
+    "streak": 5
+  },
+  {
+    "ticker": "03481K",
+    "name": "해성산업1우",
+    "streak": 5
+  },
+  {
+    "ticker": "185190",
+    "name": "수프로",
+    "streak": 5
+  },
+  {
+    "ticker": "234070",
+    "name": "에이원알폼",
+    "streak": 5
+  },
+  {
+    "ticker": "266470",
+    "name": "바이오인프라생명과학",
+    "streak": 5
+  },
+  {
+    "ticker": "45226K",
+    "name": "한화갤러리아우",
+    "streak": 5
+  },
+  {
+    "ticker": "189350",
+    "name": "코셋",
+    "streak": 5
+  },
+  {
+    "ticker": "090355",
+    "name": "노루페인트우",
+    "streak": 5
+  },
+  {
+    "ticker": "36328K",
+    "name": "티와이홀딩스우",
+    "streak": 5
+  },
+  {
+    "ticker": "014285",
+    "name": "금강공업우",
+    "streak": 5
+  },
+  {
+    "ticker": "001525",
+    "name": "동양우",
+    "streak": 5
+  },
+  {
+    "ticker": "021045",
+    "name": "대호특수강우",
+    "streak": 5
+  }
+]

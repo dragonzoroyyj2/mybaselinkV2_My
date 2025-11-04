@@ -1,0 +1,213 @@
+<!-- templates/fragments/left.html -->
+<div th:fragment="leftFragment">
+  <nav id="left" class="sidebar">
+    <ul>
+      <li><a href="/pages/main/base"><i class="fas fa-home"></i><span>홈</span></a></li>
+
+      <li class="has-submenu">
+        <a href="#" class="submenu-toggle"><i class="fas fa-file-alt"></i><span>리포트 관리</span></a>
+        <ul class="submenu">
+          <li><a href="/pages/p01/p01a05/p01a05List">리포트 목록</a></li>
+          <li class="has-submenu">
+            <a href="#" class="submenu-toggle">리포트 통계</a>
+            <ul class="submenu">
+              <li><a href="#">일별 통계</a></li>
+              <li class="has-submenu">
+                <a href="#" class="submenu-toggle">월별 통계</a>
+                <ul class="submenu">
+                  <li><a href="#">1월</a></li>
+                  <li><a href="#">2월</a></li>
+                  <li class="has-submenu">
+                    <a href="#" class="submenu-toggle">상세 통계</a>
+                    <ul class="submenu">
+                      <li><a href="#">부서별</a></li>
+                      <li><a href="#">개인별</a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <li class="has-submenu">
+        <a href="#"><i class="fas fa-chart-line"></i><span>Job</span></a>
+        <ul class="submenu">
+          <li><a href="/pages/stock/stockBatch">Stock Batch</a></li>
+          <li><a href="/pages/stock/stockBatchBoard">Stock Batch Board</a></li>
+        </ul>
+      </li>
+
+      <li class="has-submenu">
+        <a href="#"><i class="fas fa-chart-line"></i><span>Stock</span></a>
+        <ul class="submenu">
+          <li><a href="/pages/stock/stockList">종목 리스트</a></li>
+          <li><a href="/pages/stock/stockLastCloseDownward">계단하락 종목 차트</a></li>
+          <li><a href="/pages/stock/similar-advanced-new">similar-advanced-new</a></li>
+          <li><a href="/pages/stock/chart_pattern">chart_pattern 리스트</a></li>
+        </ul>
+      </li>
+
+      <li class="has-submenu">
+        <a href="#"><i class="fas fa-chart-line"></i><span>주식 관리</span></a>
+        <ul class="submenu">
+          <li><a href="/pages/stock/krx_list">종목 리스트</a></li>
+          <li><a href="/pages/stock/similar-advanced">유사 종목 차트 리얼</a></li>
+          <li><a href="/pages/stock/similar-advanced-new">유사 종목 차트 리얼 new</a></li>
+          <li><a href="/pages/stock/lastCloseDownward">계단하락 종목 차트</a></li>
+          <li><a href="/pages/stocks/history">거래 내역</a></li>
+        </ul>
+      </li>
+
+      <li class="has-submenu">
+        <a href="#" class="submenu-toggle"><i class="fas fa-cog"></i><span>설정</span></a>
+        <ul class="submenu">
+          <li><a href="/pages/sy/syusr/syusr01List">사용자 관리</a></li>
+          <li><a href="#">권한 설정</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <style>
+    /* 기본 사이드바 */
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      width: 240px;
+      height: calc(100% - 50px);
+      background: #f3f4f6;
+      border-right: 1px solid #d1d5db;
+      overflow-y: auto;
+      transform: translateX(-240px);
+      transition: transform 0.3s ease;
+      z-index: 3001;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    /* 리스트 구조 */
+    .sidebar ul { list-style: none; margin: 0; padding: 0; }
+    .sidebar li { border-bottom: 1px solid #e5e7eb; }
+
+    .sidebar li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      color: #333;
+      text-decoration: none;
+      background: #f3f4f6;
+      transition: background 0.2s, color 0.2s;
+      position: relative;
+    }
+    .sidebar li a:hover {
+      background: #e5e7eb;
+      color: #000;
+    }
+
+    /* 화살표 */
+    .has-submenu > a::after {
+      content: "▾";
+      margin-left: auto;
+      font-size: 0.8rem;
+      transition: transform 0.2s ease;
+    }
+    .has-submenu.open > a::after { transform: rotate(180deg); }
+
+    /* 서브 메뉴 단계별 색상 (회색 계열 유지) */
+    .submenu { display: none; background: #f9fafb; }
+    .has-submenu.open > .submenu { display: block; }
+    .submenu a { padding-left: 30px; background: #f9fafb; }
+    .submenu .submenu a { padding-left: 45px; background: #f3f4f6; }
+    .submenu .submenu .submenu a { padding-left: 60px; background: #e5e7eb; }
+    .submenu .submenu .submenu .submenu a { padding-left: 75px; background: #e0e0e0; }
+
+    /* 열린 메뉴 */
+    .has-submenu.open > a {
+      background: #e0e0e0;
+      color: #111;
+      font-weight: 600;
+    }
+
+    /* ✅ 현재 활성 메뉴 (회색 강조) */
+    .sidebar li a.active {
+      background: #d1d5db !important;
+      color: #000 !important;
+      font-weight: 700 !important;
+    }
+
+    /* ✅ 왼쪽 구분선 (회색계) */
+    .sidebar li a.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background-color: #9ca3af;
+    }
+  </style>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const SIDEBAR_STATE_KEY = "sidebar_open_state";
+    const menuItems = document.querySelectorAll(".sidebar li.has-submenu > a");
+
+    // 메뉴 상태 복원
+    try {
+      const saved = JSON.parse(localStorage.getItem(SIDEBAR_STATE_KEY) || "[]");
+      saved.forEach(selector => {
+        const el = document.querySelector(selector);
+        if (el) el.parentElement.classList.add("open");
+      });
+    } catch {
+      localStorage.removeItem(SIDEBAR_STATE_KEY);
+    }
+
+    // 클릭 시 토글 및 저장
+    menuItems.forEach(link => {
+      link.addEventListener("click", e => {
+        const parent = link.parentElement;
+        const submenu = parent.querySelector(":scope > .submenu");
+        if (!submenu) return;
+        e.preventDefault();
+        parent.classList.toggle("open");
+
+        const opens = Array.from(document.querySelectorAll(".sidebar li.has-submenu.open > a"))
+                           .map(a => getPath(a));
+        localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify(opens));
+      });
+    });
+
+    function getPath(el) {
+      const path = [];
+      while (el && el !== document) {
+        let name = el.tagName.toLowerCase();
+        const siblings = Array.from(el.parentNode.children).filter(e => e.tagName === el.tagName);
+        if (siblings.length > 1) name += `:nth-of-type(${siblings.indexOf(el) + 1})`;
+        path.unshift(name);
+        el = el.parentNode;
+        if (el.classList && el.classList.contains("sidebar")) break;
+      }
+      return ".sidebar " + path.join(" > ");
+    }
+
+    // ✅ 현재 URL 기준 활성 메뉴
+    const currentPath = window.location.pathname;
+    document.querySelectorAll(".sidebar a").forEach(a => {
+      const href = a.getAttribute("href");
+      if (href && currentPath.startsWith(href)) {
+        a.classList.add("active");
+        // 상위 열기
+        let parent = a.parentElement;
+        while (parent && !parent.classList.contains("sidebar")) {
+          if (parent.classList.contains("has-submenu")) parent.classList.add("open");
+          parent = parent.parentElement;
+        }
+      }
+    });
+  });
+  </script>
+</div>

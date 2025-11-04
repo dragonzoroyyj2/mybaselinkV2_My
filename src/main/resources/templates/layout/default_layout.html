@@ -41,6 +41,9 @@
   <link rel="stylesheet" href="/css/common/commonTable.css">       <!-- ② 테이블 / 로딩오버레이 / 체크박스 -->
   <link rel="stylesheet" href="/css/common/commonSearch.css">      <!-- ③ 검색창 / 필터 전용 -->
   <link rel="stylesheet" href="/css/common/commonPagination.css">  <!-- ④ 페이징 버튼 전용 -->
+  <link rel="stylesheet" href="/css/common/commonModal.css">
+  <link rel="stylesheet" href="/css/common/commonToast.css">
+
 </head>
 
 <body>
@@ -65,7 +68,7 @@
   <!-- ✅ 전역 사이드바 토글 -->
   <script>
   /*
-    | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적               		|
+  | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적               		|
 	| ----------- 	| ------------------- | ------------------------- | -------------------- 				|
 	| **초소형폰**  | `max-width: 360px`  | iPhone SE, Galaxy A10e    | 최소 대응 (기본 텍스트/버튼 축소) |
 	| **소형폰**    | `max-width: 480px`  | Galaxy S8, iPhone 12 mini | 모바일 세로 모드 기준         	|
@@ -73,7 +76,10 @@
 	| **태블릿**    | `max-width: 1024px` | iPad, Galaxy Tab 세로     | 리스트/폼 폭 조절           		|
 	| **데스크탑 기본** | `> 1024px`      | 노트북/PC             	 | 기본 레이아웃 유지           		|
 
-  */
+*/
+  
+  
+  
     document.addEventListener("DOMContentLoaded", () => {
       const sidebar = document.querySelector(".sidebar");
       const overlay = document.getElementById("sidebarOverlay");
@@ -97,11 +103,12 @@
   </script>
 
   <!-- ✅ 공용 스크립트 -->
-  <script src="/js/common/commonLoading_op.js"></script>
-  <script src="/js/common/commonNotify.js"></script>
-  <script src="/js/common/commonPagination_op.js"></script>
-  <script src="/js/common/commonModal_op.js"></script>
-  <script src="/js/common/commonUnifiedList_op.js"></script>
+  <script src="/js/common/common_loadseq_1_Loading_op.js"></script>
+  <script src="/js/common/common_loadseq_2_Notify.js"></script>
+  <script src="/js/common/common_loadseq_3_Pagination_op.js"></script>
+  <script src="/js/common/common_loadseq_4_Modal_op.js"></script>
+  <script src="/js/common/common_loadseq_5_UnifiedList_op.js"></script>
+
 
   <!-- ✅ 페이지별 스크립트 주입 -->
   <th:block layout:fragment="pageScript"></th:block>
@@ -119,7 +126,6 @@
         }
       }
 
-      // 초기 설정 및 리사이즈 대응
       adjustMainMargin();
       window.addEventListener("resize", adjustMainMargin);
     });

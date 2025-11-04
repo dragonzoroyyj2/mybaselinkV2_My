@@ -1,5 +1,7 @@
 package com.mybaselinkV2.app.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -8,13 +10,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * 작업 상태 + 진행률 + 로그 관리 서비스
- * - thread-safe
- * - SSE 전송용 스냅샷 제공
+ * 📊 TaskStatusService (v2.1 실전 통합판)
+ * ------------------------------------------------------------
+ * ✅ 작업 상태 + 진행률 + 로그 + SSE 스냅샷 관리
+ * ✅ thread-safe (ConcurrentHashMap 기반)
+ * ✅ Python JSON 결과 파싱 유틸 추가 (parseJsonMap / parseJsonList)
+ * ✅ StockBatch / StockLastCloseDownward 등 공용
+ * ------------------------------------------------------------
  */
 @Service
 public class TaskStatusService {
 
+    // ==============================================================
+    // 📄 내부 구조체 정의
+    // ==============================================================
+
+    /** 🔹 로그 한 줄 정보 */
     public static final class LogLine {
         private final int seq;
         private final String line;
@@ -30,6 +41,7 @@ public class TaskStatusService {
         public Instant getTs() { return ts; }
     }
 
+    /** 🔹 작업 상태 정보 */
     public static final class TaskStatus {
         private final String status; // IN_PROGRESS, COMPLETED, CANCELLED, FAILED
         private final Map<String,Object> result; // progress, runner, etc.
@@ -45,12 +57,19 @@ public class TaskStatusService {
         public String getErrorMessage() { return errorMessage; }
     }
 
-    // 상태/로그 저장소
+    // ==============================================================
+    // 🧠 내부 저장소
+    // ==============================================================
+
     private final Map<String, TaskStatus> statusMap = new ConcurrentHashMap<>();
     private final Map<String, List<LogLine>> logsMap = new ConcurrentHashMap<>();
     private final Map<String, Integer> logSeqMap = new ConcurrentHashMap<>();
 
     private static final int MAX_LOG_LINES = 5000;
+
+    // ==============================================================
+    // ⚙️ 상태 관련 메서드
+    // ==============================================================
 
     /** 상태 저장/갱신 */
     public void setTaskStatus(String taskId, TaskStatus status) {
@@ -76,10 +95,12 @@ public class TaskStatusService {
         Map<String,Object> result = new HashMap<>();
         if (s.getResult() != null) result.putAll(s.getResult());
         body.put("result", result);
-
-        // 최신 로그도 필요하면 붙일 수 있음(지금은 상태만)
         return body;
     }
+
+    // ==============================================================
+    // 🪵 로그 관리
+    // ==============================================================
 
     /** 로그 추가 */
     public void appendLog(String taskId, String line) {
@@ -88,6 +109,15 @@ public class TaskStatusService {
         list.add(new LogLine(next, line));
         if (list.size() > MAX_LOG_LINES) list.remove(0);
     }
+
+    /** 로그 조회 */
+    public List<LogLine> getLogs(String taskId) {
+        return logsMap.getOrDefault(taskId, List.of());
+    }
+
+    // ==============================================================
+    // 📈 상태 전환
+    // ==============================================================
 
     /** 진행률 갱신 + 러너 유지 */
     public void updateProgress(String taskId, double pct, String runner) {
@@ -129,17 +159,36 @@ public class TaskStatusService {
         setTaskStatus(taskId, new TaskStatus("FAILED", result, err));
     }
 
-    /** 로그 조회 */
-    public List<LogLine> getLogs(String taskId) {
-        return logsMap.getOrDefault(taskId, List.of());
-    }
-    
-    
-    /** ✅ 전체 상태 초기화 (재시작 시 100% 깜빡임 방지용) */
+    /** 전체 초기화 (재시작 시 사용) */
     public void reset(String taskId) {
         statusMap.remove(taskId);
         logsMap.remove(taskId);
         logSeqMap.remove(taskId);
     }
 
+    // ==============================================================
+    // 🧩 Python JSON 파싱 유틸 (추가)
+    // ==============================================================
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    /** Python이 반환한 JSON이 `{}` 형태일 때 */
+    public Map<String, Object> parseJsonMap(String json) {
+        try {
+            if (json == null || json.trim().isEmpty()) return new LinkedHashMap<>();
+            return mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("JSON 파싱 오류(Map): " + e.getMessage(), e);
+        }
+    }
+
+    /** Python이 반환한 JSON이 `[]` 형태일 때 */
+    public List<Map<String, Object>> parseJsonList(String json) {
+        try {
+            if (json == null || json.trim().isEmpty()) return Collections.emptyList();
+            return mapper.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("JSON 파싱 오류(List): " + e.getMessage(), e);
+        }
+    }
 }

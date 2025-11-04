@@ -1,0 +1,173 @@
+/* ===============================================================
+   ✅ commonModal.css (v1.0 - 2025.11 안정판)
+   ---------------------------------------------------------------
+   - 모든 레이어팝업(모달) + 내부 폼 구조 통합
+   - elegant-modal / header / body / footer / form-row 포함
+   - 반응형 완전 대응 (360~1024px)
+================================================================ */
+
+/* 기본 모달 배경 */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 4000;
+}
+.modal.active { display: flex; }
+.modal-open { overflow: hidden; }
+
+/* 메인 카드 */
+.elegant-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  width: 520px;
+  max-width: 95%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeInUp 0.25s ease;
+  position: relative;
+}
+
+/* 헤더 */
+.elegant-header {
+  background: #f3f4f6;
+  color: #111827;
+  padding: 8px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+.elegant-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.close-btn {
+  cursor: pointer;
+  font-size: 18px;
+  color: #6b7280;
+  transition: 0.15s;
+}
+.close-btn:hover { color: #111827; }
+
+/* 본문 */
+.elegant-body {
+  padding: 15px 18px;
+  background: #fff;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* 내부 폼 (form-row 기반) */
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.form-row label {
+  flex: 0 0 100px;
+  text-align: right;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 600;
+}
+.form-row input[type="text"],
+.form-row input[type="date"],
+.form-row input[type="number"],
+.form-row select,
+.form-row textarea {
+  flex: 1;
+  padding: 7px 9px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+.form-row textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.5;
+}
+.form-row.options {
+  align-items: flex-start;
+}
+.form-row.options label {
+  text-align: left;
+  flex: 0 0 auto;
+  font-weight: 500;
+  color: #374151;
+}
+.form-row.options input[type="checkbox"],
+.form-row.options input[type="radio"] {
+  margin-right: 6px;
+  transform: scale(1.1);
+  accent-color: #2563eb;
+}
+
+/* 푸터 */
+.elegant-footer {
+  padding: 10px 15px;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 로딩 오버레이 */
+.modal-loading {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255,255,255,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  z-index: 10;
+}
+.modal-loading .spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #d1d5db;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* 애니메이션 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .elegant-modal { width: 96vw; }
+  .form-row { flex-direction: column; align-items: stretch; }
+  .form-row label { text-align: left; flex: unset; }
+}
+@media (max-width: 360px) {
+  .form-row label { font-size: 12px; }
+  .form-row input,
+  .form-row select,
+  .form-row textarea { font-size: 13px; padding: 6px 8px; }
+}
