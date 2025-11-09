@@ -15,6 +15,10 @@
     <groupId>com.mybaselinkV2</groupId>
     <artifactId>MyBaseLinkV2</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
+    <!-- ✅ 기본은 JAR (STS 로컬 실행용) -->
+    <packaging>jar</packaging>
+
     <name>MyBaseLinkV2</name>
     <description>MyBaseLink Version0.2 Application &amp; Management Platform</description>
 
@@ -28,6 +32,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- ✅ 외부 Tomcat (prod에서만 war 사용) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- ✅ Security -->
@@ -106,7 +117,7 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
-        <!-- ✅ Parquet + Hadoop + 로깅 정리 -->
+        <!-- ✅ Parquet + Hadoop -->
         <dependency>
             <groupId>org.apache.parquet</groupId>
             <artifactId>parquet-avro</artifactId>
@@ -160,12 +171,11 @@
         </dependency>
 
         <!-- ✅ DevTools -->
-		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-devtools</artifactId>
-		    <optional>true</optional>
-		</dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <!-- ✅ Test -->
         <dependency>
@@ -176,12 +186,35 @@
 
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+    <!-- ✅ 운영 전용 prod 프로필: 오직 ROOT.war만 생성 -->
+    <profiles>
+        <profile>
+            <id>prod</id>
+            <build>
+                <plugins>
+
+                    <!-- ✅ WAR 생성 플러그인 -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>3.4.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>war</goal>
+                                </goals>
+                                <configuration>
+                                    <warName>ROOT</warName>
+                                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

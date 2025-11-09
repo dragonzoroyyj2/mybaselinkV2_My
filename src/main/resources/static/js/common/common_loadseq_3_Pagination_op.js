@@ -1,5 +1,5 @@
 /**
- * 🧭 commonPagination_op.js (v1.0)
+ * 🧭 common_loadseq_3_Pagination_op.js (v1.0)
  * --------------------------------------------------------
  * ✅ 공통 페이징 렌더러 (버튼 그룹 크기 지원)
  * ✅ 외부에서 dispatchEvent(new Event("resizePagination"))로 갱신 가능

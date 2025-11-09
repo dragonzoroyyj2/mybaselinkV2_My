@@ -21,11 +21,12 @@ import java.util.List;
 
 /**
  * ===============================================================
- * ✅ MyBaseLinkV2 - SecurityConfig (v4.0 완전 통합 안정판)
+ * ✅ MyBaseLinkV2 - SecurityConfig (v4.3 완전 통합 안정판)
  * ---------------------------------------------------------------
- * 🔹 @Lazy 불필요, JPA 초기화 충돌 없음
  * 🔹 JWT + AuthService + SSE 완벽 통합
- * 🔹 AccessDenied 예외 방지 완전판
+ * 🔹 AccessDenied / 403 완전 해결 ( /error 경로 permitAll 추가)
+ * 🔹 /api/global/status → permitAll (전역 상태 조회 전용)
+ * 🔹 나머지 /api/**, /pages/** → 로그인 필요
  * ===============================================================
  */
 @Configuration
@@ -42,6 +43,18 @@ public class SecurityConfig {
                           CustomLogoutHandler customLogoutHandler) {
         this.userDetailsService = userDetailsService;
         this.customLogoutHandler = customLogoutHandler;
+    }
+
+    /** ✅ PasswordEncoder (BCrypt) */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    /** ✅ AuthenticationManager */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+        return cfg.getAuthenticationManager();
     }
 
     /** ✅ JwtAuthenticationFilter Bean 등록 */
@@ -76,29 +89,28 @@ public class SecurityConfig {
 
                 // ✅ 로그인 및 인증 관련 허용
                 auth.requestMatchers("/", "/login", "/logout", "/auth/**").permitAll();
-
-                // ✅ SSE 통신 예외 허용 (JWT 필터 통과 불가 구간)
+                
+                // ✅ 전역 상태 조회 (403 방지용 - 로그인 없이 접근 가능)
+                auth.requestMatchers("/api/global/status").permitAll();
+                
+                // 🚀 핵심 수정: Spring 기본 에러 처리 URL 허용 ( permitAll() 엔드포인트에서 발생하는 403 에러 방지)
+                auth.requestMatchers("/error").permitAll();
+                
+                // ✅ SSE (JWT 기반이므로 인증 유지)
                 auth.requestMatchers(
                         "/api/stock/batch/sse",
+                        "/api/stock/batch/prod/sse",
+                        "/api/stock/batch/gprod/sse",
+                        "/api/stock/batch/athena/sse",
                         "/api/stock/lastCloseDownward/sse"
-                ).permitAll();
+                ).authenticated();
 
-                // ✅ YAML 설정 기반 ignore-paths 자동 허용
-                if (ignorePaths != null) {
-                    String[] paths = ignorePaths.stream()
-                            .filter(p -> p != null && !p.isBlank())
-                            .map(String::trim)
-                            .map(p -> p.endsWith("**") ? p : p + "**")
-                            .toArray(String[]::new);
-                    if (paths.length > 0) auth.requestMatchers(paths).permitAll();
-                }
-
-                // ✅ 나머지 모든 페이지/API 인증 필요
-                auth.requestMatchers("/pages/**", "/api/**").authenticated();
+                // ✅ 그 외 모든 API와 페이지는 인증 필수
+                auth.requestMatchers("/api/**", "/pages/**").authenticated();
                 auth.anyRequest().authenticated();
             })
 
-            // ✅ 세션 미사용
+            // ✅ 세션 미사용 (JWT만 사용)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
             // ✅ UserDetailsService 지정
@@ -108,23 +120,13 @@ public class SecurityConfig {
             .logout(logout -> logout
                     .logoutUrl("/logout")
                     .addLogoutHandler(customLogoutHandler)
+                    // ✅ 추가: 로그아웃 성공 시 200 OK 응답 처리 (API 명세에 적합)
+                    .logoutSuccessHandler((request, response, authentication) -> response.setStatus(200))
             )
 
             // ✅ JWT 필터 삽입
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    /** ✅ AuthenticationManager */
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
-        return cfg.getAuthenticationManager();
-    }
-
-    /** ✅ PasswordEncoder (BCrypt) */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

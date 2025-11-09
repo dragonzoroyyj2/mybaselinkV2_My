@@ -1,0 +1,1090 @@
+2025-11-09 18:24:39,800 - WARNING - 분석 시작: 총 2877 종목, 최대 워커 8개 사용.
+2025-11-09 18:24:45,282 - WARNING - FDR 재무 데이터 로드 실패 (373220): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:45,293 - WARNING - FDR 재무 데이터 로드 실패 (034020): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:45,302 - WARNING - FDR 재무 데이터 로드 실패 (207940): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:45,318 - WARNING - FDR 재무 데이터 로드 실패 (005935): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:45,321 - WARNING - FDR 재무 데이터 로드 실패 (005380): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:45,324 - WARNING - FDR 재무 데이터 로드 실패 (000660): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:45,327 - WARNING - FDR 재무 데이터 로드 실패 (005930): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:45,333 - WARNING - FDR 재무 데이터 로드 실패 (012450): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,247 - WARNING - yfinance 뉴스 로드 실패 (034020): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,289 - WARNING - yfinance 뉴스 로드 실패 (012450): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,337 - WARNING - yfinance 뉴스 로드 실패 (005930): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,392 - WARNING - FDR 재무 데이터 로드 실패 (105560): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,398 - WARNING - yfinance 뉴스 로드 실패 (373220): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,405 - WARNING - yfinance 뉴스 로드 실패 (207940): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,432 - WARNING - yfinance 뉴스 로드 실패 (000660): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,480 - WARNING - yfinance 뉴스 로드 실패 (005935): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,503 - WARNING - yfinance 뉴스 로드 실패 (005380): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,527 - WARNING - FDR 재무 데이터 로드 실패 (329180): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,628 - WARNING - FDR 재무 데이터 로드 실패 (000270): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,666 - WARNING - yfinance 뉴스 로드 실패 (105560): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,712 - WARNING - FDR 재무 데이터 로드 실패 (068270): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,728 - WARNING - FDR 재무 데이터 로드 실패 (035420): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,793 - WARNING - yfinance 뉴스 로드 실패 (329180): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:46,794 - WARNING - FDR 재무 데이터 로드 실패 (055550): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,797 - WARNING - FDR 재무 데이터 로드 실패 (042660): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,812 - WARNING - FDR 재무 데이터 로드 실패 (402340): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,856 - WARNING - FDR 재무 데이터 로드 실패 (028260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,888 - WARNING - FDR 재무 데이터 로드 실패 (032830): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:46,975 - WARNING - yfinance 뉴스 로드 실패 (000270): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,006 - WARNING - yfinance 뉴스 로드 실패 (035420): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,012 - WARNING - yfinance 뉴스 로드 실패 (068270): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,013 - WARNING - yfinance 뉴스 로드 실패 (055550): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,106 - WARNING - yfinance 뉴스 로드 실패 (042660): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,109 - WARNING - yfinance 뉴스 로드 실패 (032830): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,152 - WARNING - yfinance 뉴스 로드 실패 (028260): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,156 - WARNING - FDR 재무 데이터 로드 실패 (267260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,226 - WARNING - FDR 재무 데이터 로드 실패 (015760): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,311 - WARNING - FDR 재무 데이터 로드 실패 (196170): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,372 - WARNING - FDR 재무 데이터 로드 실패 (009540): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,391 - WARNING - yfinance 뉴스 로드 실패 (267260): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,405 - WARNING - FDR 재무 데이터 로드 실패 (035720): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,426 - WARNING - FDR 재무 데이터 로드 실패 (051910): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,463 - WARNING - yfinance 뉴스 로드 실패 (015760): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,464 - WARNING - FDR 재무 데이터 로드 실패 (012330): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,477 - WARNING - FDR 재무 데이터 로드 실패 (086790): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,539 - WARNING - yfinance 뉴스 로드 실패 (196170): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,554 - WARNING - FDR 재무 데이터 로드 실패 (006400): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,598 - WARNING - yfinance 뉴스 로드 실패 (009540): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,609 - WARNING - FDR 재무 데이터 로드 실패 (005490): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,660 - WARNING - yfinance 뉴스 로드 실패 (035720): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,672 - WARNING - FDR 재무 데이터 로드 실패 (010140): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,679 - WARNING - yfinance 뉴스 로드 실패 (086790): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,736 - WARNING - yfinance 뉴스 로드 실패 (012330): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,764 - WARNING - yfinance 뉴스 로드 실패 (051910): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,795 - WARNING - FDR 재무 데이터 로드 실패 (000810): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,891 - WARNING - yfinance 뉴스 로드 실패 (005490): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,927 - WARNING - FDR 재무 데이터 로드 실패 (298040): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,944 - WARNING - yfinance 뉴스 로드 실패 (010140): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:47,966 - WARNING - FDR 재무 데이터 로드 실패 (064350): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:47,987 - WARNING - yfinance 뉴스 로드 실패 (006400): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,092 - WARNING - FDR 재무 데이터 로드 실패 (138040): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,095 - WARNING - yfinance 뉴스 로드 실패 (000810): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,152 - WARNING - FDR 재무 데이터 로드 실패 (010130): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,176 - WARNING - yfinance 뉴스 로드 실패 (298040): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,246 - WARNING - yfinance 뉴스 로드 실패 (064350): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,255 - WARNING - FDR 재무 데이터 로드 실패 (096770): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,302 - WARNING - yfinance 뉴스 로드 실패 (138040): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,385 - WARNING - FDR 재무 데이터 로드 실패 (011200): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,386 - WARNING - FDR 재무 데이터 로드 실패 (316140): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,389 - WARNING - FDR 재무 데이터 로드 실패 (003670): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,411 - WARNING - yfinance 뉴스 로드 실패 (010130): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,430 - WARNING - FDR 재무 데이터 로드 실패 (034730): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,497 - WARNING - FDR 재무 데이터 로드 실패 (009150): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,498 - WARNING - FDR 재무 데이터 로드 실패 (267250): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,522 - WARNING - yfinance 뉴스 로드 실패 (096770): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,538 - WARNING - FDR 재무 데이터 로드 실패 (033780): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,603 - WARNING - FDR 재무 데이터 로드 실패 (024110): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,635 - WARNING - yfinance 뉴스 로드 실패 (316140): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,636 - WARNING - yfinance 뉴스 로드 실패 (034730): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,647 - WARNING - yfinance 뉴스 로드 실패 (003670): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,762 - WARNING - yfinance 뉴스 로드 실패 (009150): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,787 - WARNING - yfinance 뉴스 로드 실패 (267250): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,802 - WARNING - FDR 재무 데이터 로드 실패 (000150): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,851 - WARNING - yfinance 뉴스 로드 실패 (033780): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,917 - WARNING - yfinance 뉴스 로드 실패 (024110): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:48,934 - WARNING - FDR 재무 데이터 로드 실패 (247540): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,937 - WARNING - FDR 재무 데이터 로드 실패 (066570): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:48,996 - WARNING - FDR 재무 데이터 로드 실패 (010120): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,057 - WARNING - FDR 재무 데이터 로드 실패 (006800): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,065 - WARNING - FDR 재무 데이터 로드 실패 (018260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,070 - WARNING - yfinance 뉴스 로드 실패 (000150): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,145 - WARNING - FDR 재무 데이터 로드 실패 (352820): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,173 - WARNING - FDR 재무 데이터 로드 실패 (003550): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,187 - WARNING - FDR 재무 데이터 로드 실패 (259960): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,216 - WARNING - yfinance 뉴스 로드 실패 (247540): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,252 - WARNING - yfinance 뉴스 로드 실패 (066570): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,262 - WARNING - yfinance 뉴스 로드 실패 (006800): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,284 - WARNING - yfinance 뉴스 로드 실패 (010120): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,378 - WARNING - yfinance 뉴스 로드 실패 (018260): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,379 - WARNING - yfinance 뉴스 로드 실패 (352820): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,421 - WARNING - yfinance 뉴스 로드 실패 (003550): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,428 - WARNING - FDR 재무 데이터 로드 실패 (030200): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,480 - WARNING - FDR 재무 데이터 로드 실패 (042700): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,505 - WARNING - yfinance 뉴스 로드 실패 (259960): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,521 - WARNING - FDR 재무 데이터 로드 실패 (086280): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,569 - WARNING - FDR 재무 데이터 로드 실패 (086520): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,683 - WARNING - FDR 재무 데이터 로드 실패 (323410): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,694 - WARNING - FDR 재무 데이터 로드 실패 (272210): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,695 - WARNING - FDR 재무 데이터 로드 실패 (017670): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,700 - WARNING - yfinance 뉴스 로드 실패 (030200): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,715 - WARNING - FDR 재무 데이터 로드 실패 (443060): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,836 - WARNING - yfinance 뉴스 로드 실패 (086520): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,878 - WARNING - FDR 재무 데이터 로드 실패 (003230): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,907 - WARNING - FDR 재무 데이터 로드 실패 (005830): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,917 - WARNING - yfinance 뉴스 로드 실패 (272210): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,933 - WARNING - yfinance 뉴스 로드 실패 (443060): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,934 - WARNING - yfinance 뉴스 로드 실패 (323410): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:49,983 - WARNING - FDR 재무 데이터 로드 실패 (047810): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:49,998 - WARNING - yfinance 뉴스 로드 실패 (017670): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,129 - WARNING - FDR 재무 데이터 로드 실패 (000100): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,139 - WARNING - yfinance 뉴스 로드 실패 (005830): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,174 - WARNING - FDR 재무 데이터 로드 실패 (326030): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,219 - WARNING - FDR 재무 데이터 로드 실패 (071050): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,223 - WARNING - FDR 재무 데이터 로드 실패 (047050): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,229 - WARNING - yfinance 뉴스 로드 실패 (047810): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,279 - WARNING - FDR 재무 데이터 로드 실패 (079550): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,318 - WARNING - FDR 재무 데이터 로드 실패 (278470): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,353 - WARNING - FDR 재무 데이터 로드 실패 (010950): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,403 - WARNING - FDR 재무 데이터 로드 실패 (010620): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,410 - WARNING - yfinance 뉴스 로드 실패 (326030): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,496 - WARNING - yfinance 뉴스 로드 실패 (047050): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,571 - WARNING - yfinance 뉴스 로드 실패 (003230): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,584 - WARNING - yfinance 뉴스 로드 실패 (278470): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,603 - WARNING - yfinance 뉴스 로드 실패 (010950): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,636 - WARNING - FDR 재무 데이터 로드 실패 (003490): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,713 - WARNING - FDR 재무 데이터 로드 실패 (277810): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,788 - WARNING - FDR 재무 데이터 로드 실패 (007660): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,795 - WARNING - yfinance 뉴스 로드 실패 (010620): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,816 - WARNING - FDR 재무 데이터 로드 실패 (039490): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,880 - WARNING - FDR 재무 데이터 로드 실패 (005940): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,900 - WARNING - FDR 재무 데이터 로드 실패 (090430): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:50,907 - WARNING - yfinance 뉴스 로드 실패 (003490): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:50,915 - WARNING - FDR 재무 데이터 로드 실패 (000720): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,021 - WARNING - FDR 재무 데이터 로드 실패 (377300): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,048 - WARNING - FDR 재무 데이터 로드 실패 (005387): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,056 - WARNING - yfinance 뉴스 로드 실패 (007660): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,095 - WARNING - yfinance 뉴스 로드 실패 (005940): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,099 - WARNING - FDR 재무 데이터 로드 실패 (180640): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,116 - WARNING - yfinance 뉴스 로드 실패 (090430): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,167 - WARNING - yfinance 뉴스 로드 실패 (000720): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,316 - WARNING - FDR 재무 데이터 로드 실패 (032640): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,388 - WARNING - FDR 재무 데이터 로드 실패 (034220): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,395 - WARNING - FDR 재무 데이터 로드 실패 (087010): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,430 - WARNING - FDR 재무 데이터 로드 실패 (016360): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,466 - WARNING - yfinance 뉴스 로드 실패 (005387): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,480 - WARNING - FDR 재무 데이터 로드 실패 (000880): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,484 - WARNING - FDR 재무 데이터 로드 실패 (021240): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,544 - WARNING - FDR 재무 데이터 로드 실패 (006260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,564 - WARNING - FDR 재무 데이터 로드 실패 (028300): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,585 - WARNING - yfinance 뉴스 로드 실패 (032640): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,623 - WARNING - yfinance 뉴스 로드 실패 (034220): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,655 - WARNING - yfinance 뉴스 로드 실패 (016360): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,749 - WARNING - yfinance 뉴스 로드 실패 (006260): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,767 - WARNING - yfinance 뉴스 로드 실패 (000880): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:51,817 - WARNING - FDR 재무 데이터 로드 실패 (161390): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,914 - WARNING - FDR 재무 데이터 로드 실패 (011070): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,926 - WARNING - FDR 재무 데이터 로드 실패 (029780): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:51,947 - WARNING - FDR 재무 데이터 로드 실패 (128940): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,000 - WARNING - FDR 재무 데이터 로드 실패 (298380): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,035 - WARNING - yfinance 뉴스 로드 실패 (161390): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,050 - WARNING - FDR 재무 데이터 로드 실패 (241560): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,057 - WARNING - FDR 재무 데이터 로드 실패 (141080): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,098 - WARNING - FDR 재무 데이터 로드 실패 (088980): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,199 - WARNING - yfinance 뉴스 로드 실패 (011070): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,211 - WARNING - yfinance 뉴스 로드 실패 (128940): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,221 - WARNING - yfinance 뉴스 로드 실패 (298380): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,232 - WARNING - FDR 재무 데이터 로드 실패 (307950): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,277 - WARNING - FDR 재무 데이터 로드 실패 (000250): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,296 - WARNING - yfinance 뉴스 로드 실패 (241560): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,458 - WARNING - FDR 재무 데이터 로드 실패 (214450): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,526 - WARNING - yfinance 뉴스 로드 실패 (307950): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,534 - WARNING - FDR 재무 데이터 로드 실패 (028050): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,538 - WARNING - FDR 재무 데이터 로드 실패 (454910): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,653 - WARNING - FDR 재무 데이터 로드 실패 (001040): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,670 - WARNING - FDR 재무 데이터 로드 실패 (066970): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,691 - WARNING - FDR 재무 데이터 로드 실패 (036570): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,719 - WARNING - FDR 재무 데이터 로드 실패 (138930): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,722 - WARNING - FDR 재무 데이터 로드 실패 (078930): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,757 - WARNING - yfinance 뉴스 로드 실패 (214450): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,825 - WARNING - yfinance 뉴스 로드 실패 (028050): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,883 - WARNING - yfinance 뉴스 로드 실패 (066970): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,884 - WARNING - FDR 재무 데이터 로드 실패 (001440): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,952 - WARNING - yfinance 뉴스 로드 실패 (138930): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,979 - WARNING - yfinance 뉴스 로드 실패 (036570): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:52,985 - WARNING - FDR 재무 데이터 로드 실패 (005385): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:52,996 - WARNING - yfinance 뉴스 로드 실패 (078930): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:53,125 - WARNING - FDR 재무 데이터 로드 실패 (009830): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,166 - WARNING - FDR 재무 데이터 로드 실패 (051900): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,256 - WARNING - FDR 재무 데이터 로드 실패 (062040): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,257 - WARNING - FDR 재무 데이터 로드 실패 (251270): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,258 - WARNING - FDR 재무 데이터 로드 실패 (175330): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,271 - WARNING - FDR 재무 데이터 로드 실패 (450080): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,285 - WARNING - yfinance 뉴스 로드 실패 (005385): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:53,288 - WARNING - FDR 재무 데이터 로드 실패 (302440): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,349 - WARNING - FDR 재무 데이터 로드 실패 (011790): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,372 - WARNING - yfinance 뉴스 로드 실패 (009830): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:53,459 - WARNING - yfinance 뉴스 로드 실패 (175330): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:53,478 - WARNING - yfinance 뉴스 로드 실패 (251270): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:53,515 - WARNING - FDR 재무 데이터 로드 실패 (058470): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,819 - WARNING - FDR 재무 데이터 로드 실패 (004020): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,834 - WARNING - FDR 재무 데이터 로드 실패 (271560): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,886 - WARNING - FDR 재무 데이터 로드 실패 (950160): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,889 - WARNING - FDR 재무 데이터 로드 실패 (022100): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,906 - WARNING - FDR 재무 데이터 로드 실패 (036460): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,934 - WARNING - FDR 재무 데이터 로드 실패 (310210): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,961 - WARNING - FDR 재무 데이터 로드 실패 (082740): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:53,986 - WARNING - FDR 재무 데이터 로드 실패 (035250): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,094 - WARNING - yfinance 뉴스 로드 실패 (271560): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:54,215 - WARNING - yfinance 뉴스 로드 실패 (004020): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:54,219 - WARNING - yfinance 뉴스 로드 실패 (035250): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:54,253 - WARNING - yfinance 뉴스 로드 실패 (036460): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:54,304 - WARNING - FDR 재무 데이터 로드 실패 (002380): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,313 - WARNING - FDR 재무 데이터 로드 실패 (052690): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,502 - WARNING - FDR 재무 데이터 로드 실패 (097950): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,516 - WARNING - FDR 재무 데이터 로드 실패 (039030): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,528 - WARNING - FDR 재무 데이터 로드 실패 (214370): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,552 - WARNING - FDR 재무 데이터 로드 실패 (004990): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,562 - WARNING - FDR 재무 데이터 로드 실패 (240810): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,587 - WARNING - FDR 재무 데이터 로드 실패 (347850): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,693 - WARNING - FDR 재무 데이터 로드 실패 (214150): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,698 - WARNING - FDR 재무 데이터 로드 실패 (011170): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:54,706 - WARNING - yfinance 뉴스 로드 실패 (039030): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:54,820 - WARNING - yfinance 뉴스 로드 실패 (097950): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:54,942 - WARNING - yfinance 뉴스 로드 실패 (011170): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:55,057 - WARNING - FDR 재무 데이터 로드 실패 (103590): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,189 - WARNING - FDR 재무 데이터 로드 실패 (011780): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,200 - WARNING - FDR 재무 데이터 로드 실패 (108490): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,209 - WARNING - FDR 재무 데이터 로드 실패 (071970): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,218 - WARNING - FDR 재무 데이터 로드 실패 (018880): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,247 - WARNING - FDR 재무 데이터 로드 실패 (103140): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,251 - WARNING - FDR 재무 데이터 로드 실패 (012750): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,255 - WARNING - FDR 재무 데이터 로드 실패 (017800): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,360 - WARNING - FDR 재무 데이터 로드 실패 (068760): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,417 - WARNING - yfinance 뉴스 로드 실패 (108490): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:55,423 - WARNING - yfinance 뉴스 로드 실패 (018880): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:55,433 - WARNING - yfinance 뉴스 로드 실패 (071970): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:55,684 - WARNING - FDR 재무 데이터 로드 실패 (026960): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,774 - WARNING - FDR 재무 데이터 로드 실패 (088350): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,776 - WARNING - FDR 재무 데이터 로드 실패 (111770): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,801 - WARNING - FDR 재무 데이터 로드 실패 (403870): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,811 - WARNING - FDR 재무 데이터 로드 실패 (008930): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,836 - WARNING - FDR 재무 데이터 로드 실패 (004370): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,844 - WARNING - FDR 재무 데이터 로드 실패 (145020): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,857 - WARNING - FDR 재무 데이터 로드 실패 (035900): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,951 - WARNING - FDR 재무 데이터 로드 실패 (001450): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:55,976 - WARNING - yfinance 뉴스 로드 실패 (088350): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:56,058 - WARNING - yfinance 뉴스 로드 실패 (111770): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:56,115 - WARNING - yfinance 뉴스 로드 실패 (145020): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:56,310 - WARNING - FDR 재무 데이터 로드 실패 (012510): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,352 - WARNING - FDR 재무 데이터 로드 실패 (042670): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,401 - WARNING - FDR 재무 데이터 로드 실패 (014680): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,415 - WARNING - FDR 재무 데이터 로드 실패 (257720): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,443 - WARNING - FDR 재무 데이터 로드 실패 (226950): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,458 - WARNING - FDR 재무 데이터 로드 실패 (009420): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,459 - WARNING - FDR 재무 데이터 로드 실패 (030000): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,465 - WARNING - FDR 재무 데이터 로드 실패 (018670): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,574 - WARNING - yfinance 뉴스 로드 실패 (042670): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:56,672 - WARNING - yfinance 뉴스 로드 실패 (018670): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:56,794 - WARNING - yfinance 뉴스 로드 실패 (009420): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:56,797 - WARNING - FDR 재무 데이터 로드 실패 (361610): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,948 - WARNING - FDR 재무 데이터 로드 실패 (336260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,990 - WARNING - FDR 재무 데이터 로드 실패 (081660): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:56,995 - WARNING - FDR 재무 데이터 로드 실패 (383220): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:57,003 - WARNING - FDR 재무 데이터 로드 실패 (000240): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:57,006 - WARNING - FDR 재무 데이터 로드 실패 (041510): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:57,035 - WARNING - FDR 재무 데이터 로드 실패 (001720): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:57,041 - WARNING - FDR 재무 데이터 로드 실패 (000990): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:57,106 - WARNING - FDR 재무 데이터 로드 실패 (030530): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:57,201 - WARNING - yfinance 뉴스 로드 실패 (383220): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:57,220 - WARNING - yfinance 뉴스 로드 실패 (081660): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:24:57,339 - WARNING - FDR 재무 데이터 로드 실패 (082270): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:57,491 - WARNING - FDR 재무 데이터 로드 실패 (084370): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:24:57,526 - WARNING - FDR 재무 데이터 로드 실패 (263750): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:29,116 - WARNING - 분석 시작: 총 2877 종목, 최대 워커 8개 사용. 필터: ma
+2025-11-09 18:27:32,585 - WARNING - FDR 재무 데이터 로드 실패 (034020): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:32,611 - WARNING - FDR 재무 데이터 로드 실패 (207940): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:32,617 - WARNING - FDR 재무 데이터 로드 실패 (373220): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:32,630 - WARNING - FDR 재무 데이터 로드 실패 (005380): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:32,631 - WARNING - FDR 재무 데이터 로드 실패 (000660): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:32,649 - WARNING - FDR 재무 데이터 로드 실패 (012450): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:32,651 - WARNING - FDR 재무 데이터 로드 실패 (005935): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:32,656 - WARNING - FDR 재무 데이터 로드 실패 (005930): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:33,531 - WARNING - yfinance 뉴스 로드 실패 (034020): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:33,567 - WARNING - yfinance 뉴스 로드 실패 (207940): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:33,572 - WARNING - yfinance 뉴스 로드 실패 (012450): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:33,637 - WARNING - yfinance 뉴스 로드 실패 (005930): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:33,638 - WARNING - yfinance 뉴스 로드 실패 (005380): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:33,639 - WARNING - yfinance 뉴스 로드 실패 (000660): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:33,655 - WARNING - yfinance 뉴스 로드 실패 (005935): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:33,778 - WARNING - FDR 재무 데이터 로드 실패 (105560): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:33,858 - WARNING - FDR 재무 데이터 로드 실패 (000270): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:33,877 - WARNING - FDR 재무 데이터 로드 실패 (329180): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:33,912 - WARNING - FDR 재무 데이터 로드 실패 (055550): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:33,913 - WARNING - FDR 재무 데이터 로드 실패 (068270): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:33,924 - WARNING - yfinance 뉴스 로드 실패 (373220): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:33,934 - WARNING - FDR 재무 데이터 로드 실패 (035420): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:33,935 - WARNING - FDR 재무 데이터 로드 실패 (042660): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:33,997 - WARNING - FDR 재무 데이터 로드 실패 (402340): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,021 - WARNING - yfinance 뉴스 로드 실패 (105560): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,083 - WARNING - FDR 재무 데이터 로드 실패 (028260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,122 - WARNING - yfinance 뉴스 로드 실패 (068270): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,154 - WARNING - yfinance 뉴스 로드 실패 (055550): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,180 - WARNING - yfinance 뉴스 로드 실패 (329180): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,207 - WARNING - yfinance 뉴스 로드 실패 (035420): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,227 - WARNING - yfinance 뉴스 로드 실패 (000270): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,342 - WARNING - yfinance 뉴스 로드 실패 (028260): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,356 - WARNING - FDR 재무 데이터 로드 실패 (032830): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,386 - WARNING - yfinance 뉴스 로드 실패 (042660): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,429 - WARNING - FDR 재무 데이터 로드 실패 (267260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,520 - WARNING - FDR 재무 데이터 로드 실패 (015760): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,548 - WARNING - FDR 재무 데이터 로드 실패 (196170): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,573 - WARNING - FDR 재무 데이터 로드 실패 (035720): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,583 - WARNING - FDR 재무 데이터 로드 실패 (009540): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,595 - WARNING - yfinance 뉴스 로드 실패 (032830): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,605 - WARNING - FDR 재무 데이터 로드 실패 (051910): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,638 - WARNING - FDR 재무 데이터 로드 실패 (012330): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,685 - WARNING - FDR 재무 데이터 로드 실패 (086790): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,688 - WARNING - yfinance 뉴스 로드 실패 (267260): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,755 - WARNING - yfinance 뉴스 로드 실패 (015760): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,756 - WARNING - FDR 재무 데이터 로드 실패 (006400): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,794 - WARNING - yfinance 뉴스 로드 실패 (009540): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,845 - WARNING - yfinance 뉴스 로드 실패 (051910): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,878 - WARNING - yfinance 뉴스 로드 실패 (012330): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,898 - WARNING - yfinance 뉴스 로드 실패 (086790): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:34,915 - WARNING - FDR 재무 데이터 로드 실패 (005490): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:34,995 - WARNING - yfinance 뉴스 로드 실패 (196170): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,001 - WARNING - FDR 재무 데이터 로드 실패 (010140): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,008 - WARNING - yfinance 뉴스 로드 실패 (006400): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,033 - WARNING - FDR 재무 데이터 로드 실패 (000810): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,038 - WARNING - yfinance 뉴스 로드 실패 (035720): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,189 - WARNING - FDR 재무 데이터 로드 실패 (064350): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,194 - WARNING - FDR 재무 데이터 로드 실패 (298040): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,203 - WARNING - yfinance 뉴스 로드 실패 (005490): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,242 - WARNING - FDR 재무 데이터 로드 실패 (138040): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,275 - WARNING - yfinance 뉴스 로드 실패 (010140): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,284 - WARNING - FDR 재무 데이터 로드 실패 (010130): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,306 - WARNING - FDR 재무 데이터 로드 실패 (096770): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,371 - WARNING - FDR 재무 데이터 로드 실패 (316140): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,387 - WARNING - FDR 재무 데이터 로드 실패 (011200): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,388 - WARNING - yfinance 뉴스 로드 실패 (000810): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,395 - WARNING - yfinance 뉴스 로드 실패 (064350): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,412 - WARNING - yfinance 뉴스 로드 실패 (298040): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,505 - WARNING - yfinance 뉴스 로드 실패 (138040): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,559 - WARNING - FDR 재무 데이터 로드 실패 (003670): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,593 - WARNING - yfinance 뉴스 로드 실패 (010130): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,602 - WARNING - FDR 재무 데이터 로드 실패 (034730): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,618 - WARNING - yfinance 뉴스 로드 실패 (096770): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,626 - WARNING - yfinance 뉴스 로드 실패 (316140): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,680 - WARNING - FDR 재무 데이터 로드 실패 (009150): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,742 - WARNING - FDR 재무 데이터 로드 실패 (267250): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,825 - WARNING - yfinance 뉴스 로드 실패 (034730): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,855 - WARNING - yfinance 뉴스 로드 실패 (003670): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:35,928 - WARNING - FDR 재무 데이터 로드 실패 (033780): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,940 - WARNING - FDR 재무 데이터 로드 실패 (247540): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,973 - WARNING - FDR 재무 데이터 로드 실패 (000150): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,986 - WARNING - FDR 재무 데이터 로드 실패 (024110): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:35,987 - WARNING - yfinance 뉴스 로드 실패 (009150): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,063 - WARNING - yfinance 뉴스 로드 실패 (267250): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,077 - WARNING - FDR 재무 데이터 로드 실패 (066570): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,082 - WARNING - FDR 재무 데이터 로드 실패 (010120): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,156 - WARNING - FDR 재무 데이터 로드 실패 (006800): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,176 - WARNING - FDR 재무 데이터 로드 실패 (018260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,190 - WARNING - yfinance 뉴스 로드 실패 (247540): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,196 - WARNING - yfinance 뉴스 로드 실패 (033780): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,239 - WARNING - yfinance 뉴스 로드 실패 (024110): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,258 - WARNING - yfinance 뉴스 로드 실패 (000150): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,329 - WARNING - yfinance 뉴스 로드 실패 (010120): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,398 - WARNING - yfinance 뉴스 로드 실패 (066570): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,471 - WARNING - yfinance 뉴스 로드 실패 (018260): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,496 - WARNING - yfinance 뉴스 로드 실패 (006800): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,643 - WARNING - FDR 재무 데이터 로드 실패 (352820): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,685 - WARNING - FDR 재무 데이터 로드 실패 (259960): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,713 - WARNING - FDR 재무 데이터 로드 실패 (042700): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,714 - WARNING - FDR 재무 데이터 로드 실패 (030200): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,734 - WARNING - FDR 재무 데이터 로드 실패 (003550): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,744 - WARNING - FDR 재무 데이터 로드 실패 (086280): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,758 - WARNING - FDR 재무 데이터 로드 실패 (086520): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,773 - WARNING - FDR 재무 데이터 로드 실패 (017670): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,848 - WARNING - yfinance 뉴스 로드 실패 (352820): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,915 - WARNING - FDR 재무 데이터 로드 실패 (323410): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:36,948 - WARNING - yfinance 뉴스 로드 실패 (259960): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,956 - WARNING - yfinance 뉴스 로드 실패 (030200): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:36,967 - WARNING - yfinance 뉴스 로드 실패 (086520): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,136 - WARNING - FDR 재무 데이터 로드 실패 (272210): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,151 - WARNING - yfinance 뉴스 로드 실패 (323410): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,158 - WARNING - yfinance 뉴스 로드 실패 (003550): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,225 - WARNING - yfinance 뉴스 로드 실패 (017670): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,271 - WARNING - FDR 재무 데이터 로드 실패 (005830): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,297 - WARNING - FDR 재무 데이터 로드 실패 (443060): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,329 - WARNING - FDR 재무 데이터 로드 실패 (003230): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,346 - WARNING - FDR 재무 데이터 로드 실패 (047810): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,351 - WARNING - yfinance 뉴스 로드 실패 (272210): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,444 - WARNING - FDR 재무 데이터 로드 실패 (326030): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,452 - WARNING - FDR 재무 데이터 로드 실패 (000100): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,477 - WARNING - FDR 재무 데이터 로드 실패 (071050): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,482 - WARNING - FDR 재무 데이터 로드 실패 (047050): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,494 - WARNING - yfinance 뉴스 로드 실패 (005830): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,531 - WARNING - yfinance 뉴스 로드 실패 (443060): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,619 - WARNING - FDR 재무 데이터 로드 실패 (079550): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,629 - WARNING - FDR 재무 데이터 로드 실패 (278470): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,675 - WARNING - yfinance 뉴스 로드 실패 (003230): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,682 - WARNING - yfinance 뉴스 로드 실패 (326030): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,722 - WARNING - yfinance 뉴스 로드 실패 (047050): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,726 - WARNING - yfinance 뉴스 로드 실패 (047810): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:37,896 - WARNING - FDR 재무 데이터 로드 실패 (010950): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:37,904 - WARNING - yfinance 뉴스 로드 실패 (278470): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,045 - WARNING - FDR 재무 데이터 로드 실패 (010620): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,046 - WARNING - FDR 재무 데이터 로드 실패 (277810): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,067 - WARNING - FDR 재무 데이터 로드 실패 (007660): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,075 - WARNING - FDR 재무 데이터 로드 실패 (003490): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,085 - WARNING - FDR 재무 데이터 로드 실패 (039490): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,122 - WARNING - FDR 재무 데이터 로드 실패 (090430): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,125 - WARNING - FDR 재무 데이터 로드 실패 (005940): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,137 - WARNING - yfinance 뉴스 로드 실패 (010950): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,203 - WARNING - FDR 재무 데이터 로드 실패 (000720): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,264 - WARNING - yfinance 뉴스 로드 실패 (010620): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,338 - WARNING - yfinance 뉴스 로드 실패 (003490): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,339 - WARNING - yfinance 뉴스 로드 실패 (005940): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,353 - WARNING - yfinance 뉴스 로드 실패 (007660): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,376 - WARNING - yfinance 뉴스 로드 실패 (090430): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,509 - WARNING - yfinance 뉴스 로드 실패 (000720): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,559 - WARNING - FDR 재무 데이터 로드 실패 (377300): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,572 - WARNING - FDR 재무 데이터 로드 실패 (005387): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,665 - WARNING - FDR 재무 데이터 로드 실패 (180640): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,689 - WARNING - FDR 재무 데이터 로드 실패 (032640): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,698 - WARNING - FDR 재무 데이터 로드 실패 (087010): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,699 - WARNING - FDR 재무 데이터 로드 실패 (016360): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,708 - WARNING - FDR 재무 데이터 로드 실패 (034220): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,726 - WARNING - FDR 재무 데이터 로드 실패 (000880): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,793 - WARNING - yfinance 뉴스 로드 실패 (005387): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,881 - WARNING - FDR 재무 데이터 로드 실패 (021240): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:38,902 - WARNING - yfinance 뉴스 로드 실패 (016360): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,927 - WARNING - yfinance 뉴스 로드 실패 (034220): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,933 - WARNING - yfinance 뉴스 로드 실패 (032640): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:27:38,992 - WARNING - FDR 재무 데이터 로드 실패 (006260): module 'FinanceDataReader' has no attribute 'financials'
+2025-11-09 18:27:39,035 - WARNING - yfinance 뉴스 로드 실패 (000880): 'NoneType' object cannot be interpreted as an integer
+2025-11-09 18:29:36,720 - WARNING - 분석 시작: 총 2877 종목, 최대 워커 8개 사용. 필터: ma
+2025-11-09 18:30:21,469 - ERROR - 268280.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:21,855 - ERROR - 071055.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:22,253 - ERROR - 002350.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:22,259 - ERROR - 102710.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:22,260 - ERROR - 058610.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:22,266 - ERROR - 000640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:22,667 - ERROR - 389470.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:22,672 - ERROR - 214320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:23,240 - ERROR - 005420.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:23,637 - ERROR - 000370.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:24,036 - ERROR - 052400.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:24,040 - ERROR - 053800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:24,043 - ERROR - 251970.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:24,050 - ERROR - 348210.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:24,445 - ERROR - 025980.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:24,483 - ERROR - 278280.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:25,015 - ERROR - 293940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:25,442 - ERROR - 080220.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:25,838 - ERROR - 003160.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:25,843 - ERROR - 032190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:25,847 - ERROR - 032500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:25,852 - ERROR - 119850.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:26,245 - ERROR - 322000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:26,247 - ERROR - 145720.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:26,793 - ERROR - 475150.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:27,275 - ERROR - 023160.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:27,674 - ERROR - 057050.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:27,676 - ERROR - 001570.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:27,685 - ERROR - 450140.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:27,690 - ERROR - 078160.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:28,089 - ERROR - 383800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:28,094 - ERROR - 211050.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:28,645 - ERROR - 356860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:29,072 - ERROR - 00104K.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:29,471 - ERROR - 006380.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:29,476 - ERROR - 127120.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:29,481 - ERROR - 079900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:29,484 - ERROR - 009520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:29,882 - ERROR - 025540.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:29,885 - ERROR - 052020.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:30,474 - ERROR - 099320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:30,874 - ERROR - 271940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:31,271 - ERROR - 006730.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:31,272 - ERROR - 074600.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:31,276 - ERROR - 060250.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:31,281 - ERROR - 089010.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:31,888 - ERROR - 089970.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:31,892 - ERROR - 336370.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:32,296 - ERROR - 000400.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:32,693 - ERROR - 199800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:33,243 - ERROR - 082920.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:33,246 - ERROR - 002960.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:33,248 - ERROR - 033100.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:33,256 - ERROR - 131290.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:33,650 - ERROR - 372320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:34,063 - ERROR - 030520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:34,069 - ERROR - 005880.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:34,472 - ERROR - 348950.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:34,997 - ERROR - 228760.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:35,000 - ERROR - 377740.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:35,003 - ERROR - 016590.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:35,393 - ERROR - 399720.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:35,403 - ERROR - 090460.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:35,812 - ERROR - 003030.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:35,813 - ERROR - 001060.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:36,234 - ERROR - 002020.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:36,758 - ERROR - 047920.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:36,764 - ERROR - 101730.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:36,769 - ERROR - 383310.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:37,161 - ERROR - 095660.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:37,168 - ERROR - 200670.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:37,561 - ERROR - 453340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:37,571 - ERROR - 003545.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:37,983 - ERROR - 222080.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:38,520 - ERROR - 044490.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:38,536 - ERROR - 005810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:38,555 - ERROR - 010780.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:38,954 - ERROR - 058970.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:38,963 - ERROR - 097520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:39,416 - ERROR - 025320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:39,860 - ERROR - 456040.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:39,865 - ERROR - 016380.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:40,441 - ERROR - 034310.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:40,444 - ERROR - 016800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:40,449 - ERROR - 017940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:40,838 - ERROR - 145990.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:40,844 - ERROR - 093050.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:41,239 - ERROR - 284740.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:41,644 - ERROR - 171090.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:42,035 - ERROR - 179900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:42,552 - ERROR - 064260.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:42,553 - ERROR - 214430.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:42,559 - ERROR - 067630.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:42,967 - ERROR - 161000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:42,974 - ERROR - 253590.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:43,387 - ERROR - 007810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:43,782 - ERROR - 178920.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:44,206 - ERROR - 004690.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:44,602 - ERROR - 036620.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:44,616 - ERROR - 015750.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:44,624 - ERROR - 001500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:45,016 - ERROR - 389650.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:45,029 - ERROR - 101930.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:45,440 - ERROR - 083450.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:45,831 - ERROR - 017810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:46,252 - ERROR - 365340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:46,674 - ERROR - 048410.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:46,678 - ERROR - 003300.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:46,683 - ERROR - 089890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:47,094 - ERROR - 002240.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:47,101 - ERROR - 094800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:47,502 - ERROR - 053030.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:47,913 - ERROR - 170900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:48,311 - ERROR - 192650.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:48,729 - ERROR - 272290.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:48,729 - ERROR - 006220.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:48,735 - ERROR - 059090.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:49,137 - ERROR - 058650.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:49,152 - ERROR - 025900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:49,557 - ERROR - 107640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:50,057 - ERROR - 009410.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:50,477 - ERROR - 419530.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:50,987 - ERROR - 352480.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:50,992 - ERROR - 050890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:51,000 - ERROR - 060280.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:51,397 - ERROR - 033240.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:51,404 - ERROR - 004700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:51,811 - ERROR - 090435.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:52,212 - ERROR - 124500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:52,626 - ERROR - 183190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:53,030 - ERROR - 215200.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:53,038 - ERROR - 005389.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:53,058 - ERROR - 034950.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:53,449 - ERROR - 220100.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:53,453 - ERROR - 009900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:53,870 - ERROR - 114190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:54,262 - ERROR - 194480.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:54,660 - ERROR - 099190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:55,090 - ERROR - 093320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:55,101 - ERROR - 056080.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:55,119 - ERROR - 029530.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:55,512 - WARNING - yfinance 뉴스 로드 실패 (005610): Failed to perform, curl: (18) end of response with 16 bytes missing. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2025-11-09 18:30:55,514 - ERROR - 206650.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:55,928 - ERROR - 079370.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:56,335 - ERROR - 138610.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:56,743 - ERROR - 425420.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:57,153 - ERROR - 002710.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:57,163 - ERROR - 189300.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:57,163 - ERROR - 091810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:57,577 - ERROR - 000157.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:57,583 - ERROR - 014830.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:58,000 - ERROR - 105630.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:58,414 - ERROR - 041960.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:58,819 - ERROR - 114810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:59,222 - ERROR - 100790.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:59,230 - ERROR - 026890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:59,236 - ERROR - 094170.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:59,628 - ERROR - 089590.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:30:59,636 - ERROR - 072710.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:00,037 - ERROR - 357120.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:00,450 - ERROR - 420770.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:00,847 - ERROR - 455900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:01,261 - ERROR - 252990.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:01,263 - ERROR - 069080.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:01,276 - ERROR - 078340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:01,682 - ERROR - 037270.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:01,687 - ERROR - 174900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:02,094 - ERROR - 016610.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:02,506 - ERROR - 078130.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:02,944 - ERROR - 344820.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:03,360 - ERROR - 448730.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:03,361 - ERROR - 460860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:03,365 - ERROR - 168360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:03,755 - ERROR - 317330.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:03,760 - ERROR - 003280.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:04,152 - ERROR - 013030.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:04,609 - ERROR - 102940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:05,000 - ERROR - 014940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:05,438 - ERROR - 101360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:05,441 - ERROR - 065680.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:05,445 - ERROR - 432320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:05,848 - ERROR - 101160.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:05,872 - ERROR - 042520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:06,243 - ERROR - 104830.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:06,642 - ERROR - 091700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:07,055 - ERROR - 215600.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:07,444 - ERROR - 304100.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:07,449 - ERROR - 314930.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:07,452 - ERROR - 200130.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:07,842 - ERROR - 204620.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:07,847 - ERROR - 117730.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:08,346 - ERROR - 403550.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:08,753 - ERROR - 130660.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:09,153 - ERROR - 035890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:09,561 - ERROR - 144510.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:09,563 - ERROR - 033640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:09,567 - ERROR - 001940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:09,994 - ERROR - 389260.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:09,998 - ERROR - 104700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:10,407 - ERROR - 041830.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:10,808 - ERROR - 099430.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:11,242 - ERROR - 027410.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:11,623 - ERROR - 064820.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:11,626 - ERROR - 003000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:11,630 - ERROR - 215000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:12,014 - ERROR - 011930.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:12,020 - ERROR - 018250.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:12,430 - ERROR - 045100.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:12,842 - ERROR - 024720.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:13,243 - ERROR - 416180.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:13,651 - ERROR - 079940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:13,662 - ERROR - 272450.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:13,673 - ERROR - 093520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:14,081 - ERROR - 064550.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:14,087 - ERROR - 340570.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:14,500 - ERROR - 046890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:14,919 - ERROR - 122640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:15,350 - ERROR - 015860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:15,751 - ERROR - 031330.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:15,755 - ERROR - 015360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:15,761 - ERROR - 003520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:16,170 - ERROR - 126560.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:16,175 - ERROR - 034120.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:16,567 - ERROR - 441270.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:16,980 - ERROR - 051980.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:17,436 - ERROR - 060980.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:17,829 - ERROR - 199430.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:17,832 - ERROR - 010170.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:17,837 - ERROR - 086390.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:18,241 - ERROR - 006390.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:18,249 - ERROR - 094480.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:18,642 - ERROR - 230360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:19,069 - ERROR - 108860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:19,483 - ERROR - 256840.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:19,897 - ERROR - 243070.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:19,937 - ERROR - 031430.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:19,939 - ERROR - 084010.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:20,339 - ERROR - 475400.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:20,347 - ERROR - 039440.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:20,774 - ERROR - 306200.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:21,570 - ERROR - 126340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:21,986 - ERROR - 338220.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:22,389 - ERROR - 294570.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:22,399 - ERROR - 005945.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:22,410 - ERROR - 053610.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:22,820 - ERROR - 001530.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:22,826 - ERROR - 078350.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:23,223 - ERROR - 001200.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:23,689 - ERROR - 003960.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:24,107 - ERROR - 020000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:24,536 - ERROR - 084690.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:24,551 - ERROR - 095500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:24,556 - ERROR - 017860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:24,934 - ERROR - 006110.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:24,960 - ERROR - 094360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:25,334 - ERROR - 034830.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:25,741 - ERROR - 348340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:26,157 - ERROR - 448280.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:26,547 - ERROR - 029460.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:26,557 - ERROR - 001820.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:26,575 - ERROR - 001390.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:26,981 - ERROR - 347700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:26,984 - ERROR - 138490.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:27,379 - ERROR - 038500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:27,792 - ERROR - 194700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:28,183 - ERROR - 008060.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:28,578 - ERROR - 017390.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:28,585 - ERROR - 005090.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:28,610 - ERROR - 051500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:28,977 - ERROR - 043150.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:28,994 - ERROR - 200880.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:29,401 - ERROR - 445090.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:29,810 - ERROR - 008490.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:30,216 - ERROR - 900140.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:30,621 - ERROR - 054950.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:30,638 - ERROR - 950140.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:30,646 - ERROR - 025860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:31,033 - ERROR - 206640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:31,039 - ERROR - 402030.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:31,432 - ERROR - 110990.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:31,905 - ERROR - 033270.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:32,312 - ERROR - 338840.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:32,715 - ERROR - 001510.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:32,722 - ERROR - 002320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:32,729 - ERROR - 000320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:33,168 - ERROR - 136480.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:33,175 - ERROR - 286940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:33,550 - ERROR - 377190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:34,000 - ERROR - 003920.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:31:34,413 - ERROR - 003800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:35:22,836 - WARNING - 분석 시작: 총 2877 종목, 최대 워커 4개 사용. 필터: ma
+2025-11-09 18:36:48,531 - ERROR - 000400.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:49,160 - ERROR - 199800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:49,583 - ERROR - 131290.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:49,588 - ERROR - 033100.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:49,985 - ERROR - 082920.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:50,686 - ERROR - 002960.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:51,077 - ERROR - 372320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:51,663 - ERROR - 030520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:51,667 - ERROR - 005880.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:52,343 - ERROR - 348950.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:52,744 - ERROR - 228760.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:53,158 - ERROR - 377740.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:53,552 - ERROR - 399720.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:54,081 - ERROR - 016590.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:54,480 - ERROR - 090460.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:54,876 - ERROR - 001060.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:55,659 - ERROR - 003030.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:56,433 - ERROR - 002020.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:56,838 - ERROR - 101730.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:57,226 - ERROR - 383310.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:57,627 - ERROR - 047920.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:58,158 - ERROR - 200670.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:58,559 - ERROR - 095660.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:58,963 - ERROR - 453340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:36:59,358 - ERROR - 003545.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:00,016 - ERROR - 222080.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:00,421 - ERROR - 010780.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:01,005 - ERROR - 005810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:01,406 - ERROR - 044490.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:01,946 - ERROR - 058970.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:02,705 - ERROR - 097520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:03,100 - ERROR - 025320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:03,706 - ERROR - 456040.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:04,244 - ERROR - 016380.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:04,771 - ERROR - 016800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:04,777 - ERROR - 017940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:05,168 - ERROR - 034310.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:05,808 - ERROR - 145990.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:06,343 - ERROR - 093050.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:06,349 - ERROR - 284740.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:06,742 - ERROR - 171090.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:07,282 - ERROR - 179900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:07,816 - ERROR - 214430.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:07,822 - ERROR - 064260.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:08,264 - ERROR - 067630.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:08,808 - ERROR - 161000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:09,349 - ERROR - 253590.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:09,752 - ERROR - 007810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:09,752 - ERROR - 178920.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:10,287 - ERROR - 004690.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:10,848 - ERROR - 015750.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:11,245 - ERROR - 036620.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:11,253 - ERROR - 001500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:11,829 - ERROR - 389650.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:12,365 - ERROR - 101930.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:12,755 - ERROR - 083450.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:12,782 - ERROR - 017810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:13,340 - ERROR - 365340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:13,878 - ERROR - 003300.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:14,276 - ERROR - 048410.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:14,279 - ERROR - 089890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:14,868 - ERROR - 002240.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:15,411 - ERROR - 094800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:15,811 - ERROR - 170900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:15,815 - ERROR - 053030.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:16,359 - ERROR - 192650.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:16,901 - ERROR - 059090.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:17,689 - ERROR - 272290.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:17,691 - ERROR - 006220.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:18,237 - ERROR - 025900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:18,774 - ERROR - 058650.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:19,181 - ERROR - 009410.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:19,187 - ERROR - 107640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:19,747 - ERROR - 419530.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:20,277 - ERROR - 352480.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:20,676 - ERROR - 050890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:20,711 - ERROR - 060280.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:21,252 - ERROR - 033240.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:21,788 - ERROR - 004700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:22,589 - ERROR - 090435.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:22,607 - ERROR - 124500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:23,163 - ERROR - 183190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:23,705 - ERROR - 005389.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:24,107 - ERROR - 215200.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:24,112 - ERROR - 034950.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:24,655 - ERROR - 220100.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:25,192 - ERROR - 009900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:25,586 - ERROR - 114190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:25,616 - ERROR - 194480.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:26,149 - ERROR - 099190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:26,817 - ERROR - 029530.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:26,821 - ERROR - 056080.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:26,824 - ERROR - 093320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:27,403 - ERROR - 206650.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:28,072 - ERROR - 005610.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:28,075 - ERROR - 079370.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:28,077 - ERROR - 138610.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:28,647 - ERROR - 425420.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:29,684 - ERROR - 002710.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:29,684 - ERROR - 189300.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:29,692 - ERROR - 091810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:30,338 - ERROR - 000157.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:31,143 - ERROR - 041960.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:31,165 - ERROR - 105630.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:31,182 - ERROR - 014830.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:31,538 - ERROR - 114810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:32,353 - ERROR - 094170.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:32,353 - ERROR - 100790.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:32,363 - ERROR - 026890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:32,762 - ERROR - 089590.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:33,582 - ERROR - 420770.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:33,589 - ERROR - 072710.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:33,591 - ERROR - 357120.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:33,982 - ERROR - 455900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:34,799 - ERROR - 078340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:34,810 - ERROR - 252990.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:34,820 - ERROR - 069080.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:35,216 - ERROR - 037270.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:36,026 - ERROR - 016610.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:36,029 - ERROR - 174900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:36,031 - ERROR - 078130.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:36,420 - ERROR - 344820.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:37,252 - ERROR - 460860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:37,258 - ERROR - 448730.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:37,263 - ERROR - 168360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:37,667 - ERROR - 003280.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:38,521 - ERROR - 102940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:38,526 - ERROR - 013030.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:38,532 - ERROR - 317330.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:38,908 - ERROR - 014940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:39,733 - ERROR - 432320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:39,739 - ERROR - 101360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:40,126 - ERROR - 042520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:40,135 - ERROR - 065680.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:40,976 - ERROR - 101160.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:40,983 - ERROR - 104830.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:41,371 - ERROR - 091700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:41,780 - ERROR - 215600.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:42,756 - ERROR - 314930.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:42,765 - ERROR - 200130.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:43,167 - ERROR - 304100.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:43,558 - ERROR - 117730.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:44,244 - ERROR - 204620.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:44,248 - ERROR - 403550.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:44,746 - ERROR - 130660.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:45,151 - ERROR - 035890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:45,833 - ERROR - 033640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:46,236 - ERROR - 144510.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:46,841 - ERROR - 001940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:47,309 - ERROR - 104700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:47,673 - ERROR - 389260.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:47,703 - ERROR - 041830.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:48,253 - ERROR - 099430.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:48,797 - ERROR - 027410.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:49,204 - ERROR - 003000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:49,209 - ERROR - 215000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:49,757 - ERROR - 064820.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:50,297 - ERROR - 018250.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:50,688 - ERROR - 045100.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:50,695 - ERROR - 011930.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:51,269 - ERROR - 024720.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:51,803 - ERROR - 416180.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:52,315 - ERROR - 079940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:52,319 - ERROR - 272450.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:52,884 - ERROR - 093520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:53,460 - ERROR - 064550.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:53,851 - ERROR - 340570.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:53,859 - ERROR - 046890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:54,424 - ERROR - 122640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:54,972 - ERROR - 015860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:55,367 - ERROR - 031330.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:55,373 - ERROR - 015360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:55,921 - ERROR - 003520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:56,466 - ERROR - 126560.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:56,869 - ERROR - 034120.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:57,302 - ERROR - 441270.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:57,690 - ERROR - 051980.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:58,363 - ERROR - 060980.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:58,753 - ERROR - 086390.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:59,343 - ERROR - 010170.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:37:59,740 - ERROR - 199430.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:00,290 - ERROR - 094480.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:00,689 - ERROR - 006390.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:01,081 - ERROR - 230360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:01,477 - ERROR - 108860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:02,031 - ERROR - 256840.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:02,422 - ERROR - 243070.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:02,966 - ERROR - 084010.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:03,371 - ERROR - 031430.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:03,917 - ERROR - 475400.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:04,328 - ERROR - 039440.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:04,731 - ERROR - 306200.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:05,138 - ERROR - 126340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:06,054 - ERROR - 338220.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:06,458 - ERROR - 005945.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:06,858 - ERROR - 294570.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:07,297 - ERROR - 053610.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:07,849 - ERROR - 001530.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:08,252 - ERROR - 078350.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:08,652 - ERROR - 001200.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:09,057 - ERROR - 003960.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:09,628 - ERROR - 020000.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:10,059 - ERROR - 084690.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:10,449 - ERROR - 017860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:10,881 - ERROR - 095500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:11,428 - ERROR - 006110.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:11,820 - ERROR - 094360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:12,247 - ERROR - 034830.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:12,679 - ERROR - 348340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:13,224 - ERROR - 448280.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:13,614 - ERROR - 029460.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:14,026 - ERROR - 001390.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:14,424 - ERROR - 001820.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:14,976 - ERROR - 347700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:15,368 - ERROR - 138490.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:15,770 - ERROR - 038500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:16,205 - ERROR - 194700.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:16,743 - ERROR - 008060.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:17,135 - ERROR - 017390.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:17,569 - ERROR - 005090.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:17,986 - ERROR - 051500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:18,533 - ERROR - 043150.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:18,924 - ERROR - 200880.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:19,375 - ERROR - 445090.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:19,779 - ERROR - 008490.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:20,322 - ERROR - 900140.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:20,746 - ERROR - 054950.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:21,146 - ERROR - 950140.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:21,548 - ERROR - 025860.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:22,064 - ERROR - 402030.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:22,465 - ERROR - 206640.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:23,186 - ERROR - 110990.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:23,588 - ERROR - 033270.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:24,115 - ERROR - 338840.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:24,544 - ERROR - 002320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:24,954 - ERROR - 001510.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:25,353 - ERROR - 000320.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:25,886 - ERROR - 136480.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:26,288 - ERROR - 286940.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:26,691 - ERROR - 377190.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:27,100 - ERROR - 003920.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:27,655 - ERROR - 003800.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:28,412 - ERROR - 077360.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:29,398 - ERROR - 009160.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:29,789 - ERROR - 003120.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:30,330 - ERROR - 088260.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:30,740 - ERROR - 036200.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:31,141 - ERROR - 002310.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:31,542 - ERROR - 067080.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:32,093 - ERROR - 006340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:32,490 - ERROR - 378340.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:32,886 - ERROR - 200710.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:33,281 - ERROR - 025770.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:33,831 - ERROR - 009290.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:34,239 - ERROR - 009680.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:34,652 - ERROR - 194370.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:35,058 - ERROR - 018310.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:35,642 - ERROR - 382900.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:36,035 - ERROR - 009155.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:36,456 - ERROR - 115450.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:36,876 - ERROR - 126720.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:37,426 - ERROR - 007690.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:37,815 - ERROR - 005720.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:38,265 - ERROR - 003220.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:38,670 - ERROR - 078020.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:39,229 - ERROR - 114840.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:39,620 - ERROR - 060720.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:40,113 - ERROR - 016880.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:40,529 - ERROR - 092790.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:41,066 - ERROR - 372170.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:41,464 - ERROR - 006405.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:42,008 - ERROR - 241590.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:42,012 - ERROR - 265520.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:42,568 - ERROR - 092230.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:42,970 - ERROR - 002810.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:43,522 - ERROR - 013890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:43,527 - ERROR - 035600.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:44,077 - ERROR - 061970.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:44,503 - ERROR - 108380.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:45,049 - ERROR - 950170.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:45,056 - ERROR - 011760.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:45,609 - ERROR - 005500.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:46,015 - ERROR - 089980.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:46,567 - ERROR - 295310.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:38:46,575 - ERROR - 123890.KS: Failed to retrieve the news and received faulty response instead.
+2025-11-09 18:42:23,914 - WARNING - 분석 시작: 총 2877 종목, 최대 워커 8개 사용. 필터: ma
+2025-11-09 18:42:36,543 - WARNING - yfinance 뉴스 로드 실패 (402340, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:40,033 - WARNING - yfinance 뉴스 로드 실패 (011200, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:41,831 - WARNING - yfinance 뉴스 로드 실패 (402340, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:42,460 - WARNING - yfinance 뉴스 로드 실패 (042700, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:42,478 - WARNING - yfinance 뉴스 로드 실패 (086280, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:44,933 - WARNING - yfinance 뉴스 로드 실패 (000100, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:45,457 - WARNING - yfinance 뉴스 로드 실패 (011200, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:45,487 - WARNING - yfinance 뉴스 로드 실패 (071050, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:46,341 - WARNING - yfinance 뉴스 로드 실패 (079550, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:47,754 - WARNING - yfinance 뉴스 로드 실패 (042700, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:47,783 - WARNING - yfinance 뉴스 로드 실패 (086280, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:48,971 - WARNING - yfinance 뉴스 로드 실패 (277810, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:50,178 - WARNING - yfinance 뉴스 로드 실패 (039490, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:50,238 - WARNING - yfinance 뉴스 로드 실패 (000100, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:50,839 - WARNING - yfinance 뉴스 로드 실패 (071050, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:51,754 - WARNING - yfinance 뉴스 로드 실패 (079550, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:54,373 - WARNING - yfinance 뉴스 로드 실패 (277810, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:55,559 - WARNING - yfinance 뉴스 로드 실패 (039490, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:42:56,796 - WARNING - yfinance 뉴스 로드 실패 (377300, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:57,035 - WARNING - yfinance 뉴스 로드 실패 (180640, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:42:58,612 - WARNING - yfinance 뉴스 로드 실패 (087010, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:43:00,980 - WARNING - yfinance 뉴스 로드 실패 (028300, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:43:01,250 - WARNING - yfinance 뉴스 로드 실패 (021240, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:43:02,173 - WARNING - yfinance 뉴스 로드 실패 (377300, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:43:02,400 - WARNING - yfinance 뉴스 로드 실패 (180640, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:43:03,251 - WARNING - yfinance 뉴스 로드 실패 (029780, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:43:04,385 - WARNING - yfinance 뉴스 로드 실패 (087010, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:17,471 - WARNING - 분석 시작: 총 2877 종목, 최대 워커 8개 사용. 필터: ma
+2025-11-09 18:44:24,808 - WARNING - yfinance 뉴스 로드 실패 (402340, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:27,893 - WARNING - yfinance 뉴스 로드 실패 (011200, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:30,126 - WARNING - yfinance 뉴스 로드 실패 (402340, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:30,818 - WARNING - yfinance 뉴스 로드 실패 (042700, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:30,914 - WARNING - yfinance 뉴스 로드 실패 (086280, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:33,064 - WARNING - yfinance 뉴스 로드 실패 (000100, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:33,198 - WARNING - yfinance 뉴스 로드 실패 (011200, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:33,486 - WARNING - yfinance 뉴스 로드 실패 (071050, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:34,159 - WARNING - yfinance 뉴스 로드 실패 (079550, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:36,114 - WARNING - yfinance 뉴스 로드 실패 (042700, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:36,215 - WARNING - yfinance 뉴스 로드 실패 (086280, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:37,303 - WARNING - yfinance 뉴스 로드 실패 (277810, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:38,370 - WARNING - yfinance 뉴스 로드 실패 (000100, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:38,566 - WARNING - yfinance 뉴스 로드 실패 (039490, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:38,797 - WARNING - yfinance 뉴스 로드 실패 (071050, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:39,492 - WARNING - yfinance 뉴스 로드 실패 (079550, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:42,119 - WARNING - yfinance 뉴스 로드 실패 (377300, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:42,520 - WARNING - yfinance 뉴스 로드 실패 (180640, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:42,627 - WARNING - yfinance 뉴스 로드 실패 (277810, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:43,892 - WARNING - yfinance 뉴스 로드 실패 (039490, 시도 2/3): Empty news list received, retrying...
+2025-11-09 18:44:44,578 - WARNING - yfinance 뉴스 로드 실패 (087010, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:45,795 - WARNING - yfinance 뉴스 로드 실패 (021240, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:44:46,447 - WARNING - yfinance 뉴스 로드 실패 (028300, 시도 1/3): Empty news list received, retrying...
+2025-11-09 18:47:32,561 - WARNING - 분석 시작: 총 2877 종목, 최대 워커 8개 사용. 필터: ma
+2025-11-09 20:42:00,109 - WARNING - 분석 시작: 총 2877 종목, 최대 워커 8개 사용. 필터: ma
+2025-11-10 05:02:33,017 - WARNING - 분석 시작: 총 2877 종목 중 **10개** 종목만 테스트합니다. 최대 워커 8개 사용. 필터: ma. 기간(Years): 5
+2025-11-10 05:02:41,852 - WARNING - 분석 완료: 5개 종목 필터링 됨. 0개 종목 오류 발생. 총 소요 시간: 8.87초
+2025-11-10 05:05:25,850 - WARNING - 분석 시작: 총 2877 종목 중 **10개** 종목만 테스트합니다. 최대 워커 8개 사용. 필터: ma. 기간(Years): 5
+2025-11-10 05:05:32,175 - WARNING - 분석 완료: 5개 종목 필터링 됨. 0개 종목 오류 발생. 총 소요 시간: 6.35초
+2025-11-10 05:14:01,594 - WARNING - 분석 시작: 총 2877 종목 중 **10개** 종목만 테스트합니다. 최대 워커 8개 사용. 필터: ma. 기간(Years): 5
+2025-11-10 05:14:08,492 - WARNING - 분석 완료: 5개 종목 필터링 됨. 0개 종목 오류 발생. 총 소요 시간: 6.93초
+2025-11-10 06:01:49,074 - WARNING - 분석 시작: 총 2877 종목 중 **10개** 종목만 테스트합니다. 최대 워커 8개 사용. 필터: ma. 기간(Years): 5
+2025-11-10 06:01:56,885 - WARNING - 분석 완료: 5개 종목 필터링 됨. 0개 종목 오류 발생. 총 소요 시간: 7.84초
+2025-11-10 06:22:46,417 - WARNING - 분석 시작: 총 2877 종목 중 **10개** 종목만 테스트합니다. 최대 워커 8개 사용. 필터: ma. 기간(Years): 5
+2025-11-10 06:22:53,694 - WARNING - 분석 완료: 5개 종목 필터링 됨. 0개 종목 오류 발생. 총 소요 시간: 7.3초
+2025-11-10 06:40:01,550 - WARNING - 분석 시작: 총 2877 종목 중 **10개** 종목만 테스트합니다. 최대 워커 8개 사용. 필터: cup_and_handle. 기간(Years): 1
+2025-11-10 06:40:09,221 - WARNING - 분석 완료: 5개 종목 필터링 됨. 0개 종목 오류 발생. 총 소요 시간: 7.7초

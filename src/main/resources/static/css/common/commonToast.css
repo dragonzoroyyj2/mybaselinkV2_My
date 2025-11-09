@@ -6,8 +6,42 @@
    - 화면 우측 하단에 자동 정렬
 ================================================================ */
 
-/* 컨테이너 (여러 토스트 누적용) */
+/* ===============================================================
+   🌙 다크모드 대응 전역 변수 추가 (2025.11 통합)
+================================================================ */
+:root {
+  --toast-bg: #fff;
+  --toast-text: #111827;
+  --toast-shadow: rgba(0,0,0,0.15);
+  --toast-success-bg: #ecfdf5;
+  --toast-success-border: #16a34a;
+  --toast-error-bg: #fef2f2;
+  --toast-error-border: #dc2626;
+  --toast-warning-bg: #fffbeb;
+  --toast-warning-border: #f59e0b;
+  --toast-info-bg: #eff6ff;
+  --toast-info-border: #2563eb;
+  --toast-close: #6b7280;
+}
 
+body.dark-mode {
+  --toast-bg: #1f2937;
+  --toast-text: #f3f4f6;
+  --toast-shadow: rgba(0,0,0,0.4);
+  --toast-success-bg: #064e3b;
+  --toast-success-border: #10b981;
+  --toast-error-bg: #7f1d1d;
+  --toast-error-border: #ef4444;
+  --toast-warning-bg: #78350f;
+  --toast-warning-border: #fbbf24;
+  --toast-info-bg: #1e3a8a;
+  --toast-info-border: #3b82f6;
+  --toast-close: #d1d5db;
+  background: #111827;
+  color: var(--toast-text);
+}
+
+/* 컨테이너 (여러 토스트 누적용) */
 .toast-container2 { 
   position: fixed;
    top: 70px;        /* ✅ 상단바 아래 */ /* bottom: 20px;  ✅ 하단 */
@@ -32,18 +66,14 @@
   z-index: 6000;
 }
 
-
-
-
-
 /* 기본 토스트 */
 .toast {
   min-width: 220px;
   max-width: 340px;
-  background: #fff;
-  color: #111827;
+  background: var(--toast-bg);
+  color: var(--toast-text);
   border-radius: 8px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 3px 10px var(--toast-shadow);
   padding: 10px 14px;
   font-size: 14px;
   font-weight: 500;
@@ -57,20 +87,20 @@
 
 /* 상태별 색상 */
 .toast.success {
-  border-left: 5px solid #16a34a;
-  background: #ecfdf5;
+  border-left: 5px solid var(--toast-success-border);
+  background: var(--toast-success-bg);
 }
 .toast.error {
-  border-left: 5px solid #dc2626;
-  background: #fef2f2;
+  border-left: 5px solid var(--toast-error-border);
+  background: var(--toast-error-bg);
 }
 .toast.warning {
-  border-left: 5px solid #f59e0b;
-  background: #fffbeb;
+  border-left: 5px solid var(--toast-warning-border);
+  background: var(--toast-warning-bg);
 }
 .toast.info {
-  border-left: 5px solid #2563eb;
-  background: #eff6ff;
+  border-left: 5px solid var(--toast-info-border);
+  background: var(--toast-info-bg);
 }
 
 /* 아이콘 */
@@ -82,12 +112,12 @@
 .toast .close-toast {
   margin-left: auto;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--toast-close);
   font-size: 16px;
   transition: 0.15s;
 }
 .toast .close-toast:hover {
-  color: #111827;
+  color: var(--toast-text);
 }
 
 /* 사라질 때 */

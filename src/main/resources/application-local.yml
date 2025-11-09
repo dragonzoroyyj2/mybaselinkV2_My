@@ -28,12 +28,21 @@ python:
   update_stock_listing:
     path: "${python.root.path}/python/stock/py/update_stock_listing.py"
 
+  update_stock_listing_prod:
+    path: "${python.root.path}/python/stock/py/update_stock_listing_prod.py"
+
   find_last_close_downward:
     path: "${python.root.path}/python/stock/py/find_last_close_downward.py"
+
+  athena_k_market_ai:
+    path: "${python.root.path}/python/stock/py/athena_k_market_ai.py"
 
   stock:
     stock_listing:
       path: "${python.root.path}/python/data/stock_list/stock_listing.json"
+
+    stock_listing_prod:
+      path: "${python.root.path}/python/data/stock_list/stock_listing_prod.json"
 
 ###########################################################################
 # ✅ DataSource (PostgreSQL 접속)

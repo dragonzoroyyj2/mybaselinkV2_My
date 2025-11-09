@@ -1,0 +1,609 @@
+<!--stockBatchProd.html  -->
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+<meta charset="UTF-8">
+<title>📊 Stock Batch Prod</title>
+
+<style>
+  /* ===============================================================
+     ✅ CSS 변수 정의 (Light & Dark Mode)
+  =============================================================== */
+  :root {
+    --main-bg: #f3f4f6;
+    --card-bg: #ffffff;
+    --text-color-primary: #111827;
+    --text-color-secondary: #6b7280;
+    --border-color-default: #d1d5db;
+    --input-bg: #ffffff;
+    --progress-bar-bg: #e5e7eb;
+    
+    /* Log Box (always dark background, but text colors adapt) */
+    --log-box-bg: #111; 
+    --log-text-default: #e0e0e0;
+    --log-text-info: #9ca3af;
+    --log-text-progress: #60a5fa;
+    --log-text-warning: #f59e0b;
+    --log-text-error: #ef4444;
+    --log-text-complete: #22c55e;
+  }
+
+  body.dark-mode {
+    --main-bg: #1f2937;
+    --card-bg: #374151;
+    --text-color-primary: #f9fafb;
+    --text-color-secondary: #9ca3af; 
+    --border-color-default: #4b5563; 
+    --input-bg: #4b5563;
+    --progress-bar-bg: #4b5563;
+
+    /* Log Box text colors for Dark Mode (better contrast) */
+    --log-text-warning: #fbbf24; /* Brighter orange/yellow */
+    --log-text-error: #f87171; /* Brighter red */
+  }
+
+  /* ===============================================================
+     ✅ 일반 UI 스타일 (CSS 변수 적용)
+  =============================================================== */
+
+  h2{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;color:var(--text-color-primary);}
+  .card-box,.dashboard-cards,.log-wrapper{
+      background:var(--card-bg);
+      border-radius:12px;
+      padding:18px;
+      box-shadow:0 2px 6px rgba(0,0,0,.15); /* Keep shadow for contrast */
+      margin-top:14px;
+      transition: background 0.3s;
+  }
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-size:.9rem;font-weight:600;color:#fff;min-width:110px;text-align:center;}
+  .btn-start{background:#2563eb;}
+  .btn-cancel{background:#dc2626;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .controls{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;}
+  
+  input[type=number], select{
+      width:90px;
+      padding:.45rem .6rem;
+      border:1px solid var(--border-color-default);
+      border-radius:6px;
+      color:var(--text-color-primary);
+      background-color:var(--input-bg);
+      transition: background-color 0.3s, border-color 0.3s;
+  }
+  
+  .dashboard-cards{display:flex;flex-wrap:wrap;gap:14px;}
+  .card{
+      flex:1 1 300px;
+      background:var(--card-bg);
+      border-radius:12px;
+      padding:16px;
+      box-shadow:0 2px 6px rgba(0,0,0,.05);
+      display:flex;
+      flex-direction:column;
+      transition: background 0.3s;
+  }
+  .card-header{display:flex;align-items:center;gap:6px;font-size:.95rem;font-weight:600;margin-bottom:6px;}
+  .card-header i{color:#2563eb;}
+  .card-header .right{margin-left:auto;font-weight:600;font-size:.9rem;}
+  
+  .progress-bar{
+      width:100%;
+      background:var(--progress-bar-bg);
+      height:14px;
+      border-radius:7px;
+      margin-top:10px;
+      overflow:hidden;
+      transition: background-color 0.3s;
+  }
+  .progress-bar div{height:100%;width:0%;transition:width .3s;}
+  .bar-total div{background:#2563eb;}
+  .bar-krx div{background:#10b981;}
+  .bar-data div{background:#f59e0b;}
+  
+  /* 🚩 수정된 부분: 로그 헤더 디자인 통일성 강화 */
+  .log-wrapper h3{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:0;
+    font-size:1rem;
+    padding-bottom: 4px; /* 헤더 아래 공간 추가 */
+    border-bottom: 1px solid var(--border-color-default); /* 구분선 추가 */
+  }
+
+  /* 🚩 수정된 부분: 로그 복사 버튼 호버 디자인 통일성 강화 */
+  .copy-btn{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size:.9rem;
+    cursor:pointer;
+    user-select:none;
+    margin-left:10px;
+    color:#3b82f6; 
+    opacity: 0.9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+  .copy-btn:hover{
+    opacity:1;
+    background: var(--border-color-default); /* 카드 배경색과 통일성 있는 호버 효과 */
+    text-decoration:none;
+  }
+  
+  /* 🚩 수정된 부분: 로그 박스 높이 증가 및 테두리 모양(inset shadow) 추가 */
+  .log-box{
+      background:var(--log-box-bg); /* Always black/dark gray */
+      color:var(--log-text-default);
+      font-family:Consolas,mono;
+      font-size:13px;
+      padding:12px; /* 패딩을 약간 늘려 여유 공간 확보 */
+      border-radius:10px;
+      /* --- 높이 수정: 180px -> 240px --- */
+      height:240px; 
+      /* --- 멋진 테두리모양 추가 (내부 그림자) --- */
+      box-shadow:inset 0 2px 4px rgba(0,0,0,0.3); 
+      overflow-y:auto;
+      overflow-x:auto; 
+      margin-top:6px;
+      line-height:1.4;
+      transition: all 0.3s ease;
+  }
+  .log-box p { 
+    margin: 0; 
+    padding: 0; 
+    white-space: nowrap; 
+  }
+  /* 로그 색상 변수 적용 */
+  .log-default{color:var(--log-text-default);}
+  .log-info{color:var(--log-text-info);}
+  .log-progress{color:var(--log-text-progress);}
+  .log-warning{color:var(--log-text-warning);font-weight:600;} 
+  .log-error{color:var(--log-text-error);font-weight:600;}
+  .log-complete{color:var(--log-text-complete);font-weight:600;}
+
+  /* 힌트 및 연결 상태 */
+  #adminHint{font-size:12px;color:var(--text-color-secondary);margin-top:4px;}
+  #hintTimer{margin-left: 10px; color:var(--text-color-secondary);}
+  #connStatus{font-size:12px;margin-left:10px;color:var(--text-color-secondary);}
+
+  /* 모바일 해상도에 맞춘 반응형 레이아웃 */
+  @media (max-width: 640px) {
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .controls label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .controls input[type=number], .controls select {
+        width: 100px;
+    }
+    .btn {
+        width: 100%;
+        margin-top: 4px;
+    }
+    .dashboard-cards .card {
+        flex: 1 1 100%; 
+    }
+    /* 🚩 수정된 부분: 모바일 해상도에서도 높이 증가 (150px -> 200px) */
+    .log-box {
+        height: 200px; 
+    }
+  }
+</style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+		<div class="page-header">
+		  <div class="page-title">
+		    <h2 th:text="${pageTitle} ?: '📄 기본 페이지 제목'">📄 기본 페이지 제목</h2>
+		  </div>
+		  <div class="breadcrumb">
+		    <i class="fas fa-folder-open"></i>
+		    <span th:text="${breadcrumb} ?: '시스템 / 기본 경로'">시스템 / 기본 경로</span>
+		  </div>
+		</div>   
+
+    <div class="card-box">
+      <div class="controls">
+        <label>워커:
+          <input type="number" id="workers" value="16" min="1" max="16">
+        </label>
+        
+        <label>수집 기간 (년):
+          <select id="historyYears">
+            <option value="3" selected>3년</option>
+            <option value="4">4년</option>
+            <option value="5">5년</option>
+            <option value="6">6년</option>
+            <option value="7">7년</option>
+            <option value="8">8년</option>
+            <option value="9">9년</option>
+            <option value="10">10년</option>
+          </select>
+        </label>
+        
+        <label><input type="checkbox" id="force"> 강제 다운로드</label>
+        <button id="btnStart" class="btn btn-start">업데이트 시작</button>
+        <button id="btnCancel" class="btn btn-cancel" disabled>취소</button>
+        <span id="connStatus"></span>
+      </div>
+      <div id="adminHint" style="font-size:12px;color:#666;margin-top:4px;">
+        <span id="hintStatus">※ 관리자만 실행 가능</span>
+        <span id="hintTimer" style="margin-left: 10px; color:#999;"></span>
+      </div>
+    </div>
+
+    <div class="dashboard-cards">
+      <div class="card">
+        <div class="card-header"><i class="fas fa-layer-group"></i>전체 진행률
+          <span class="right" id="badgeTotal">-</span>
+        </div>
+        <strong id="pctTotal">0%</strong>
+        <div class="progress-bar bar-total"><div id="barTotal"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><i class="fas fa-database"></i>KRX 종목 목록
+          <span class="right" id="badgeKrx"></span>
+        </div>
+        <strong id="pctKrx">0%</strong>
+        <div class="progress-bar bar-krx"><div id="barKrx"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><i class="fas fa-chart-line"></i>개별 종목 데이터
+          <span class="right" id="badgeData"></span>
+        </div>
+        <strong id="pctData">0%</strong>
+        <div class="progress-bar bar-data"><div id="barData"></div></div>
+      </div>
+    </div>
+
+    <div class="log-wrapper">
+      <h3>
+        실시간 로그
+        <span class="copy-btn" id="copyLogBtn"><i class="fas fa-copy"></i> 로그 복사</span>
+      </h3>
+      <div id="logBox" class="log-box"><p class="log-info">로그 대기중...</p></div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="pageScript">
+<script>
+	(function(){
+	  const $btnStart=document.getElementById("btnStart"),
+	        $btnCancel=document.getElementById("btnCancel"),
+	        $barTotal=document.getElementById("barTotal"),
+	        $pctTotal=document.getElementById("pctTotal"),
+	        $barKrx=document.getElementById("barKrx"),
+	        $pctKrx=document.getElementById("pctKrx"),
+	        $barData=document.getElementById("barData"),
+	        $pctData=document.getElementById("pctData"),
+	        $badgeTotal=document.getElementById("badgeTotal"),
+	        $badgeKrx=document.getElementById("badgeKrx"),
+	        $badgeData=document.getElementById("badgeData"),
+	        $hint=document.getElementById("adminHint"),
+            $hintStatus=document.getElementById("hintStatus"), // 상태/진행률 영역 (깜빡임 방지용)
+            $hintTimer=document.getElementById("hintTimer"),   // 타이머 영역 (깜빡임 방지용)
+	        $log=document.getElementById("logBox"),
+	        $copy=document.getElementById("copyLogBtn"),
+	        $workers=document.getElementById("workers"),
+	        $force=document.getElementById("force"),
+            $historyYears=document.getElementById("historyYears"),
+	        $conn=document.getElementById("connStatus");
+	
+	  let isOwner=false, currentTaskId=null, es=null, startTime=null, timerInterval=null;
+	  let connected=false, reconnecting=false, currentUser=null, currentRunner=null, currentProgress=0;
+	
+	  // ===== 로그 관리 (성능 최적화 유지) =====
+	  const MAX_LOG_LINES=700, FLUSH_INTERVAL=200;
+	  let logLines=[], pendingLogs=[], flushTimer=null;
+
+	  function colorize(line){
+	    if(/(error|예외)/i.test(line)) return `<span class="log-error">${line}</span>`;
+	    if(/\[PROGRESS\]/i.test(line)) return `<span class="log-progress">${line}</span>`;
+	    if(/\b(LOG|INFO)\b/i.test(line)) return `<span class="log-info">${line}</span>`;
+	    if(/(완료|COMPLETED)/i.test(line)) return `<span class="log-complete">${line}</span>`;
+	    return line;
+	  }
+	
+	  function scheduleFlush(){
+	    if(flushTimer) return;
+	    flushTimer=setTimeout(()=>{
+	      flushTimer=null;
+	      if(pendingLogs.length===0) return;
+	      
+	      const fragment = document.createDocumentFragment();
+	      
+	      for(const line of pendingLogs){
+	          logLines.push(line); 
+	          
+	          const p = document.createElement('p');
+	          p.innerHTML = colorize(line); 
+	          fragment.appendChild(p);
+	      }
+	      
+	      const currentDomLines = $log.children.length;
+	      const newLinesCount = pendingLogs.length;
+          
+	      while(currentDomLines + newLinesCount > MAX_LOG_LINES && $log.firstChild) {
+	          $log.removeChild($log.firstChild);
+	      }
+          
+	      if(logLines.length > MAX_LOG_LINES) logLines=logLines.slice(-MAX_LOG_LINES);
+
+	      $log.appendChild(fragment); 
+
+	      pendingLogs.length=0; 
+	      
+	      $log.scrollTop=$log.scrollHeight;
+	    },FLUSH_INTERVAL);
+	  }
+	
+	  function appendLog(msg){
+	    if(!msg) return;
+	    if($log.textContent.includes("대기중")){
+	        $log.innerHTML=""; 
+	        logLines.length=0; 
+	        pendingLogs.length=0;
+	    }
+	    pendingLogs.push(msg);
+	    scheduleFlush();
+	  }
+	
+	  // ===== 타이머 (0초부터 힌트 옆에 표시 - 깜빡임 해결) =====
+	  function updateHintTimer(){
+	    if(startTime===null || !currentRunner) return;
+	    
+	    const sec=Math.floor((Date.now()-startTime)/1000);
+	    const m=Math.floor(sec/60), s=sec%60;
+	    const timeStr = `⏱ ${m>0?m+"분 ":""}${s}초 경과`;
+	    
+	    // *핵심 수정*: 힌트 타이머 엘리먼트만 텍스트를 업데이트하여 깜빡임 제거
+	    $hintTimer.textContent = timeStr; 
+	  }
+
+	  function startTimer(){
+	    startTime=Date.now();
+	    if(timerInterval) clearInterval(timerInterval);
+	    updateHintTimer(); // 즉시 0초 표시
+	    timerInterval=setInterval(updateHintTimer,1000);
+	  }
+	  
+	  function stopTimer(){
+	    if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+	  }
+	
+	  // ===== 퍼센트 =====
+	  function setBar(bar,pct,val){
+	    const v=Math.min(100,Math.max(0,Math.round(val||0)));
+	    bar.style.width=v+"%"; pct.textContent=v+"%";
+	  }
+	
+	  // ===== UI =====
+	  function resetUI(){
+	    isOwner=false; currentTaskId=null; currentRunner=null; currentProgress=0;
+	    setBar($barTotal,$pctTotal,0);
+	    setBar($barKrx,$pctKrx,0);
+	    setBar($barData,$pctData,0);
+	    $badgeTotal.textContent="-"; $badgeKrx.textContent=""; $badgeData.textContent="";
+	    $hintStatus.innerHTML="※ 관리자만 실행 가능"; 
+        $hintTimer.textContent=""; // 타이머 비우기
+	    $btnStart.disabled=false; $btnCancel.disabled=true;
+	    $log.innerHTML='<p class="log-info">로그 대기중...</p>';
+        logLines.length=0; pendingLogs.length=0;
+	    stopTimer(); startTime=null;
+	  }
+	
+	  // finalTime 인자 제거 (힌트 영역에 완료 시간 표시 안 함)
+	  function updateHint(runner, progress){ 
+	    currentRunner = runner;
+	    currentProgress = progress;
+        
+	    const runnerText = isOwner ? `⚙️ ${currentRunner}님 실행 중` : `🚫 ${currentRunner}님 실행 중`;
+	    const progressText = ` (${Math.round(progress||0)}%)`;
+
+        // 실행 중: "⚙️ admin님 실행 중 (45%)" 만 hintStatus에 설정
+        $hintStatus.innerHTML = `${runnerText}${progressText}`;
+        // hintTimer는 updateHintTimer()에서 실시간으로 업데이트되거나, COMPLETED 시 비워짐
+	  }
+	
+	  function applyOwnerUI(runner, progress){
+	    isOwner=true;
+	    updateHint(runner, progress);
+	    $btnStart.disabled=true; $btnCancel.disabled=false;
+	  }
+	
+	  function applyWatcherUI(runner, progress){
+	    isOwner=false;
+	    updateHint(runner, progress);
+	    $btnStart.disabled=true; $btnCancel.disabled=true;
+	  }
+	
+	  // ===== 상태 복원 (첫 번째 사용자만) =====
+	  async function restoreState(){
+	    try{
+	      const meRes = await fetch("/auth/validate",{credentials:"include"});
+	      if(meRes.ok){
+	        const me = await meRes.json();
+	        if(me && me.valid) currentUser = me.username || me.name || null;
+	      }
+	      const res = await fetch("/api/stock/batch/prod/active",{credentials:"include"});
+	      if(!res.ok) return;
+	      const a = await res.json();
+	      if(!a || !a.active) { resetUI(); return; }
+	
+	      const runner = a.runner || "알 수 없음";
+	      const prog = (typeof a.progress==="number") ? a.progress : 0;
+	      currentTaskId = a.taskId || null;
+	
+	      setBar($barTotal,$pctTotal,prog||0);
+	
+	      if(currentUser && runner && currentUser===runner){
+	        applyOwnerUI(runner, prog);
+	      }else{
+	        applyWatcherUI(runner, prog);
+	      }
+	    }catch(e){
+	      console.warn("상태 복원 실패", e);
+	    }
+	  }
+	
+	  // ===== SSE =====
+	  function connect(){
+	    if(es){try{es.close();}catch(_){}} es=null;
+	    es=new EventSource("/api/stock/batch/prod/sse",{withCredentials:true});
+	    connected=true; reconnecting=false; $conn.textContent="";
+	
+	    es.addEventListener("status",e=>{
+	      const d=JSON.parse(e.data||"{}");
+	      if(d.status==="IDLE"){resetUI();return;}
+	
+	      if(d.dataTotal>0){setBar($barData,$pctData,(d.dataSaved*100/d.dataTotal));$badgeData.textContent=`${d.dataSaved}/${d.dataTotal}`;}
+	      if(d.krxTotal>0){setBar($barKrx,$pctKrx,(d.krxSaved*100/d.krxTotal));$badgeKrx.textContent=`${d.krxSaved}/${d.krxTotal}`;}
+	      if(typeof d.progress==="number"){setBar($barTotal,$pctTotal,d.progress);}
+	
+	      if(d.runner){
+	        const owner = (typeof d.owner==="boolean") ? d.owner : (currentUser && d.runner && currentUser===d.runner);
+	        isOwner = owner;
+            currentRunner = d.runner;
+            currentProgress = d.progress||0;
+
+	        if(owner){ applyOwnerUI(d.runner, d.progress||0); }
+	        else     { applyWatcherUI(d.runner, d.progress||0); }
+	      }
+          
+          // 실행 중이면 타이머 업데이트 (SSE로 PROGRESS가 올 때마다 실행 상태를 최신화)
+          if (d.status === "RUNNING" && startTime) {
+              updateHintTimer();
+          }
+
+	      if(Array.isArray(d.logs)) d.logs.forEach(l=>appendLog(l));
+	
+	      if(d.status==="START"){ startTimer(); }
+	      
+	      if(d.status==="COMPLETED"){
+	        setBar($barTotal,$pctTotal,100);
+	        $badgeTotal.textContent="✅ 완료";
+	        
+            // 최종 시간 계산 및 타이머 중지
+            let timeStr = "알 수 없는 시간";
+            if(startTime !== null){ 
+                const finalSeconds = Math.floor((Date.now()-startTime)/1000);
+                const m = Math.floor(finalSeconds/60), s = finalSeconds%60;
+                timeStr = `${m>0?m+"분 ":""}${s}초`; 
+            }
+	        stopTimer(); 
+            
+            // 힌트 영역에 완료 상태만 최종 표시 (시간은 표시 안함)
+            updateHint(currentRunner || 'admin', 100); 
+            $hintTimer.textContent = "";
+
+            // 로그 창에 최종 소요 시간 출력 (요청 사항 반영)
+            appendLog(`[COMPLETED] 전체 작업이 성공적으로 완료되었습니다. (총 소요 시간: ${timeStr})`);
+	        
+	        $btnStart.disabled=false; $btnCancel.disabled=true;
+	      }
+	      
+	      if(d.status==="CANCELLED"||d.status==="FAILED"){
+	        stopTimer();
+	        resetUI();
+	      }
+	    });
+	
+	    es.addEventListener("ping",()=>{connected=true;});
+	
+	    es.onerror=()=>{
+	      if(!reconnecting){reconnecting=true;$conn.textContent="⚠️ SSE 재연결 중...";}
+	      connected=false;
+	      try{es.close();}catch(_){}
+	      es=null;
+	      setTimeout(()=>{
+	        connect();
+	        $conn.textContent="✅ 연결 복원됨";
+	        setTimeout(()=>{$conn.textContent="";},1500);
+	      },2000);
+	    };
+	
+	    window.addEventListener("beforeunload",()=>{if(es){try{es.close();}catch(_){}}});
+	  }
+	
+	  // ===== 버튼 =====
+	  $btnStart.onclick=async()=>{
+	    resetUI(); setBar($barTotal,$pctTotal,0);
+	    $btnStart.disabled=true; $btnCancel.disabled=true;
+	    
+	    // workers, historyYears, force 값을 가져와 URL 생성
+        const workers = $workers.value || 16;
+        const historyYears = $historyYears.value || 3;
+        const force = $force.checked ? "&force=true" : "";
+        
+	    const url=`/api/stock/batch/prod/update?workers=${workers}&historyYears=${historyYears}${force}`;
+	    
+	    const res=await fetch(url,{method:"POST",credentials:"include"});
+	    if(res.ok){
+	      const d=await res.json().catch(()=>({}));
+	      currentTaskId=d.taskId||null;
+	    } else {
+	      const err = await res.json().catch(()=>({error: `서버 오류 (${res.status})`}));
+	      if (err.error) {
+              appendLog(`⚠️ 실행 실패: ${err.error}`);
+          } else {
+              appendLog("⚠️ 다른 사용자 작업 중");
+          }
+	    }
+	  };
+	
+	  $btnCancel.onclick=async()=>{
+	    if(!isOwner||!currentTaskId) return;
+	    await fetch(`/api/stock/batch/prod/cancel/${currentTaskId}`,{method:"POST",credentials:"include"});
+	  };
+	
+	  $copy.onclick=()=>{
+	    // logLines은 복사 가능한 Raw Text만 포함
+	    const t=logLines.join("\n");
+        const textArea = document.createElement("textarea");
+        textArea.value = t;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            // 복사 성공 시 아이콘 변경 (우아한 스타일 유지)
+            $copy.innerHTML=`<i class="fas fa-check"></i> 복사 완료`;
+            $copy.style.color = '#22c55e';
+            $copy.style.background = '#dcfce7';
+            setTimeout(()=>{
+                $copy.innerHTML=`<i class="fas fa-copy"></i> 로그 복사`;
+                $copy.style.color = '#3b82f6';
+                $copy.style.background = 'transparent';
+            },1500);
+        } catch (err) {
+            console.error('복사 실패:', err);
+        }
+        document.body.removeChild(textArea);
+	  };
+	
+	  // 실행 순서: 1) 상태 복원 → 2) SSE 연결
+	  (async function init(){
+	    await restoreState();
+	    connect();
+	  })();
+	})();
+</script>
+</th:block>
+
+</body>
+</html>

@@ -1,34 +1,112 @@
 /* ===============================================================
-   ✅ commonLayout.css (v1.0 - 2025.11 경량 안정판)
+   ✅ commonLayout.css (v1.2 - 2025.11 VH 고정 최종판)
    ---------------------------------------------------------------
    - 페이지 기본 / 헤더 / 검색바 / 리스트 정보줄 / 버튼 / 폼 공통
    - Pretendard + Noto Sans KR 폰트 지정
-   - ✅ breadcrumb 2단계 고정, 3단계부터 줄바꿈
-   - ✅ 리스트 상단 좌/우 고정 반응형 완전 대응
-   - ⚙️ 모달 관련 스타일은 commonModal.css 로 분리됨
+   
+   ✅ 스크롤 바운스(Bounce) 완화 수정 적용됨
+   ✅ overscroll-behavior-y: none 속성 유지 (튕김 현상 해결)
+   ✅ touch-action: manipulation 속성 유지 (더블 클릭 확대 방지)
+   ✅ 🚩 VH 안정화 최종: html/body의 height를 var(--vh)로 강력하게 고정 (울렁거림 최종 FIX)
+   ✅ 🚩 스크롤 버퍼 강화: 상/하단 padding 대폭 증가
 ================================================================ */
 
+/* ===============================================================
+   🚨 모바일 폼/터치 FIX (자동 확대/더블탭 확대 방지) - 2025.11 통합
+================================================================ */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+textarea,
+select {
+  /* 최소 16px을 적용하여 모바일 입력창 클릭 시 자동 확대 방지 */
+  font-size: 16px !important; 
+}
+
+body {
+    /* 더블 탭 확대/축소 비활성화 (전역 레이아웃/터치 Fix) */
+    touch-action: manipulation;
+}
+
+/* ===============================================================
+   🌙 다크모드 대응 전역 변수 추가 (2025.11 통합)
+================================================================ */
+:root {
+  --layout-bg: #f9fafb;
+  --layout-text: #111827;
+  --layout-border: #e5e7eb;
+  --layout-header: #111827;
+  --layout-muted: #6b7280;
+  --layout-accent: #2563eb;
+  --layout-btn-bg: #2563eb;
+  --layout-btn-hover: #1d4ed8;
+  --layout-btn-text: #fff;
+  --layout-btn-gray: #6b7280;
+  --layout-btn-red: #dc2626;
+  --layout-btn-green: #16a34a;
+}
+
+body.dark-mode {
+  --layout-bg: #111827;
+  --layout-text: #f3f4f6;
+  --layout-border: #374151;
+  --layout-header: #f9fafb;
+  --layout-muted: #9ca3af;
+  --layout-accent: #3b82f6;
+  --layout-btn-bg: #3b82f6;
+  --layout-btn-hover: #2563eb;
+  --layout-btn-text: #f9fafb;
+  --layout-btn-gray: #4b5563;
+  --layout-btn-red: #ef4444;
+  --layout-btn-green: #10b981;
+  background: var(--layout-bg);
+  color: var(--layout-text);
+}
+
 /* 🔤 전역 */
+/* ✅ 추가: box-sizing 설정을 HTML에 상속 */
+html {
+  box-sizing: border-box;
+}
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
 html, body {
   font-family: "Pretendard","Noto Sans KR","Apple SD Gothic Neo",
     "Malgun Gothic","맑은 고딕","돋움",sans-serif;
   font-size: 14px;
-  color: #111827;
+  color: var(--layout-text);
   line-height: 1.5;
-  background: #f9fafb;
+  background: var(--layout-bg);
   -webkit-font-smoothing: antialiased;
   margin: 0;
+
+  /* 🚩 최종 FIX: height: 100% 제거하고 calc(var(--vh) * 100)로 height/min-height 모두 강제 고정 */
+  height: calc(var(--vh) * 100); 
+  min-height: calc(var(--vh) * 100); 
+  
+  /* 스크롤 바운스 완화 2: overscroll-behavior 속성으로 네이티브 튕김 방지 */
+  overscroll-behavior-y: none; 
+  
+  /* ✅ 더블 클릭 확대 방지 보조: 모바일에서 300ms 지연 제거 및 줌 동작 제어 */
+  /* touch-action: manipulation; -> body 선택자로 commonLayout.css 상단에 이동됨 */
 }
 
 /* ===============================================================
    ✅ 기본 레이아웃
 ================================================================ */
 .content-container {
-  padding: 20px 25px;
-  background: #f9fafb;
-  min-height: calc(100vh - 100px);
+  /* 🚩 ADJUST: 상단 패딩을 줄여 헤더와의 간격을 좁힘 (40px -> 20px) */
+  padding: 20px 25px 80px 25px;
+  background: var(--layout-bg);
+  /* 🚩 FIX: calc(100vh - 100px) -> 고정된 --vh 변수로 대체 */
+  /* 헤더가 sticky로 변경되어 문서 흐름에 포함되므로, 높이 계산 시 margin-top은 제거 */
+  min-height: calc(var(--vh) * 100 - 50px); /* 50px (푸터 높이 가정)만 제외 */
   box-sizing: border-box;
-  margin-top: 50px;
+  /* margin-top: 50px; <- sticky로 변경하여 제거함 */
 }
 .main-inner {
   max-width: 1600px;
@@ -46,7 +124,7 @@ html, body {
   align-items: center;
   flex-wrap: nowrap;
   margin-bottom: 10px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--layout-border);
   padding-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -57,7 +135,7 @@ html, body {
 .page-header .page-title h2 {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--layout-header);
   margin: 0;
   display: flex;
   align-items: center;
@@ -70,7 +148,7 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #6b7280;
+  color: var(--layout-muted);
   font-size: 12.5px;       /* ✅ 더 작게 */
   line-height: 1.4;
   text-align: right;
@@ -82,7 +160,7 @@ html, body {
 }
 .page-header .breadcrumb i {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--layout-border);
 }
 /* ✅ 3단계 이상부터 줄바꿈 허용 */
 .page-header .breadcrumb.multiline {
@@ -116,14 +194,16 @@ html, body {
 }
 .search-group input[type="text"] {
   padding: 7px 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--layout-border);
   border-radius: 5px;
   outline: none;
   width: 180px;
   font-size: 14px;
+  background: var(--layout-bg);
+  color: var(--layout-text);
 }
 .search-group input[type="text"]:focus {
-  border-color: #2563eb;
+  border-color: var(--layout-accent);
   box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
 }
 
@@ -136,18 +216,18 @@ html, body {
   justify-content: center;
   gap: 5px;
   padding: 6px 12px;
-  background: #2563eb;
+  background: var(--layout-btn-bg);
   border: none;
-  color: white;
+  color: var(--layout-btn-text);
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
   transition: 0.15s;
 }
-.btn:hover { background: #1d4ed8; }
-.btn.gray { background: #6b7280; }
-.btn.red { background: #dc2626; }
-.btn.excel { background: #16a34a; }
+.btn:hover { background: var(--layout-btn-hover); }
+.btn.gray { background: var(--layout-btn-gray); }
+.btn.red { background: var(--layout-btn-red); }
+.btn.excel { background: var(--layout-btn-green); }
 .btn.gray:hover { background: #4b5563; }
 .btn.red:hover { background: #b91c1c; }
 .btn.excel:hover { background: #15803d; }
@@ -163,7 +243,7 @@ html, body {
   gap: 6px;
   margin-bottom: 10px;
   font-size: 14px;
-  color: #374151;
+  color: var(--layout-text);
   width: 100%;
 }
 .list-info span#totalCount {
@@ -189,26 +269,28 @@ html, body {
 }
 .form-group label {
   font-weight: 600;
-  color: #374151;
+  color: var(--layout-text);
   font-size: 13px;
 }
 .form-group input,
 .form-group select,
 .form-group textarea {
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--layout-border);
   border-radius: 6px;
   padding: 6px 8px;
   font-size: 14px;
+  background: var(--layout-bg);
+  color: var(--layout-text);
   outline: none;
 }
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #2563eb;
+  border-color: var(--layout-accent);
   box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
 }
 .input-error {
-  border-color: #dc2626 !important;
+  border-color: var(--layout-btn-red) !important;
   background: #fef2f2;
 }
 .option-group {
@@ -235,7 +317,8 @@ html, body {
 
 @media (max-width: 480px) {
   html, body { font-size: 13px; }
-  .content-container { padding: 10px 14px; }
+  /* 🚩 ADJUST: 상단 패딩 30px -> 10px로 감소 (모바일) */
+  .content-container { padding: 10px 14px 80px 14px; } 
   .page-header { margin-bottom: 6px; }
   .page-header .page-title h2 { font-size: 14px; }
   .page-header .breadcrumb { font-size: 11px; }
@@ -246,20 +329,24 @@ html, body {
 }
 
 @media (max-width: 768px) {
-  .content-container { padding: 15px 18px; }
+  html, body { font-size: 13px; }
+  /* 🚩 ADJUST: 상단 패딩 35px -> 15px로 감소 (태블릿 세로) */
+  .content-container { padding: 15px 18px 80px 18px; }
   .page-header .page-title h2 { font-size: 15px; }
   .list-info { flex-direction: row; justify-content: space-between; }
   .btn { font-size: 13px; padding: 6px 11px; }
 }
 
 @media (max-width: 1024px) {
-  .content-container { padding: 18px 20px; }
+  /* 🚩 ADJUST: 상단 패딩 38px -> 18px로 감소 (태블릿 가로) */
+  .content-container { padding: 18px 20px 80px 20px; }
   .page-header .page-title h2 { font-size: 16px; }
   .page-header .breadcrumb { font-size: 12px; }
 }
 
 @media (min-width: 1025px) {
-  .content-container { padding: 20px 25px; }
+  /* 🚩 ADJUST: 상단 패딩 40px -> 20px로 감소 (데스크탑) */
+  .content-container { padding: 20px 25px 80px 25px; }
   .page-header .page-title h2 { font-size: 17px; }
   .page-header .breadcrumb { font-size: 12.5px; }
 }

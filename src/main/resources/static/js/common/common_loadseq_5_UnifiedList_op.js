@@ -1,5 +1,5 @@
 /* ===============================================================
-   ✅ commonUnifiedList_op.js (v1.0)
+   ✅ common_loadseq_5_UnifiedList_op.js (v1.0)
    ---------------------------------------------------------------
    - 모든 HTML 입력태그 자동 매핑 (input, select, textarea 등)
    - 팝업 닫기/저장/수정/엑셀/삭제 후에도 클릭 정상 ✅
@@ -50,14 +50,12 @@ class UnifiedList {
   }
 
   /* ----------------------------------------------------------
-     📥 리스트 조회
-  ---------------------------------------------------------- */
-  /* ----------------------------------------------------------
-     📥 리스트 조회 (v1.9 수정판)
+     📥 리스트 조회 (v1.1 수정판)
      ----------------------------------------------------------
      - ✅ mode: "client" 일 경우 최초 1회만 서버 요청 (캐시 후 로컬 페이징)
      - ✅ mode: "server" 일 경우 매 페이지마다 서버 요청
-     - ✅ overlay 중복 방지 및 pointer-events 해제 포함
+     - ✅ 로딩 오버레이를 항상 '테이블 기준 중앙'에 표시 (모바일·웹 동일)
+     - ✅ overlay 중복 방지 및 pointer-events 완전 제거
   ---------------------------------------------------------- */
   async loadList(page = 0, _env = "web", search = "") {
     // 🔹 검색어 유지 로직
@@ -76,19 +74,24 @@ class UnifiedList {
       return;
     }
 
-    // ✅ 로딩 오버레이 생성 (없을 때만)
-    let overlay = document.querySelector(".global-loading-overlay");
-    if (!overlay) {
+    // ✅ 테이블 기준 로딩 오버레이 표시
+    const tableContainer = tbody.closest(".table-container");
+    let overlay = tableContainer?.querySelector(".table-loading-overlay");
+
+    if (!overlay && tableContainer) {
       overlay = document.createElement("div");
-      overlay.className = "global-loading-overlay";
+      overlay.className = "table-loading-overlay";
       overlay.innerHTML = `
-        <div class="global-spinner-wrap">
+        <div class="table-spinner-wrap">
           <div class="spinner"></div>
         </div>`;
-      document.body.appendChild(overlay);
+      tableContainer.appendChild(overlay);
     }
-    overlay.style.display = "flex";
-    overlay.style.pointerEvents = "auto";
+
+    if (overlay) {
+      overlay.style.display = "flex";
+      overlay.style.pointerEvents = "auto";
+    }
 
     const startTime = Date.now();
 
@@ -127,11 +130,14 @@ class UnifiedList {
       const elapsed = Date.now() - startTime;
       const delay = Math.max(0, 100 - elapsed);
       setTimeout(() => {
-        overlay.style.display = "none";
-        overlay.style.pointerEvents = "none";
+        if (overlay) {
+          overlay.style.display = "none";
+          overlay.style.pointerEvents = "none";
+        }
       }, delay);
     }
   }
+
 
 
   _renderClientData() {

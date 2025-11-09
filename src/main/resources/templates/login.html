@@ -6,7 +6,6 @@
 <title>MyBaseLink 로그인</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<!-- Favicon -->
 <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
 <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
 <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
@@ -25,6 +24,7 @@
 <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
 <meta name="theme-color" content="#ffffff">
 <style>
+/* 폰트 관련은 그대로 유지 */
 body {
   margin: 0;
   min-height: 100vh;
@@ -37,11 +37,26 @@ body {
   color: #fff;
 }
 
+/* 추가: 로딩 오버레이 스타일 - 배경 클릭 방지 */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* 배경을 약간 어둡게 처리 */
+  z-index: 100; /* 모든 UI 위에 위치 */
+  display: none; /* 초기에는 숨김 */
+  cursor: wait; /* 커서를 로딩 모양으로 변경 */
+  pointer-events: auto; /* 클릭 이벤트를 막음 */
+}
+
+
 .login-container {
   width: 100%;
-  max-width: 340px;
+  max-width: 340px; 
   margin: 0 5vw;
-  padding: 2rem 1.5rem;
+  padding: 2rem 1.5rem; 
   background: rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.25);
@@ -52,16 +67,26 @@ body {
   box-sizing: border-box;
   border: 1px solid rgba(255,255,255,0.2);
   position: relative;
-  z-index: 2;
+  z-index: 2; /* 오버레이보다 낮게 설정하여 로그인 컨테이너는 보이게 함 */
 }
 
+/* ========================================= */
+/* .chart-container 스타일 (이하 그대로 유지) */
+/* ========================================= */
 .chart-container {
-  width: 90%;
-  max-width: 300px;
+  width: 100%; 
+  max-width: 340px; 
   height: 150px;
   margin: 0 auto 1.5px auto;
+  padding: 0 1.5rem; 
+  box-sizing: border-box; 
   position: relative;
   z-index: 1;
+}
+
+.chart-container canvas {
+  width: 100%; 
+  height: 100%;
 }
 
 #toggleRepeatIcon {
@@ -125,12 +150,46 @@ button {
   font-size: 0.95rem;
   margin-top: 0.5rem;
   box-sizing: border-box;
+  opacity: 1;
+  pointer-events: auto;
 }
 
-button:hover {
+button:hover:not(:disabled) { 
   background: linear-gradient(90deg,#4b5563,#374151);
   transform: translateY(-2px);
 }
+
+/* ========================================= */
+/* 로딩 스피너 및 버튼 스타일 (이하 그대로 유지) */
+/* ========================================= */
+button.loading-btn {
+  background: #4b5563; 
+  cursor: not-allowed;
+  transform: none; 
+  opacity: 0.85;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  vertical-align: middle;
+  margin-right: 8px; 
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.button-text {
+  vertical-align: middle;
+}
+
+/* ========================================= */
 
 .login-footer {
   margin-top: 1rem;
@@ -152,18 +211,26 @@ button:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ========================================= */
+/* 미디어 쿼리 (이하 그대로 유지) */
+/* ========================================= */
 @media (max-width:400px){
   .login-container{padding:1.8rem 1.2rem;margin:0 6vw;}
   .input-group input, button{padding-left:14px;padding-right:40px;}
-  .chart-container{max-width:260px;}
+  .chart-container{
+    max-width: 100%; 
+    padding: 0 1.2rem; 
+  } 
 }
 </style>
 </head>
 
 <body>
 
+<div id="loadingOverlay"></div>
+
 <div class="chart-container">
-  <canvas id="candleChart" width="300" height="150"></canvas>
+  <canvas id="candleChart" height="150"></canvas>
   <i id="toggleRepeatIcon" class="fas fa-pause-circle" title="반복 시작/정지"></i>
 </div>
 
@@ -180,7 +247,9 @@ button:hover {
     <i class="fas fa-lock"></i>
   </div>
 
-  <button id="loginBtn">로그인</button>
+  <button id="loginBtn">
+    <span class="button-text">로그인</span>
+  </button>
 
   <div class="login-footer">
     <p>계정이 없나요? <a href="#">회원가입</a></p>
@@ -188,177 +257,255 @@ button:hover {
 </div>
 
 <script>
-// ==================== 플래그 & 아이콘 ====================
+// ==================== 플래그 & 아이콘 (그대로 유지) ====================
 let repeatChart = true;
 let animationId = null;
 let chartOpacity = 0.7;
-let holdTime = 0;
+let holdTime=0;
 const icon = document.getElementById("toggleRepeatIcon");
 
-function updateIcon() {
-    if (repeatChart) {
-        icon.className = "fas fa-pause-circle";
-        icon.style.color = "rgba(255,255,255,0.9)";
-        icon.title = "반복 중 (클릭 시 중지)";
-    } else {
-        icon.className = "fas fa-play-circle";
-        icon.style.color = "rgba(255,255,255,0.6)";
-        icon.title = "반복 중지 (클릭 시 시작)";
-    }
+function updateIcon(){
+  if(repeatChart){
+    icon.className="fas fa-pause-circle";
+    icon.style.color="rgba(255,255,255,0.9)";
+    icon.title="반복 중 (클릭 시 중지)";
+  } else {
+    icon.className="fas fa-play-circle";
+    icon.style.color="rgba(255,255,255,0.6)";
+    icon.title="반복 중지 (클릭 시 시작)";
+  }
 }
 updateIcon();
-icon.addEventListener("click", () => {
-    repeatChart = !repeatChart;
-    updateIcon();
-    if (repeatChart && animationId === null) {
-        fadeOpacity = chartOpacity;
-        drawCandles();
-    } else if (!repeatChart && animationId !== null) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-    }
+icon.addEventListener("click", ()=>{
+  repeatChart=!repeatChart;
+  updateIcon();
+  if(repeatChart && animationId===null){
+    fadeOpacity=chartOpacity;
+    drawCandles();
+  } else if(!repeatChart && animationId!==null){
+    cancelAnimationFrame(animationId);
+    animationId=null;
+  }
 });
 
-// ==================== 로그인 ====================
-// ==================== 로그인 ====================
-document.getElementById("loginBtn").addEventListener("click", async () => {
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-    
-    if (!username || !password) {
-        alert("아이디와 비밀번호를 입력하세요.");
-        return;
-    }
+// ==================== 로그인 (수정된 로직) ====================
+const loginBtn = document.getElementById("loginBtn");
+const buttonText = loginBtn.querySelector(".button-text");
+const loadingOverlay = document.getElementById("loadingOverlay"); // 오버레이 요소
 
-    try {
-        console.log("📡 로그인 요청 전송...");
-
-        const res = await fetch("/auth/login", {  // ✅ 핵심 수정!
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include", // ✅ HttpOnly 쿠키 전송
-            body: JSON.stringify({ username, password })
-        });
-
-        console.log("응답 상태:", res.status);
-        console.log("응답 헤더:", [...res.headers.entries()]);
-
-        if (!res.ok) {
-            let errText = "로그인 실패";
-            try {
-                const data = await res.json();
-                if (data.error) errText = data.error;
-            } catch {}
-            alert(errText);
-            return;
-        }
-
-        console.log("✅ 로그인 성공! 페이지 이동합니다.");
-        location.href = "/pages/main/base";
-        
-    } catch (err) {
-        console.error("❌ 서버 요청 실패:", err);
-        alert("서버 연결 실패");
-    }
-});
-
-
-// ==================== 봉차트 ====================
-const candleCount = 13;
-let candles = [], index = 0, fadeOpacity = chartOpacity;
-const canvas = document.getElementById("candleChart");
-const ctx = canvas.getContext("2d");
-const width = 15;
-
-function resetCandles() {
-    candles = [];
-    index = 0;
-    fadeOpacity = chartOpacity;
-    holdTime = 0;
-    const minH = 20;
-    for (let i = 0; i < candleCount - 1; i++) {
-        let base = minH + i * 5;
-        let noise = Math.floor(Math.random() * 10) - 5;
-        let height = base + noise;
-        const color = (i % 2 === 0)
-            ? `rgba(59,130,246,${0.5+Math.random()*0.2})`
-            : `rgba(239,68,68,${0.5+Math.random()*0.2})`;
-        candles.push({ targetHeight: height, currentHeight: 0, color });
-    }
-    const lastHeight = Math.floor(candles[candleCount - 2].targetHeight * 1.3);
-    candles.push({ targetHeight: lastHeight, currentHeight: 0, color: `rgba(239,68,68,0.9)` });
+/** 로딩 스피너를 표시하고 버튼을 비활성화하며, 오버레이를 고 배경 클릭을 막습니다. */
+function showLoading() {
+  loginBtn.classList.add("loading-btn");
+  loginBtn.disabled = true;
+  buttonText.innerHTML = '<div class="spinner"></div> 로딩 중...';
+  loadingOverlay.style.display = 'block'; // 오버레이 표시
 }
 
-function drawCandles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const spacing = (canvas.width - candleCount * width) / (candleCount - 1);
+/** 버튼을 초기 상태로 되돌리고 활성화하며, 오버레이를 끕니다. */
+function hideLoading() {
+  loginBtn.classList.remove("loading-btn");
+  loginBtn.disabled = false;
+  buttonText.innerHTML = '로그인';
+  loginBtn.style.background = ''; // CSS 그라디언트로 복귀
+  loadingOverlay.style.display = 'none'; // 오버레이 숨김
+}
 
-    for (let i = 0; i <= index; i++) {
-        const c = candles[i];
-        const speed = (i === candleCount - 1) ? 6 : 3 + Math.random() * 2;
-        if (c.currentHeight < c.targetHeight) c.currentHeight += speed;
-        if (c.currentHeight > c.targetHeight) c.currentHeight = c.targetHeight;
-        const x = i * (width + spacing);
-        const y = canvas.height - c.currentHeight;
-        ctx.fillStyle = c.color;
-        ctx.fillRect(x, y, width, c.currentHeight);
+
+loginBtn.addEventListener("click", async ()=>{
+  const username=document.getElementById("username").value.trim();
+  const password=document.getElementById("password").value.trim();
+  
+  if(!username||!password){
+    alert("아이디와 비밀번호를 입력하세요."); 
+    return;
+  }
+
+  showLoading(); // 로딩 스피너 표시 및 오버레이 활성화
+
+  try{
+    const res=await fetch("/auth/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username,password})
+    });
+
+    if(res.ok){
+      // 로그인 성공 처리
+      const data=await res.json();
+      localStorage.setItem("token",data.token);
+      localStorage.setItem("username",data.username);
+      localStorage.setItem("sessionMillis",data.sessionMillis);
+      localStorage.setItem("serverTime",data.serverTime);
+      
+      // 로딩 버튼에 성공 UI 표시 (오버레이는 유지)
+      loginBtn.classList.remove("loading-btn");
+      loginBtn.disabled = true; // 성공 메시지를 보여주는 동안 클릭 방지
+      loginBtn.style.background = '#10b981'; // 초록색 배경
+      buttonText.innerHTML = '<i class="fas fa-check-circle"></i> 로그인 성공!';
+      
+      // 1초(1000ms) 후 페이지 이동 및 오버레이 제거
+      setTimeout(() => {
+        // 오버레이 제거는 페이지 이동 직전에만 필요하지만, 안전을 위해 호출합니다.
+        loadingOverlay.style.display = 'none'; 
+        location.href="/pages/main/base";
+      }, 1000); // 1초 대기
+
+    } else { 
+      // 로그인 실패 처리
+      // 실패 시 에러 메시지 표시
+      loginBtn.classList.remove("loading-btn");
+      loginBtn.disabled = true; 
+      loginBtn.style.background = '#ef4444'; // 빨간색 배경
+      buttonText.innerHTML = '<i class="fas fa-times-circle"></i> 로그인 실패 ❌';
+      
+      // 1.5초 후 버튼 초기화 및 오버레이 제거
+      setTimeout(() => {
+        hideLoading(); 
+      }, 1500); 
     }
+  }catch(err){
+    // 서버 오류 처리
+    console.error(err); 
+    
+    loginBtn.classList.remove("loading-btn");
+    loginBtn.disabled = true; 
+    loginBtn.style.background = '#ef4444'; 
+    buttonText.innerHTML = '<i class="fas fa-times-circle"></i> 서버 오류 ❌';
+    
+    // 1.5초 후 버튼 초기화 및 오버레이 제거
+    setTimeout(() => {
+      hideLoading(); 
+    }, 1500);
+  }
+});
 
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-    gradient.addColorStop(0, "rgba(248,113,113," + fadeOpacity + ")");
-    gradient.addColorStop(0.5, "rgba(59,130,246," + fadeOpacity + ")");
-    gradient.addColorStop(1, "rgba(248,113,113," + fadeOpacity + ")");
 
+// ==================== 봉차트 (이하 그대로 유지) ====================
+const candleCount=13;
+let candles=[],index=0,fadeOpacity=chartOpacity;
+const canvasContainer = document.querySelector('.chart-container');
+const canvas=document.getElementById("candleChart");
+const ctx=canvas.getContext("2d");
+const width = 15;
+
+/** 캔버스 크기를 컨테이너에 맞게 조절하고, 차트를 다시 그립니다. */
+function resizeCanvas() {
+    canvas.width = canvasContainer.clientWidth;
+    canvas.height = 150; 
+}
+
+// 초기 크기 설정 및 리사이즈 이벤트 리스너 추가
+resizeCanvas();
+window.addEventListener('resize', () => {
+    resizeCanvas();
+    resetCandles(); 
+    if(animationId === null) {
+      drawCandles(); 
+    }
+});
+
+
+function resetCandles(){
+  candles=[]; index=0; fadeOpacity=chartOpacity; holdTime=0;
+  const minH=20;
+  for(let i=0;i<candleCount-1;i++){
+    let base=minH+i*5;
+    let noise=Math.floor(Math.random()*10)-5;
+    let height=base+noise;
+    const color=(i%2===0)?`rgba(59,130,246,${0.5+Math.random()*0.2})`:`rgba(239,68,68,${0.5+Math.random()*0.2})`;
+    candles.push({targetHeight:height,currentHeight:0,color});
+  }
+  const lastHeight=Math.floor(candles[candleCount-2].targetHeight*1.3);
+  candles.push({targetHeight:lastHeight,currentHeight:0,color:`rgba(239,68,68,0.9)`});
+}
+
+function drawCandles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height); 
+  const spacing=(canvas.width-candleCount*width)/(candleCount-1); 
+
+  // 봉 그리기
+  for(let i=0;i<=index;i++){
+    const c=candles[i];
+    const speed=(i===candleCount-1)?6:3+Math.random()*2;
+    if(c.currentHeight<c.targetHeight)c.currentHeight+=speed;
+    if(c.currentHeight>c.targetHeight)c.currentHeight=c.targetHeight;
+    const x=i*(width+spacing);
+    const y=canvas.height-c.currentHeight;
+    ctx.fillStyle=c.color;
+    ctx.fillRect(x,y,width,c.currentHeight);
+  }
+
+  // 라인 그라디언트
+  const gradient=ctx.createLinearGradient(0,0,canvas.width,0); 
+  gradient.addColorStop(0,"rgba(248,113,113,"+fadeOpacity+")");
+  gradient.addColorStop(0.5,"rgba(59,130,246,"+fadeOpacity+")");
+  gradient.addColorStop(1,"rgba(248,113,113,"+fadeOpacity+")");
+
+  // 지그재그 라인
+  ctx.beginPath();
+  ctx.strokeStyle=gradient;
+  ctx.lineWidth=2;
+  for(let i=0;i<=index;i++){
+    const c=candles[i];
+    const x=i*(width+spacing)+width/2;
+    const y=canvas.height-c.currentHeight-10;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // 마지막 화살표 + 반짝임 전체
+  if(index>=candleCount-1){
+    const last=candles[candleCount-1];
+    const lx=canvas.width-width/2-1; 
+    const ly=canvas.height-last.currentHeight-10;
+    const arrowWidth=Math.min(22,canvas.width-lx-2); 
+    const arrowHeight=14;
+
+    const glowAlpha=0.5+0.5*Math.sin(Date.now()/100);
+    // 화살표
     ctx.beginPath();
-    ctx.strokeStyle = gradient;
-    ctx.lineWidth = 2;
-    for (let i = 0; i <= index; i++) {
-        const c = candles[i];
-        const x = i * (width + spacing) + width / 2;
-        const y = canvas.height - c.currentHeight - 10;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+    ctx.moveTo(lx, ly-arrowHeight/2);
+    ctx.lineTo(lx, ly+arrowHeight/2);
+    ctx.lineTo(lx+arrowWidth, ly);
+    ctx.closePath();
+    ctx.fillStyle=`rgba(248,113,113,${glowAlpha})`;
+    ctx.fill();
+
+    // 라인 끝점 반짝임
+    ctx.fillStyle=`rgba(255,255,255,${0.2+0.3*Math.sin(Date.now()/80)})`;
+    for(let i=0;i<5;i++){
+      const offsetX=Math.random()*2;
+      const offsetY=Math.random()*2-1;
+      ctx.beginPath();
+      ctx.arc(lx+arrowWidth, ly+offsetY,1.5,0,2*Math.PI);
+      ctx.fill();
     }
-    ctx.stroke();
+  }
 
-    if (index >= candleCount - 1) {
-        const last = candles[candleCount - 1];
-        const lx = canvas.width - width / 2 - 1;
-        const ly = canvas.height - last.currentHeight - 10;
-        const arrowWidth = Math.min(22, canvas.width - lx - 2);
-        const arrowHeight = 14;
+  if(index<candleCount-1 && candles[index].currentHeight>=candles[index].targetHeight) index++;
 
-        const glowAlpha = 0.5 + 0.5 * Math.sin(Date.now() / 100);
+  if(index>=candleCount-1){
+    if(holdTime<45){holdTime++;}
+    else{fadeOpacity-=0.02;if(fadeOpacity<0)fadeOpacity=0;}
+  }
 
-        ctx.beginPath();
-        ctx.moveTo(lx, ly - arrowHeight / 2);
-        ctx.lineTo(lx, ly + arrowHeight / 2);
-        ctx.lineTo(lx + arrowWidth, ly);
-        ctx.closePath();
-        ctx.fillStyle = `rgba(248,113,113,${glowAlpha})`;
-        ctx.fill();
+  if(fadeOpacity>0){
+    animationId=requestAnimationFrame(drawCandles);
+  } else {
+    animationId=null;
+    if(repeatChart){
+      setTimeout(()=>{
+        resetCandles();
+        drawCandles();
+      },2000);
     }
-
-    if (index < candleCount - 1 && candles[index].currentHeight >= candles[index].targetHeight) index++;
-
-    if (fadeOpacity > 0) animationId = requestAnimationFrame(drawCandles);
-    else {
-        animationId = null;
-        if (repeatChart) {
-            setTimeout(() => {
-                resetCandles();
-                drawCandles();
-            }, 2000);
-        }
-    }
+  }
 }
 
 resetCandles();
 drawCandles();
 </script>
-
 
 </body>
 </html>

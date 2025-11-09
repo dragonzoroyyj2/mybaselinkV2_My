@@ -1,0 +1,184 @@
+/* ===============================================================
+   ✅ commonTop.css (Top Bar & Profile Layer Styles)
+   ---------------------------------------------------------------
+   - top.html 프래그먼트 전용 스타일
+   - 다크모드 대응 변수 포함
+================================================================ */
+
+/* --- Top Bar Local Variables --- */
+:root {
+  --top-primary-bg: #f3f4f6;
+  --top-border-color: #d1d5db;
+  --top-text-color: #111827;
+  --top-unified-btn-bg: #e5e7eb;
+  --top-unified-btn-text: #1f2937;
+  --top-icon-color: #374151;
+  --top-alert-info-bg: rgba(37, 99, 235, 0.15);
+  --top-alert-info-text: #1e3a8a;
+  --top-alert-warning-text: #f59e0b;
+  --top-alert-danger-text: #dc2626;
+  --top-profile-bg: rgba(255,255,255,0.8);
+  --top-shadow-color: rgba(0, 0, 0, 0.1);
+  --top-glass-border: rgba(255,255,255,0.4);
+  --top-glass-shadow: rgba(31, 41, 55, 0.2);
+  --top-transition-speed: 0.25s;
+}
+
+/* 🌙 다크모드 변수 오버라이드 */
+body.dark-mode {
+  --top-primary-bg: #1f2937;
+  --top-border-color: #374151;
+  --top-text-color: #f9fafb;
+  --top-unified-btn-bg: #374151;
+  --top-unified-btn-text: #f3f4f6;
+  --top-icon-color: #f3f4f6;
+  --top-profile-bg: rgba(40, 45, 50, 0.85);
+  --top-shadow-color: rgba(0, 0, 0, 0.6);
+  --top-alert-info-bg: rgba(37, 99, 235, 0.25);
+  --top-alert-info-text: #93c5fd;
+  --top-alert-warning-text: #fbbf24;
+  --top-alert-danger-text: #f87171;
+}
+
+/* ===============================================================
+   ✅ 상단 바
+=============================================================== */
+.top-bar {
+  position: sticky; /* fixed -> sticky로 변경 */
+  top: 0; /* sticky 작동을 위해 top: 0 설정 */
+  left: 0;
+  width: 100%; height: 50px;
+  display: flex; align-items: center;
+  background: var(--top-primary-bg);
+  border-bottom: 1px solid var(--top-border-color);
+  color: var(--top-text-color);
+  z-index: 4000;
+  box-sizing: border-box;
+  padding: 0 1rem;
+  transition: background var(--top-transition-speed), color var(--top-transition-speed);
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.site-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.right-section {
+  position: absolute;
+  right: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ✅ 메뉴 토글 */
+#menuToggle {
+  background: none;
+  border: none;
+  color: var(--top-text-color);
+  font-size: 20px;
+  cursor: pointer;
+  width: 36px; height: 36px;
+  transition: transform 0.2s ease;
+}
+#menuToggle:hover { transform: scale(1.1); }
+
+/* ✅ 공통 버튼 */
+.unified-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; min-width: 36px; padding: 0 10px;
+  background: var(--top-unified-btn-bg); color: var(--top-unified-btn-text);
+  border-radius: 6px; font-size: 14px; border: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.unified-btn i { font-size: 16px; color: var(--top-icon-color); }
+
+/* ✅ 타이머 */
+#sessionRefreshContainer {
+  display: flex; align-items: center; gap: 6px;
+  font-family: "Roboto Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+#sessionTimer {
+  display: inline-block; min-width: 3.2em; text-align: center;
+  font-size: 13px; font-weight: 600;
+}
+
+/* ✅ 프로필 레이어 */
+.profile-layer {
+  /* top 위치 조정: 헤더가 fixed가 아니므로, 위치를 relative하게 조정 */
+  position: absolute; 
+  top: 50px; /* 헤더 높이(50px) 바로 아래로 조정 */
+  right: 1rem;
+  width: 260px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--top-glass-border);
+  background: var(--top-profile-bg);
+  box-shadow: 0 4px 20px var(--top-glass-shadow);
+  backdrop-filter: blur(10px);
+  display: none;
+  z-index: 5000;
+  color: var(--top-text-color);
+  animation: fadeIn 0.25s ease;
+}
+
+.profile-layer h3 { margin: 0 0 12px; font-size: 15px; font-weight: 700; }
+.profile-layer label { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; font-size: 13px; font-weight: 500; }
+.profile-layer input {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px;
+  font-size: 13px; background: rgba(255,255,255,0.9); color: #111827;
+}
+
+/* 🌙 다크모드 토글 */
+.darkmode-toggle {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 10px 0 14px 0; font-size: 13px; font-weight: 500;
+}
+.switch { position: relative; width: 42px; height: 22px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; inset: 0; cursor: pointer;
+  background-color: #cbd5e1; border-radius: 34px; transition: 0.3s;
+}
+.slider::before {
+  content: ""; position: absolute; height: 16px; width: 16px;
+  left: 3px; bottom: 3px; background: #fff; border-radius: 50%;
+  transition: 0.3s;
+}
+input:checked + .slider { background-color: #2563eb; }
+input:checked + .slider::before { transform: translateX(20px); }
+
+.profile-layer-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.profile-layer-btns button {
+  padding: 5px 10px; border-radius: 6px; border: none; font-size: 13px;
+  background: #2563eb; color: #fff; cursor: pointer; transition: background 0.2s;
+}
+.profile-layer-btns button:hover { background: #1d4ed8; }
+
+/* ✅ 알림 */
+.session-alert {
+  position: fixed; /* 알림은 스크롤과 무관하게 고정 유지 */
+  top: 60px; right: 1rem;
+  background: var(--top-alert-info-bg); color: var(--top-alert-info-text);
+  padding: 6px 10px; border-radius: 6px; font-size: 13px;
+  box-shadow: 0 2px 6px var(--top-shadow-color);
+  opacity: 0.9; backdrop-filter: blur(4px);
+  z-index: 6000; pointer-events: none;
+}
+
+@keyframes fadeIn { from {opacity:0;transform:translateY(-6px);} to {opacity:1;transform:translateY(0);} }
+
+@media (max-width:640px){
+  .right-section{right:0.5rem;gap:6px;}
+  .profile-layer{right:0.5rem;width:90%;padding:14px;}
+}

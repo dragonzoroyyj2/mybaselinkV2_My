@@ -1,0 +1,45 @@
+/* ===============================================
+   ✅ commonPagination.css (v1.0 - 2025.11 안정판)
+   ------------------------------------------------
+   - 페이징 버튼 정렬, 크기, 반응형
+=============================================== */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.8rem;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.pagination button {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.pagination button.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.pagination button:hover:not(.active) {
+  background: #f3f4f6;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .pagination { margin-top: 0.6rem; gap: 2px; }
+  .pagination button {
+    font-size: 0.7rem;
+    padding: 2px 5px;
+    min-width: 26px;
+  }
+}

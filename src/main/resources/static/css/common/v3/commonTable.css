@@ -1,0 +1,192 @@
+/* ===============================================================
+   ✅ commonTable.css (v1.3 - 2025.11 실전 완전 안정판)
+   ---------------------------------------------------------------
+   - 헤더 고정 (sticky)
+   - 세로 + 가로 스크롤 완벽 지원
+   - 체크박스 열 정렬 고정
+   - 모든 해상도에서 테이블 깨짐 없음
+   - ✅ 모바일(WebView) 좌우 스크롤 시 흰 여백/울컥 현상 완전 제거
+   - ✅ 웹에서는 반응형 스크롤 자동 생성 유지
+================================================================ */
+
+/* 🧾 테이블 컨테이너 */
+.table-container {
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: auto;
+  max-height: 75vh;
+
+  /* ✅ 모바일(WebView) 백그라운드 흔들림 방지 */
+  background-clip: padding-box;     /* 배경이 border-radius 안에서 고정 */
+  transform: translateZ(0);         /* GPU 고정층으로 렌더링 (흰 여백 제거) */
+  overscroll-behavior: contain;     /* 스크롤 이벤트 상위 전달 차단 (울컥 방지) */
+  -webkit-overflow-scrolling: touch;/* iOS 부드러운 스크롤 유지 */
+}
+
+/* ✅ 테이블 기본 */
+table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  background: white;
+  table-layout: auto;
+}
+
+/* ✅ 헤더 고정 */
+thead th {
+  position: sticky;
+  top: 0;
+  background: #e5e7eb; /* 기존 질감 그대로 */
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+/* ✅ 셀 스타일 */
+th, td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 8px;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+th {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 13px;
+}
+
+td {
+  font-size: 13px;
+  color: #111827;
+}
+
+/* ✅ 짝수행 음영 */
+tbody tr:nth-child(even) td {
+  background: #f9fafb;
+}
+
+/* ✅ 링크 */
+td a {
+  color: #2563eb;
+  text-decoration: none;
+  transition: 0.15s;
+}
+td a:hover { text-decoration: underline; }
+
+/* ✅ 데이터 없음 */
+.table-container td[colspan] {
+  color: #6b7280;
+  font-size: 13px;
+  padding: 30px 0;
+}
+
+/* ✅ 체크박스 */
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* ✅ 체크박스 열 폭 고정 */
+.table-container th:first-child,
+.table-container td:first-child {
+  width: 40px;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* ==========================================================
+   ✅ 로딩 오버레이 (테이블 기준)
+========================================================== */
+.table-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.8);
+  z-index: 10;
+  border-radius: 10px;
+  pointer-events: none; /* ✅ 클릭 차단 방지 */
+}
+
+.table-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.table-spinner-wrap .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #d1d5db;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* ==========================================================
+   ✅ 전역 로딩 스피너 (화면 중앙 고정형)
+========================================================== */
+.global-loading-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.75);
+  z-index: 9999;
+}
+
+.global-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; width: 100%;
+}
+
+.global-spinner-wrap .spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #d1d5db;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================
+   ✅ 반응형 세분화
+========================================================== */
+
+/* 360px 이하 */
+@media (max-width: 360px) {
+  th, td { font-size: 11.5px; padding: 6px; }
+  .table-spinner-wrap .spinner { width: 26px; height: 26px; }
+}
+
+/* 480px 이하 */
+@media (max-width: 480px) {
+  th, td { font-size: 12px; padding: 7px; }
+  table { min-width: 600px; } /* ✅ 모바일에서 가로 스크롤 자동 생성 */
+}
+
+/* 768px 이하 */
+@media (max-width: 768px) {
+  th, td { font-size: 12.5px; padding: 8px; }
+}
+
+/* 1024px 이하 */
+@media (max-width: 1024px) {
+  th, td { font-size: 13px; padding: 9px; }
+}

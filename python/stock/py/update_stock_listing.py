@@ -43,7 +43,7 @@ except ModuleNotFoundError as e:
 # ==============================
 # 현재 파일: /MyBaseLinkV2/python/stock/py/update_stock_listing.py
 # → 상위 2단계로 올라가면 /MyBaseLinkV2/python
-BASE_DIR = Path(__file__).resolve().parents[2]  # ✅ /MyBaseLinkV2/python
+BASE_DIR = Path(__file__).resolve().parents[2]
 ROOT_DIR = BASE_DIR  # 유지
 
 LOG_DIR = BASE_DIR / "log"

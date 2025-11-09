@@ -5,6 +5,34 @@
    - 반응형 여백·폰트 일관 조정 (360~1024px)
 =============================================== */
 
+/* ===============================================================
+   🌙 다크모드 대응 전역 변수 추가 (2025.11 통합)
+================================================================ */
+:root {
+  --search-bg: #fff;
+  --search-text: #111827;
+  --search-border: #ccc;
+  --search-input-bg: #fff;
+  --search-input-text: #111827;
+  --search-btn-bg: #2563eb;
+  --search-btn-hover: #1e40af;
+  --search-btn-text: #fff;
+  --search-muted: #4b5563;
+}
+body.dark-mode {
+  --search-bg: #111827;
+  --search-text: #f3f4f6;
+  --search-border: #374151;
+  --search-input-bg: #1f2937;
+  --search-input-text: #f3f4f6;
+  --search-btn-bg: #3b82f6;
+  --search-btn-hover: #2563eb;
+  --search-btn-text: #f9fafb;
+  --search-muted: #9ca3af;
+  background: var(--search-bg);
+  color: var(--search-text);
+}
+
 .toolbar {
   display: flex;
   justify-content: flex-start;
@@ -26,22 +54,23 @@
   flex: 1 1 auto;
   min-width: 120px;
   padding: 0.5rem 0.8rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--search-border);
   border-radius: 6px;
   font-size: 0.9rem;
   outline: none;
-  background: #fff;
+  background: var(--search-input-bg);
+  color: var(--search-input-text);
   transition: border-color 0.3s, box-shadow 0.2s;
 }
 .search-group input:focus {
-  border-color: #2563eb;
+  border-color: var(--search-btn-bg);
   box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
 }
 
 /* 🔹 버튼 */
 .search-group .btn {
-  background: #2563eb;
-  color: #fff;
+  background: var(--search-btn-bg);
+  color: var(--search-btn-text);
   border: none;
   border-radius: 6px;
   padding: 0.45rem 0.7rem;
@@ -54,13 +83,13 @@
   flex-shrink: 0;
   transition: background 0.2s;
 }
-.search-group .btn:hover { background: #1e40af; }
+.search-group .btn:hover { background: var(--search-btn-hover); }
 
 .list-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #4b5563;
+  color: var(--search-muted);
   font-size: 0.9rem;
   margin-bottom: 0.4rem;
 }
@@ -73,8 +102,8 @@
 }
 
 .btn {
-  background: #2563eb;
-  color: white;
+  background: var(--search-btn-bg);
+  color: var(--search-btn-text);
   border: none;
   border-radius: 6px;
   padding: 0.35rem 0.55rem;
@@ -88,7 +117,7 @@
   transition: background 0.2s;
 }
 .btn i { font-size: 0.9rem; }
-.btn:hover { background: #1e40af; }
+.btn:hover { background: var(--search-btn-hover); }
 .btn.red { background: #dc2626; }
 .btn.red:hover { background: #b91c1c; }
 .btn.gray { background: #6b7280; }

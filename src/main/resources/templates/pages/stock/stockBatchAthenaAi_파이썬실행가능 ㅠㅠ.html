@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 AthenaAI 배치 업데이트</title> 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+      :root {
+        --main-bg: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-color-primary: #111827;
+        --text-color-secondary: #6b7280;
+        --border-color-default: #d1d5db;
+        --input-bg: #ffffff;
+        --progress-bar-bg: #e5e7eb;
+        --log-box-bg: #111; 
+        --log-text-default: #e0e0e0;
+        --log-text-info: #9ca3af;
+        --log-text-progress: #60a5fa;
+        --log-text-warning: #f59e0b;
+        --log-text-error: #ef4444;
+        --log-text-complete: #22c55e;
+        --card-border: #d1d5db;
+        --error-card-bg: #fff;
+        --error-card-border: #e5e7eb;
+        --error-card-text: #374151;
+        --error-card-hover: #fee2e2;
+        --error-card-header: #b91c1c;
+      }
+
+      .global-status-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      }
+      .global-status-header {
+        font-weight: 600;
+        color: var(--text-color-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1rem;
+      }
+      .global-status-body {
+        font-size: .9rem;
+        color: var(--text-color-secondary);
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+      }
+      .global-status-progress {
+        width: 100%;
+        height: 10px;
+        background: var(--progress-bar-bg);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      .global-status-progress div {
+        height: 100%;
+        width: 0%;
+        background: #2563eb;
+        transition: width .25s;
+      }
+      .status-idle{color:#6b7280;}
+      .status-running{color:#2563eb;}
+      .status-completed{color:#22c55e;}
+      .status-failed,.status-timeout{color:#ef4444;}
+      .status-cancelled{color:#f59e0b;}
+      @keyframes blink {0%,100%{opacity:1}50%{opacity:.35}}
+      .blinking{animation:blink 1.2s infinite;}
+      .run-controls-wrapper {display:flex;align-items:center;gap:0.75rem;margin-top:2rem;}
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+    <div class="page-header">
+      <div class="page-title"><h2>📄 AthenaAI 분석 및 시뮬레이션</h2></div>
+      <div class="breadcrumb"><i class="fas fa-robot"></i><span>AthenaAI 분석</span></div>
+    </div>
+
+    <!-- ✅ 전역 상태 카드 -->
+    <div class="global-status-card">
+        <div class="global-status-header">
+          🌐 AthenaAI 배치 진행 상태
+          <span id="globalStatusText" class="status-idle">대기중</span>
+        </div>
+        <div class="global-status-body">
+          <div>실행자: <span id="globalRunner">미연결</span></div>
+          <div>전체 진행률: <span id="globalProgressLabel">0%</span></div>
+        </div>
+        <div class="global-status-progress"><div id="globalProgressBar"></div></div>
+    </div>
+
+    <!-- ✅ 분석 폼 -->
+    <div class="card mb-8">
+      <form id="analysisForm">
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="font-bold text-gray-700">분석 유형</label>
+            <select id="analysisType" class="border rounded p-2 w-full">
+              <option value="ma" selected>이동평균선(MA) 분석</option>
+              <option value="double_bottom">이중바닥</option>
+              <option value="cup_and_handle">컵앤핸들</option>
+              <option value="decline_5d">단기급락(5일)</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label>분석 연도(Years)</label>
+              <input id="years" type="number" class="border rounded p-2 w-full" value="3" min="1" max="10">
+            </div>
+            <div>
+              <label>작업자 수(Workers)</label>
+              <input id="workers" type="number" class="border rounded p-2 w-full" value="8" min="1" max="16">
+            </div>
+            <div>
+              <label>악재종목 제외</label>
+              <input id="excludeNeg" type="checkbox" class="ml-2" checked>
+            </div>
+          </div>
+        </div>
+
+        <div class="run-controls-wrapper">
+          <button type="button" id="runAnalysisBtn" onclick="runAnalysis()" class="flex-grow px-6 py-3 bg-indigo-600 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-indigo-700">
+            🚀 분석 실행
+          </button>
+          <button type="button" id="btnCancel" onclick="cancelAnalysis()" class="px-6 py-3 bg-red-600 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-red-700" disabled>
+            ❌ 취소
+          </button>
+        </div>
+      </form>
+
+      <!-- ✅ 결과 -->
+      <div id="resultsDisplay" class="mt-6 bg-white border rounded-xl p-4 min-h-[120px]">
+        <p class="text-gray-500">분석 실행 후 여기에 결과가 표시됩니다.</p>
+      </div>
+
+      <!-- ✅ 로그 -->
+      <div id="logDisplay" class="mt-6 h-48 bg-gray-800 text-gray-200 p-4 overflow-y-scroll rounded-xl font-mono text-sm border border-gray-700">
+        <div>[INFO] 시스템 준비 완료. 현재 실행 중인 작업을 확인 중...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ SSE 및 제어 스크립트 -->
+<th:block layout:fragment="pageScript">
+<script>
+let currentTaskId = null;
+let eventSource = null;
+
+function logMessage(msg, level='info'){
+  const logDisplay = document.getElementById('logDisplay');
+  const line = document.createElement('div');
+  line.textContent = `[${level.toUpperCase()}] ${msg}`;
+  logDisplay.appendChild(line);
+  logDisplay.scrollTop = logDisplay.scrollHeight;
+}
+
+function updateGlobalStatus(progress, text, cls, runner='미연결'){
+  document.getElementById('globalStatusText').textContent = text;
+  document.getElementById('globalStatusText').className = cls;
+  document.getElementById('globalRunner').textContent = runner;
+  document.getElementById('globalProgressBar').style.width = progress + '%';
+  document.getElementById('globalProgressLabel').textContent = Math.round(progress) + '%';
+}
+
+async function runAnalysis(){
+  if(currentTaskId){ logMessage('이미 실행 중입니다.','warn'); return; }
+  const pattern = document.getElementById('analysisType').value;
+  const years = document.getElementById('years').value;
+  const workers = document.getElementById('workers').value;
+  const excludeNeg = document.getElementById('excludeNeg').checked;
+  
+  const query = new URLSearchParams({ pattern, years, workers, excludeNeg }).toString();
+  try{
+    const res = await fetch(`/api/stock/batch/athena/start?${query}`, { method:'POST' });
+    if(!res.ok) throw new Error('시작 실패');
+    const data = await res.json();
+    currentTaskId = data.taskId;
+    logMessage(`작업 시작됨: ${currentTaskId}`);
+    startSSE();
+  }catch(e){ logMessage('분석 시작 실패: '+e.message,'error'); }
+}
+
+function startSSE(){
+  if(eventSource) eventSource.close();
+  eventSource = new EventSource('/api/stock/batch/athena/sse');
+  eventSource.onmessage = e=>{
+    const data = JSON.parse(e.data);
+    if(data.status==='IN_PROGRESS'){
+      updateGlobalStatus(data.progress,'실행중','status-running',data.runner);
+      logMessage(`진행률 ${data.progress}%`);
+    }
+    if(data.status==='COMPLETED'){
+      updateGlobalStatus(100,'완료','status-completed');
+      document.getElementById('resultsDisplay').innerHTML = `<pre>${JSON.stringify(data.result||{},null,2)}</pre>`;
+      stopSSE();
+    }
+    if(data.status==='FAILED'){
+      updateGlobalStatus(0,'실패','status-failed');
+      stopSSE();
+    }
+  };
+  eventSource.onerror=()=>{
+    logMessage('SSE 연결 종료','warn');
+    stopSSE();
+  };
+}
+
+function stopSSE(){
+  if(eventSource){ eventSource.close(); eventSource=null; }
+  currentTaskId=null;
+}
+
+async function cancelAnalysis(){
+  if(!currentTaskId) return;
+  try{
+    await fetch(`/api/stock/batch/athena/cancel/${currentTaskId}`,{method:'POST'});
+    logMessage('작업 취소 요청 완료','warn');
+    updateGlobalStatus(0,'취소됨','status-cancelled');
+    stopSSE();
+  }catch(e){ logMessage('취소 실패: '+e.message,'error'); }
+}
+</script>
+</th:block>
+</body>
+</html>

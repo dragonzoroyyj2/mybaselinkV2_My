@@ -6,6 +6,39 @@
    - 반응형 완전 대응 (360~1024px)
 ================================================================ */
 
+/* ===============================================================
+   🌙 다크모드 대응 전역 변수 추가 (2025.11 통합)
+================================================================ */
+:root {
+  --modal-bg: #ffffff;
+  --modal-header-bg: #f3f4f6;
+  --modal-header-text: #111827;
+  --modal-border: #e5e7eb;
+  --modal-label: #374151;
+  --modal-input-bg: #fff;
+  --modal-input-border: #d1d5db;
+  --modal-input-text: #111827;
+  --modal-overlay-bg: rgba(255,255,255,0.7);
+  --modal-spinner-border: #d1d5db;
+  --modal-spinner-accent: #2563eb;
+}
+
+body.dark-mode {
+  --modal-bg: #1f2937;
+  --modal-header-bg: #374151;
+  --modal-header-text: #f9fafb;
+  --modal-border: #4b5563;
+  --modal-label: #d1d5db;
+  --modal-input-bg: #111827;
+  --modal-input-border: #374151;
+  --modal-input-text: #f3f4f6;
+  --modal-overlay-bg: rgba(17,24,39,0.85);
+  --modal-spinner-border: #4b5563;
+  --modal-spinner-accent: #3b82f6;
+  background: #111827;
+  color: var(--modal-input-text);
+}
+
 /* 기본 모달 배경 */
 .modal {
   display: none;
@@ -22,7 +55,7 @@
 
 /* 메인 카드 */
 .elegant-modal {
-  background: #ffffff;
+  background: var(--modal-bg);
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   width: 520px;
@@ -36,15 +69,15 @@
 
 /* 헤더 */
 .elegant-header {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--modal-header-bg);
+  color: var(--modal-header-text);
   padding: 8px 14px;
   font-size: 15px;
   font-weight: 600;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--modal-border);
 }
 .elegant-header h3 {
   margin: 0;
@@ -57,12 +90,12 @@
   color: #6b7280;
   transition: 0.15s;
 }
-.close-btn:hover { color: #111827; }
+.close-btn:hover { color: var(--modal-header-text); }
 
 /* 본문 */
 .elegant-body {
   padding: 15px 18px;
-  background: #fff;
+  background: var(--modal-bg);
   max-height: 60vh;
   overflow-y: auto;
 }
@@ -78,7 +111,7 @@
   flex: 0 0 100px;
   text-align: right;
   font-size: 13px;
-  color: #374151;
+  color: var(--modal-label);
   font-weight: 600;
 }
 .form-row input[type="text"],
@@ -88,17 +121,18 @@
 .form-row textarea {
   flex: 1;
   padding: 7px 9px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--modal-input-border);
   border-radius: 6px;
   font-size: 14px;
-  background: #fff;
+  background: var(--modal-input-bg);
+  color: var(--modal-input-text);
   outline: none;
   transition: border-color .15s, box-shadow .15s;
 }
 .form-row input:focus,
 .form-row select:focus,
 .form-row textarea:focus {
-  border-color: #2563eb;
+  border-color: var(--modal-spinner-accent);
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
 }
 .form-row textarea {
@@ -113,23 +147,23 @@
   text-align: left;
   flex: 0 0 auto;
   font-weight: 500;
-  color: #374151;
+  color: var(--modal-label);
 }
 .form-row.options input[type="checkbox"],
 .form-row.options input[type="radio"] {
   margin-right: 6px;
   transform: scale(1.1);
-  accent-color: #2563eb;
+  accent-color: var(--modal-spinner-accent);
 }
 
 /* 푸터 */
 .elegant-footer {
   padding: 10px 15px;
-  background: #f3f4f6;
+  background: var(--modal-header-bg);
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--modal-border);
 }
 
 /* 로딩 오버레이 */
@@ -137,7 +171,7 @@
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(255,255,255,0.7);
+  background: var(--modal-overlay-bg);
   display: none;
   justify-content: center;
   align-items: center;
@@ -146,8 +180,8 @@
 }
 .modal-loading .spinner {
   width: 32px; height: 32px;
-  border: 3px solid #d1d5db;
-  border-top-color: #2563eb;
+  border: 3px solid var(--modal-spinner-border);
+  border-top-color: var(--modal-spinner-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MyBaseLink 로그인</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<!-- Favicon -->
+<link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<style>
+/* 폰트 관련은 그대로 유지 */
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  background: linear-gradient(135deg, #e5e7eb, #9ca3af, #6b7280);
+  color: #fff;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 340px; /* 로그인 컨테이너의 최대 너비 */
+  margin: 0 5vw;
+  padding: 2rem 1.5rem; /* 좌우 패딩 1.5rem */
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  color: #fff;
+  animation: fadeIn 0.9s ease;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  z-index: 2;
+}
+
+/* ========================================= */
+/* 수정: .chart-container의 너비를 .login-container 내부 콘텐츠에 맞춤 */
+/* ========================================= */
+.chart-container {
+  width: 100%; /* 부모(body)의 100%를 따라가도록 설정 */
+  max-width: 340px; /* 로그인 컨테이너의 max-width와 동일하게 설정 (외곽선 제한) */
+  height: 150px;
+  margin: 0 auto 1.5px auto;
+  padding: 0 1.5rem; /* .login-container와 동일한 좌우 패딩을 적용하여 내부 여백 맞춤 */
+  box-sizing: border-box; /* padding이 max-width 안에 포함되도록 설정 */
+  position: relative;
+  z-index: 1;
+}
+
+/* 캔버스가 컨테이너 폭에 맞춰 늘어나도록 설정 */
+.chart-container canvas {
+  width: 100%; 
+  height: 100%;
+}
+/* ========================================= */
+
+#toggleRepeatIcon {
+  position:absolute; top:5px; left:5px; font-size:22px;
+  color: rgba(255,255,255,0.9); cursor:pointer; z-index:10;
+  transition: all 0.2s;
+}
+
+.login-container h2 {
+  margin-bottom: 1.2rem;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.input-group input {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px 40px 10px 14px;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+  background: rgba(255,255,255,0.9);
+  color: #333;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px #9ca3af;
+}
+
+.input-group i {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 0.9rem;
+}
+
+button {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg,#6b7280,#4b5563);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+  box-sizing: border-box;
+}
+
+button:hover {
+  background: linear-gradient(90deg,#4b5563,#374151);
+  transform: translateY(-2px);
+}
+
+.login-footer {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: #d1d5db;
+}
+
+.login-footer a {
+  color: #e5e7eb;
+  text-decoration: none;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================= */
+/* 수정: 모바일에서 차트 컨테이너의 너비도 로그인 컨테이너에 맞게 유동적으로 제한 */
+/* ========================================= */
+@media (max-width:400px){
+  .login-container{padding:1.8rem 1.2rem;margin:0 6vw;} /* 좌우 패딩 1.2rem */
+  .input-group input, button{padding-left:14px;padding-right:40px;}
+  .chart-container{
+    max-width: 100%; 
+    padding: 0 1.2rem; /* 모바일에서 .login-container와 동일한 좌우 패딩 1.2rem 적용 */
+  } 
+}
+/* ========================================= */
+</style>
+</head>
+
+<body>
+
+<div class="chart-container">
+  <!-- 수정: width 속성을 제거하여 CSS의 100% 폭을 따라가도록 설정 -->
+  <canvas id="candleChart" height="150"></canvas>
+  <i id="toggleRepeatIcon" class="fas fa-pause-circle" title="반복 시작/정지"></i>
+</div>
+
+<div class="login-container">
+  <h2>🔐 MyBaseLink 로그인</h2>
+
+  <div class="input-group">
+    <input type="text" id="username" placeholder="아이디" />
+    <i class="fas fa-user"></i>
+  </div>
+
+  <div class="input-group">
+    <input type="password" id="password" placeholder="비밀번호" />
+    <i class="fas fa-lock"></i>
+  </div>
+
+  <button id="loginBtn">로그인</button>
+
+  <div class="login-footer">
+    <p>계정이 없나요? <a href="#">회원가입</a></p>
+  </div>
+</div>
+
+<script>
+// ==================== 플래그 & 아이콘 ====================
+let repeatChart = true;
+let animationId = null;
+let chartOpacity = 0.7;
+let holdTime=0;
+const icon = document.getElementById("toggleRepeatIcon");
+
+function updateIcon(){
+  if(repeatChart){
+    icon.className="fas fa-pause-circle";
+    icon.style.color="rgba(255,255,255,0.9)";
+    icon.title="반복 중 (클릭 시 중지)";
+  } else {
+    icon.className="fas fa-play-circle";
+    icon.style.color="rgba(255,255,255,0.6)";
+    icon.title="반복 중지 (클릭 시 시작)";
+  }
+}
+updateIcon();
+icon.addEventListener("click", ()=>{
+  repeatChart=!repeatChart;
+  updateIcon();
+  if(repeatChart && animationId===null){
+    fadeOpacity=chartOpacity;
+    drawCandles();
+  } else if(!repeatChart && animationId!==null){
+    cancelAnimationFrame(animationId);
+    animationId=null;
+  }
+});
+
+// ==================== 로그인 ====================
+document.getElementById("loginBtn").addEventListener("click", async ()=>{
+  const username=document.getElementById("username").value.trim();
+  const password=document.getElementById("password").value.trim();
+  // alert() 대신 커스텀 UI를 사용해야 하지만, 기존 로직 유지를 위해 그대로 둡니다.
+  if(!username||!password){alert("아이디와 비밀번호를 입력하세요."); return;}
+  try{
+    const res=await fetch("/auth/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username,password})
+    });
+    if(res.ok){
+      const data=await res.json();
+      localStorage.setItem("token",data.token);
+      localStorage.setItem("username",data.username);
+      localStorage.setItem("sessionMillis",data.sessionMillis);
+      localStorage.setItem("serverTime",data.serverTime);
+      location.href="/pages/main/base";
+    } else { alert("로그인 실패 ❌"); }
+  }catch(err){console.error(err); alert("서버 오류가 발생했습니다.");}
+});
+
+// ==================== 봉차트 ====================
+const candleCount=13;
+let candles=[],index=0,fadeOpacity=chartOpacity;
+const canvasContainer = document.querySelector('.chart-container');
+const canvas=document.getElementById("candleChart");
+const ctx=canvas.getContext("2d");
+const width = 15;
+
+/** 캔버스 크기를 컨테이너에 맞게 조절하고, 차트를 다시 그립니다. */
+function resizeCanvas() {
+    // 캔버스의 내부 픽셀 크기를 컨테이너 크기에 맞춥니다.
+    canvas.width = canvasContainer.clientWidth;
+    canvas.height = 150; // 높이는 고정
+}
+
+// 초기 크기 설정 및 리사이즈 이벤트 리스너 추가
+resizeCanvas();
+window.addEventListener('resize', () => {
+    resizeCanvas();
+    // 캔버스 크기가 변경되면 차트 데이터를 리셋하고 다시 그립니다.
+    resetCandles(); 
+    // resetCandles() 내부에서 index, fadeOpacity 등이 초기화됩니다.
+    if(animationId === null) {
+      drawCandles(); // 정지 상태였다면 다시 시작
+    }
+});
+
+
+function resetCandles(){
+  candles=[]; index=0; fadeOpacity=chartOpacity; holdTime=0;
+  const minH=20;
+  for(let i=0;i<candleCount-1;i++){
+    let base=minH+i*5;
+    let noise=Math.floor(Math.random()*10)-5;
+    let height=base+noise;
+    const color=(i%2===0)?`rgba(59,130,246,${0.5+Math.random()*0.2})`:`rgba(239,68,68,${0.5+Math.random()*0.2})`;
+    candles.push({targetHeight:height,currentHeight:0,color});
+  }
+  const lastHeight=Math.floor(candles[candleCount-2].targetHeight*1.3);
+  candles.push({targetHeight:lastHeight,currentHeight:0,color:`rgba(239,68,68,0.9)`});
+}
+
+function drawCandles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height); // 동적 width 사용
+  const spacing=(canvas.width-candleCount*width)/(candleCount-1); // 동적 width 사용
+
+  // 봉 그리기
+  for(let i=0;i<=index;i++){
+    const c=candles[i];
+    const speed=(i===candleCount-1)?6:3+Math.random()*2;
+    if(c.currentHeight<c.targetHeight)c.currentHeight+=speed;
+    if(c.currentHeight>c.targetHeight)c.currentHeight=c.targetHeight;
+    const x=i*(width+spacing);
+    const y=canvas.height-c.currentHeight;
+    ctx.fillStyle=c.color;
+    ctx.fillRect(x,y,width,c.currentHeight);
+  }
+
+  // 라인 그라디언트
+  const gradient=ctx.createLinearGradient(0,0,canvas.width,0); // 동적 width 사용
+  gradient.addColorStop(0,"rgba(248,113,113,"+fadeOpacity+")");
+  gradient.addColorStop(0.5,"rgba(59,130,246,"+fadeOpacity+")");
+  gradient.addColorStop(1,"rgba(248,113,113,"+fadeOpacity+")");
+
+  // 지그재그 라인
+  ctx.beginPath();
+  ctx.strokeStyle=gradient;
+  ctx.lineWidth=2;
+  for(let i=0;i<=index;i++){
+    const c=candles[i];
+    const x=i*(width+spacing)+width/2;
+    const y=canvas.height-c.currentHeight-10;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // 마지막 화살표 + 반짝임 전체
+  if(index>=candleCount-1){
+    const last=candles[candleCount-1];
+    const lx=canvas.width-width/2-1; // 동적 width 사용
+    const ly=canvas.height-last.currentHeight-10;
+    const arrowWidth=Math.min(22,canvas.width-lx-2); // 동적 width 사용
+    const arrowHeight=14;
+
+    const glowAlpha=0.5+0.5*Math.sin(Date.now()/100);
+    // 화살표
+    ctx.beginPath();
+    ctx.moveTo(lx, ly-arrowHeight/2);
+    ctx.lineTo(lx, ly+arrowHeight/2);
+    ctx.lineTo(lx+arrowWidth, ly);
+    ctx.closePath();
+    ctx.fillStyle=`rgba(248,113,113,${glowAlpha})`;
+    ctx.fill();
+
+    // 라인 끝점 반짝임
+    ctx.fillStyle=`rgba(255,255,255,${0.2+0.3*Math.sin(Date.now()/80)})`;
+    for(let i=0;i<5;i++){
+      const offsetX=Math.random()*2;
+      const offsetY=Math.random()*2-1;
+      ctx.beginPath();
+      ctx.arc(lx+arrowWidth, ly+offsetY,1.5,0,2*Math.PI);
+      ctx.fill();
+    }
+  }
+
+  if(index<candleCount-1 && candles[index].currentHeight>=candles[index].targetHeight) index++;
+
+  if(index>=candleCount-1){
+    if(holdTime<45){holdTime++;}
+    else{fadeOpacity-=0.02;if(fadeOpacity<0)fadeOpacity=0;}
+  }
+
+  if(fadeOpacity>0){
+    animationId=requestAnimationFrame(drawCandles);
+  } else {
+    animationId=null;
+    if(repeatChart){
+      setTimeout(()=>{
+        resetCandles();
+        drawCandles();
+      },2000);
+    }
+  }
+}
+
+resetCandles();
+drawCandles();
+</script>
+
+</body>
+</html>

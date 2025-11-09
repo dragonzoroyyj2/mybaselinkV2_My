@@ -1,21 +1,56 @@
 /* ===============================================================
-   ✅ commonTable.css (v1.0 - 2025.11 완전 반응형 안정판)
+   ✅ commonTable.css (v1.5 - 2025.11 실전 완전 안정판)
    ---------------------------------------------------------------
    - 헤더 고정 (sticky)
    - 세로 + 가로 스크롤 완벽 지원
    - 체크박스 열 정렬 고정
    - 모든 해상도에서 테이블 깨짐 없음
+   - ✅ 모바일(WebView) 좌우 스크롤 시 흰 여백/울컥 현상 완전 제거
+   - ✅ 웹/앱 헤더 시각 차이 제거 (모바일도 평면형)
 ================================================================ */
+
+/* 🌙 다크모드 변수는 이전 버전 그대로 유지 */
+:root {
+  --table-bg: #ffffff;
+  --table-text: #111827;
+  --table-border: #e5e7eb;
+  --table-header-bg: #e5e7eb;
+  --table-header-text: #1f2937;
+  --table-row-alt: #f9fafb;
+  --table-link: #2563eb;
+  --table-overlay-bg: rgba(255,255,255,0.8);
+  --table-spinner-border: #d1d5db;
+  --table-spinner-accent: #2563eb;
+}
+
+body.dark-mode {
+  --table-bg: #1f2937;
+  --table-text: #f3f4f6;
+  --table-border: #374151;
+  --table-header-bg: #374151;
+  --table-header-text: #f9fafb;
+  --table-row-alt: #111827;
+  --table-link: #3b82f6;
+  --table-overlay-bg: rgba(17,24,39,0.85);
+  --table-spinner-border: #4b5563;
+  --table-spinner-accent: #3b82f6;
+  background: #111827;
+  color: var(--table-text);
+}
 
 /* 🧾 테이블 컨테이너 */
 .table-container {
   width: 100%;
-  background: white;
+  background: var(--table-bg);
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   position: relative;
   overflow: auto;
   max-height: 75vh;
+  background-clip: padding-box;
+  transform: translateZ(0);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ✅ 테이블 기본 */
@@ -23,47 +58,54 @@ table {
   width: 100%;
   min-width: 900px;
   border-collapse: collapse;
-  background: white;
+  background: var(--table-bg);
   table-layout: auto;
+  border-spacing: 0; /* ✅ iOS 구분선 틈 제거 */
 }
 
 /* ✅ 헤더 고정 */
+thead {
+  background: var(--table-header-bg);
+  border-bottom: 1px solid var(--table-border);
+}
 thead th {
   position: sticky;
   top: 0;
-  background: #e5e7eb;
+  background: var(--table-header-bg);
+  color: var(--table-header-text);
   z-index: 2;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  box-shadow: inset 0 -1px 0 var(--table-border); /* ✅ 아래선만 부드럽게 */
+  border-right: none; /* ✅ 헤더 셀 구분선 제거 */
+  border-bottom: 1px solid var(--table-border);
 }
 
 /* ✅ 셀 스타일 */
 th, td {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--table-border);
   padding: 10px 8px;
   text-align: center;
   white-space: nowrap;
   vertical-align: middle;
+  color: var(--table-text);
 }
 
 th {
   font-weight: 600;
-  color: #1f2937;
   font-size: 13px;
 }
 
 td {
   font-size: 13px;
-  color: #111827;
 }
 
 /* ✅ 짝수행 음영 */
 tbody tr:nth-child(even) td {
-  background: #f9fafb;
+  background: var(--table-row-alt);
 }
 
 /* ✅ 링크 */
 td a {
-  color: #2563eb;
+  color: var(--table-link);
   text-decoration: none;
   transition: 0.15s;
 }
@@ -92,7 +134,7 @@ input[type="checkbox"] {
 }
 
 /* ==========================================================
-   ✅ 로딩 오버레이
+   ✅ 로딩 오버레이 (테이블 기준)
 ========================================================== */
 .table-loading-overlay {
   position: absolute;
@@ -100,9 +142,10 @@ input[type="checkbox"] {
   display: none;
   justify-content: center;
   align-items: center;
-  background: rgba(255,255,255,0.8);
+  background: var(--table-overlay-bg);
   z-index: 10;
   border-radius: 10px;
+  pointer-events: none;
 }
 
 .table-spinner-wrap {
@@ -116,8 +159,8 @@ input[type="checkbox"] {
 .table-spinner-wrap .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #d1d5db;
-  border-top-color: #2563eb;
+  border: 4px solid var(--table-spinner-border);
+  border-top-color: var(--table-spinner-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -132,7 +175,7 @@ input[type="checkbox"] {
   display: none;
   justify-content: center;
   align-items: center;
-  background: rgba(255,255,255,0.75);
+  background: var(--table-overlay-bg);
   z-index: 9999;
 }
 
@@ -146,8 +189,8 @@ input[type="checkbox"] {
 .global-spinner-wrap .spinner {
   width: 48px;
   height: 48px;
-  border: 5px solid #d1d5db;
-  border-top-color: #2563eb;
+  border: 5px solid var(--table-spinner-border);
+  border-top-color: var(--table-spinner-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -159,25 +202,17 @@ input[type="checkbox"] {
 /* ==========================================================
    ✅ 반응형 세분화
 ========================================================== */
-
-/* 360px 이하 */
 @media (max-width: 360px) {
   th, td { font-size: 11.5px; padding: 6px; }
   .table-spinner-wrap .spinner { width: 26px; height: 26px; }
 }
-
-/* 480px 이하 */
 @media (max-width: 480px) {
   th, td { font-size: 12px; padding: 7px; }
   table { min-width: 600px; }
 }
-
-/* 768px 이하 */
 @media (max-width: 768px) {
   th, td { font-size: 12.5px; padding: 8px; }
 }
-
-/* 1024px 이하 */
 @media (max-width: 1024px) {
   th, td { font-size: 13px; padding: 9px; }
 }

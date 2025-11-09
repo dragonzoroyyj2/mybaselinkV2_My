@@ -1,0 +1,121 @@
+/* ===============================================================
+   ✅ commonToast.css (v1.0 - 2025.11 안정판)
+   ---------------------------------------------------------------
+   - 성공 / 실패 / 경고 / 정보 토스트 메시지
+   - fade-in / fade-out 애니메이션 포함
+   - 화면 우측 하단에 자동 정렬
+================================================================ */
+
+/* 컨테이너 (여러 토스트 누적용) */
+
+.toast-container2 { 
+  position: fixed;
+   top: 70px;        /* ✅ 상단바 아래 */ /* bottom: 20px;  ✅ 하단 */
+  right: 20px;   /* ✅ 오른쪽 */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 9999;
+}
+
+/* 상단 중앙  현재 적용중 변경시 : toast-container 이름 바꾸면서 사용 */
+.toast-container {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 6000;
+}
+
+
+
+
+
+/* 기본 토스트 */
+.toast {
+  min-width: 220px;
+  max-width: 340px;
+  background: #fff;
+  color: #111827;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* 상태별 색상 */
+.toast.success {
+  border-left: 5px solid #16a34a;
+  background: #ecfdf5;
+}
+.toast.error {
+  border-left: 5px solid #dc2626;
+  background: #fef2f2;
+}
+.toast.warning {
+  border-left: 5px solid #f59e0b;
+  background: #fffbeb;
+}
+.toast.info {
+  border-left: 5px solid #2563eb;
+  background: #eff6ff;
+}
+
+/* 아이콘 */
+.toast i {
+  font-size: 16px;
+}
+
+/* 닫기버튼 */
+.toast .close-toast {
+  margin-left: auto;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 16px;
+  transition: 0.15s;
+}
+.toast .close-toast:hover {
+  color: #111827;
+}
+
+/* 사라질 때 */
+.toast.hide {
+  animation: fadeOutDown 0.35s ease forwards;
+}
+
+/* 애니메이션 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOutDown {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .toast-container {
+    bottom: 14px;
+    right: 10px;
+    width: calc(100% - 20px);
+    align-items: center;
+  }
+  .toast {
+    min-width: unset;
+    width: 100%;
+    max-width: 90%;
+  }
+}
