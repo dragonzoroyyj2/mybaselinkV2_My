@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 /**
  * ===============================================================
- * 🧩 MyBaseLinkV2 - StockBatchService 안정판 v1.0 (2025-11-01)
+ * 🧩 MyBaseLinkV2 - StockBatchProdService 안정판 v1.0 (2025-11-01)
  * ---------------------------------------------------------------
  * ✅ 완전 동기화/락/퍼센트/로그 안정화
  * ✅ SSE 중복 연결 제거 / heartbeat / dead emitter cleanup
@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
  * ✅ 모든 버튼/퍼센트/로그 UI 완전 동기화
  * ---------------------------------------------------------------
  * 🚀 안정 기준 버전 — 이후 변경 시 반드시 이 버전을 백업할 것
+ * 🚨 DART API Key 관련 설정 및 전달 로직 제거 완료
  * ===============================================================
  */
 
@@ -50,11 +51,7 @@ public class StockBatchProdService {
 
     @Value("${python.working.dir}")
     private String workingDir;
-    
-    // 원래의 설정 경로 유지
-    @Value("${opendart.dart_api_key:}") 
-    private String dart_api_key;
-    
+
 
     /** 사용자별 emitter */
     private static final class Client {
@@ -151,7 +148,10 @@ public class StockBatchProdService {
             init.put("progress", progress);
             sendTo(me, init);
         } else {
-            sendTo(me, Map.of("status", "IDLE", "currentUser", user));
+            Map<String, Object> init = new LinkedHashMap<>();
+            init.put("status", "IDLE");
+            init.put("currentUser", user);
+            sendTo(me, init);
         }
         return emitter;
     }
@@ -185,8 +185,7 @@ public class StockBatchProdService {
 
     /** ✅ 일괄 업데이트 */
     @Async
-    // HistoryYears 매개변수 추가
-    public void startUpdate(String taskId, boolean force, int workers, int historyYears) { 
+    public void startUpdate(String taskId, boolean force, int workers, int historyYears) {
         String runner = currentUser();
 
         if (activeLock.get() && !Objects.equals(runner, currentRunner))
@@ -198,36 +197,38 @@ public class StockBatchProdService {
         currentTaskId = taskId;
 
         taskStatusService.reset(taskId);
-        broadcastStatus(Map.of(
-                "status", "RESET", "progress", 0,
-                "logs", List.of("[LOG] 새 업데이트 준비 중...")
-        ));
+
+        LinkedHashMap<String,Object> resetMap = new LinkedHashMap<>();
+        resetMap.put("status","RESET");
+        resetMap.put("progress",0);
+        resetMap.put("logs", List.of("[LOG] 새 업데이트 준비 중..."));
+        broadcastStatus(resetMap);
+
+        LinkedHashMap<String,Object> resultMap = new LinkedHashMap<>();
+        resultMap.put("progress",0);
+        resultMap.put("runner",runner);
 
         taskStatusService.setTaskStatus(taskId,
-                new TaskStatusService.TaskStatus("IN_PROGRESS",
-                        new HashMap<>(Map.of("progress", 0, "runner", runner)), null));
+                new TaskStatusService.TaskStatus("IN_PROGRESS", resultMap, null));
 
-        broadcastStatus(Map.of("status", "START", "progress", 0));
-
+        LinkedHashMap<String,Object> startMap = new LinkedHashMap<>();
+        startMap.put("status","START");
+        startMap.put("progress",0);
+        broadcastStatus(startMap);
+        
         Process process = null;
         try {
             List<String> cmd = new ArrayList<>();
             cmd.add(pythonExe); cmd.add("-u"); cmd.add(scriptPath);
             cmd.add("--workers"); cmd.add(String.valueOf(workers));
-            
+
             // historyYears 매개변수를 파이썬 스크립트 인수로 추가
             cmd.add("--history_years"); cmd.add(String.valueOf(historyYears));
 
-            // force 매개변수를 파이썬 스크립트 인수로 추가 (수정된 부분)
+            // force 매개변수를 파이썬 스크립트 인수로 추가
             if (force) {
                 cmd.add("--force");
             }
-
-            if (dart_api_key != null && !dart_api_key.isEmpty()) {
-                cmd.add("--dart_api_key");
-                cmd.add(dart_api_key);
-            }
-
 
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.directory(new File(workingDir));
@@ -267,42 +268,67 @@ public class StockBatchProdService {
                     progress=Math.max(progress, realPct);
 
                     if(System.currentTimeMillis()-lastFlush>500){
-                        Map<String,Object> payload=new LinkedHashMap<>();
-                        payload.put("status","IN_PROGRESS");
-                        payload.put("progress",progress);
-                        payload.put("logs",new ArrayList<>(buffer));
-                        payload.put("krxTotal",krxTotal);
-                        payload.put("krxSaved",krxSaved);
-                        payload.put("dataTotal",dataTotal);
-                        payload.put("dataSaved",dataSaved);
+                        LinkedHashMap<String,Object> inprog = new LinkedHashMap<>();
+                        inprog.put("status","IN_PROGRESS");
+                        inprog.put("progress",progress);
+                        inprog.put("logs",new ArrayList<>(buffer));
+                        inprog.put("krxTotal",krxTotal);
+                        inprog.put("krxSaved",krxSaved);
+                        inprog.put("dataTotal",dataTotal);
+                        inprog.put("dataSaved",dataSaved);
+
                         taskStatusService.updateProgress(taskId,progress,runner);
-                        broadcastStatus(payload);
+                        broadcastStatus(inprog);
+
                         buffer.clear();
                         lastFlush=System.currentTimeMillis();
                     }
                 }
             }
 
-            broadcastStatus(Map.of(
-                    "status","IN_PROGRESS","progress",100,
-                    "logs",List.of("[LOG] 모든 종목 저장 완료"),
-                    "krxTotal",krxTotal,"krxSaved",krxTotal,
-                    "dataTotal",dataTotal,"dataSaved",dataTotal
-            ));
+            LinkedHashMap<String,Object> lastMap = new LinkedHashMap<>();
+            lastMap.put("status","IN_PROGRESS");
+            lastMap.put("progress",100);
+            lastMap.put("logs",List.of("[LOG] 모든 종목 저장 완료"));
+            lastMap.put("krxTotal",krxTotal);
+            lastMap.put("krxSaved",krxTotal);
+            lastMap.put("dataTotal",dataTotal);
+            lastMap.put("dataSaved",dataTotal);
+            broadcastStatus(lastMap);
 
             boolean finished=process.waitFor(Duration.ofHours(1).toSeconds(),TimeUnit.SECONDS);
-            if(!finished){ process.destroyForcibly(); taskStatusService.fail(taskId,"시간 초과");
-                broadcastStatus(Map.of("status","FAILED")); return; }
-            if(process.exitValue()!=0){ taskStatusService.fail(taskId,"Python 오류 종료");
-                broadcastStatus(Map.of("status","FAILED")); return; }
+            if(!finished){
+                process.destroyForcibly();
+                taskStatusService.fail(taskId,"시간 초과");
+
+                LinkedHashMap<String,Object> failMap = new LinkedHashMap<>();
+                failMap.put("status","FAILED");
+                broadcastStatus(failMap);
+                return;
+            }
+            if(process.exitValue()!=0){
+                taskStatusService.fail(taskId,"Python 오류 종료");
+
+                LinkedHashMap<String,Object> failMap = new LinkedHashMap<>();
+                failMap.put("status","FAILED");
+                broadcastStatus(failMap);
+                return;
+            }
 
             taskStatusService.complete(taskId);
-            broadcastStatus(Map.of("status","COMPLETED","progress",100));
+            LinkedHashMap<String,Object> compMap = new LinkedHashMap<>();
+            compMap.put("status","COMPLETED");
+            compMap.put("progress",100);
+            broadcastStatus(compMap);
 
         } catch(Exception e){
             log.error("[{}] 실행중 오류",taskId,e);
             taskStatusService.fail(taskId,e.getMessage());
-            broadcastStatus(Map.of("status","FAILED"));
+
+            LinkedHashMap<String,Object> failMap = new LinkedHashMap<>();
+            failMap.put("status","FAILED");
+            broadcastStatus(failMap);
+
         } finally {
             if(process!=null&&process.isAlive()){ try{process.destroyForcibly();}catch(Exception ignore){} }
             runningProcesses.remove(taskId);
@@ -320,7 +346,11 @@ public class StockBatchProdService {
         Process p=runningProcesses.get(taskId);
         if(p!=null&&p.isAlive())p.destroyForcibly();
         taskStatusService.cancel(taskId);
-        broadcastStatus(Map.of("status","CANCELLED"));
+
+        LinkedHashMap<String,Object> cancelMap = new LinkedHashMap<>();
+        cancelMap.put("status","CANCELLED");
+        broadcastStatus(cancelMap);
+
         activeLock.set(false);
         currentRunner=null;
         currentTaskId=null;
@@ -333,3 +363,5 @@ public class StockBatchProdService {
     public String getCurrentTaskId(){return currentTaskId;}
     public String getCurrentRunner(){return currentRunner;}
 }
+
+

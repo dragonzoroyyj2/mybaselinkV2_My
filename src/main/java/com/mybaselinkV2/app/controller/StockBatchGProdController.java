@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.LinkedHashMap;
 
 /**
  * ===============================================================
@@ -58,15 +59,27 @@ public class StockBatchGProdController {
             String runner = globalStockService.getCurrentTaskInfo()
                     .map(i -> i.user)
                     .orElse("다른 사용자");
-            return ResponseEntity.status(409).body(Map.of("error", runner + "님이 이미 실행 중입니다."));
+
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("error", runner + "님이 이미 실행 중입니다.");
+            return ResponseEntity.status(409).body(body);
         }
 
         try {
             gProdService.startUpdate(taskId, force, workers, historyYears, username);
-            return ResponseEntity.ok(Map.of("taskId", taskId, "runner", username));
+
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("taskId", taskId);
+            body.put("runner", username);
+
+            return ResponseEntity.ok(body);
         } catch (Exception e) {
             log.error("⚠️ [{}] 실행 중 예외", taskId, e);
-            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("error", e.getMessage());
+
+            return ResponseEntity.internalServerError().body(body);
         }
     }
 
@@ -76,16 +89,33 @@ public class StockBatchGProdController {
     @PostMapping("/cancel/{taskId}")
     public ResponseEntity<?> cancel(Authentication auth, @PathVariable String taskId) {
         String username = (auth != null && auth.getName() != null) ? auth.getName() : "anonymous";
+
         log.warn("🟥 [{}] 취소 요청 by {}", taskId, username);
+
         try {
             boolean cancelled = gProdService.cancelTask(taskId, username);
             if (!cancelled) {
-                return ResponseEntity.status(409).body(Map.of("error", "취소 실패: 이미 종료된 작업 또는 권한 없음"));
+
+                Map<String, Object> body = new LinkedHashMap<>();
+                body.put("error", "취소 실패: 이미 종료된 작업 또는 권한 없음");
+
+                return ResponseEntity.status(409).body(body);
             }
-            return ResponseEntity.ok(Map.of("cancelled", true, "taskId", taskId));
+
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("cancelled", true);
+            body.put("taskId", taskId);
+
+            return ResponseEntity.ok(body);
+
         } catch (Exception e) {
             log.error("❌ [{}] 취소 실패", taskId, e);
-            return ResponseEntity.internalServerError().body(Map.of("cancelled", false, "error", e.getMessage()));
+
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("cancelled", false);
+            body.put("error", e.getMessage());
+
+            return ResponseEntity.internalServerError().body(body);
         }
     }
 
@@ -94,22 +124,29 @@ public class StockBatchGProdController {
     // ===============================================================
     @GetMapping("/active")
     public ResponseEntity<?> active() {
+
         var info = globalStockService.getCurrentTaskInfo();
         if (info.isEmpty()) {
-            return ResponseEntity.ok(Map.of("active", false));
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("active", false);
+            return ResponseEntity.ok(body);
         }
 
         var i = info.get();
         var snap = taskStatusService.snapshot(i.taskId);
 
-        return ResponseEntity.ok(Map.of(
-                "active", true,
-                "taskId", i.taskId,
-                "runner", i.user,
-                "menu", i.menu,
-                "progress", (snap != null && snap.get("result") instanceof Map r && r.get("progress") instanceof Number)
-                        ? ((Number) ((Map<?, ?>) snap.get("result")).get("progress")).doubleValue()
-                        : 0
-        ));
+        double progress = 0;
+        if (snap != null && snap.get("result") instanceof Map<?, ?> r && r.get("progress") instanceof Number n) {
+            progress = n.doubleValue();
+        }
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("active", true);
+        body.put("taskId", i.taskId);
+        body.put("runner", i.user);
+        body.put("menu", i.menu);
+        body.put("progress", progress);
+
+        return ResponseEntity.ok(body);
     }
 }

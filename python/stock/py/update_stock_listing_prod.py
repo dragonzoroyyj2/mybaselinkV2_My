@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-📘 update_stock_listing_prod.py (v2.6 실전 안정판 - 개선판)
+📘 update_stock_listing_prod_final.py (v2.6 실전 안정판 - 최종 개선판)
 ----------------------------------------------------------
 ✅ StockBatchGProdService(v3.3) 완전 동기화
 ✅ BASE_DIR = Path(__file__).resolve().parents[2]
-✅ Spring @Value("${opendart.dart_api_key:}") → --dart_api_key 인자 완전 대응
-✅ DART_API_KEY 인자 전달 시 환경변수 자동 설정
 ✅ 로직/구조/진행률/로깅 기존 완전 유지
 ----------------------------------------------------------
-🌟 개선점: KRX 종목 목록 캐시 기간 (KRX_LIST_CACHE_DAYS) 명시적 검사 로직 추가
+🌟 개선점 반영 완료: KRX 종목 목록 캐시 기간 (KRX_LIST_CACHE_DAYS) 명시적 검사 로직 적용
+🔥 개선점 반영 완료: fetch_and_save_data 내 상세 오류 로깅 적용
 ----------------------------------------------------------
 """
 
@@ -29,23 +28,26 @@ try:
     import FinanceDataReader as fdr
     import requests
 except ModuleNotFoundError as e:
+    # 한국어 메시지 출력
     print(json.dumps({"error": f"필수 모듈 누락: {e.name} 설치 필요"}, ensure_ascii=False), flush=True)
     sys.exit(1)
 
 # ==============================
 # 상수 정의
 # ==============================
-PER_STOCK_TIMEOUT = 10
+PER_STOCK_TIMEOUT = 15 # ⏱️ 증가: 10s -> 15s. API의 느린 응답에 대비
 MAX_RETRIES = 3
-KRX_LIST_CACHE_DAYS = 1 # 🌟 개선점 적용 기준: 1일
+KRX_LIST_CACHE_DAYS = 1 # 🌟 KRX 목록 캐시 유효 기간: 1일
 
-DEFAULT_WORKERS = 16
+DEFAULT_WORKERS = 14	 # 🌟 초안정화: 8 -> 4로 극단적 감소. 안정성 최대화
 DEFAULT_HISTORY_YEARS = 3
 
 # ==============================
 # 경로 설정
 # ==============================
-BASE_DIR = Path(__file__).resolve().parents[2]
+# BASE_DIR: 스크립트가 실행되는 현재 작업 디렉토리
+# BASE_DIR = Path(".").resolve() # <--- 이 부분을 주석 처리합니다.
+BASE_DIR = Path("D:/Test_scheduler_py").resolve() # <--- 이 라인으로 강제 지정합니다.
 LOG_DIR = BASE_DIR / "log"
 DATA_DIR = BASE_DIR / "data" / "stock_data"
 LISTING_FILE = BASE_DIR / "data" / "stock_list" / "stock_listing.json"
@@ -148,7 +150,9 @@ def fetch_and_save_data(item: Dict[str, Any], history_years: int, force_download
                 last_date = existing_df['Date'].max().date()
                 if last_date >= end_date:
                     return f"{code} {name} → 이미 최신", "cached"
-        except Exception:
+        except Exception as e:
+            # 파일 읽기 오류는 상세 로그를 남기지 않고, 재다운로드 유도 (last_date = None)
+            logging.warning(f"[{code}] {name} Parquet 파일 읽기 오류: {e}. 전체 재다운로드를 시도합니다.")
             last_date = None
 
     if last_date and not force_download:
@@ -160,10 +164,12 @@ def fetch_and_save_data(item: Dict[str, Any], history_years: int, force_download
 
     for attempt in range(MAX_RETRIES):
         try:
+            # 타임아웃 처리를 위해 requests 라이브러리 레벨의 예외를 명시적으로 처리해야 함.
             df = fdr.DataReader(code, start=start_date_str, end=end_date.strftime('%Y-%m-%d'))
             if df.empty:
                 return f"{code} {name} → 데이터 없음", "no_data"
             df = df.reset_index()
+            
             if update_type == "증분" and not existing_df.empty:
                 existing_df['Date'] = pd.to_datetime(existing_df['Date'])
                 combined_df = pd.concat([existing_df, df], ignore_index=True).drop_duplicates(subset=['Date'], keep='last')
@@ -172,15 +178,22 @@ def fetch_and_save_data(item: Dict[str, Any], history_years: int, force_download
             else:
                 df.to_parquet(path, index=False)
                 return f"{code} {name} → 저장 완료 ({update_type}, {len(df)}행)", "success"
+        
         except requests.exceptions.RequestException as e:
+            # 네트워크/요청 오류 상세 로깅 (타임아웃 포함)
+            logging.error(f"[{code}] {name} 네트워크 오류/타임아웃 발생 (시도 {attempt + 1}/{MAX_RETRIES}): {e}")
             if attempt < MAX_RETRIES - 1:
                 time.sleep(1 + attempt)
             else:
-                return f"{code} {name} → 실패: {type(e).__name__}", "failed"
+                return f"{code} {name} → 최종 실패: {type(e).__name__}", "failed"
+        
         except Exception as e:
+            # 🔥 제시된 개선사항 반영: 상세 오류 로깅 (기타 예외) 🔥
+            # exc_info=False로 설정하여 traceback은 남기지 않고 메시지만 상세히 기록
+            logging.error(f"[{code}] {name} 데이터 수집 중 상세 예외 발생: {type(e).__name__} - {e}", exc_info=False)
             return f"{code} {name} → 실패: {type(e).__name__}", "failed"
 
-    return f"{code} {name} → 최종 실패", "failed"
+    return f"{code} {name} → 최종 실패 (모든 재시도 소진)", "failed"
 
 # ==============================
 # 병렬 다운로드 처리
@@ -203,24 +216,31 @@ def download_and_save_stocks(krx, workers: int, history_years: int, force_downlo
             item = futures[future]
             code = item.get("Code")
             try:
-                result_msg, result_type = future.result(timeout=PER_STOCK_TIMEOUT)
+                # 개별 스레드 실행 결과에 대한 타임아웃 처리
+                result_msg, result_type = future.result(timeout=PER_STOCK_TIMEOUT + 5) # 스레드 실행 자체에 대한 추가 타임아웃
+                
                 if result_type == "failed":
                     failed_count += 1
                 elif result_type != "cached":
                     success_count += 1
+                    
                 completed_count += 1
                 logging.info(f"[LOG] {result_msg} ({completed_count}/{total_count})")
+                
                 if (completed_count % update_step == 0) or (completed_count == total_count):
                     pct = 30.0 + (completed_count / total_count) * 70.0
                     logging.info(f"[PROGRESS] {pct:.1f} 종목 저장 {completed_count}/{total_count}")
+                    
             except TimeoutError:
                 failed_count += 1
                 completed_count += 1
-                logging.error(f"[TIMEOUT] {code} → 응답 없음 ({PER_STOCK_TIMEOUT}초 초과)")
+                # TimeoutError는 ThreadPoolExecutor에서 발생하므로 여기서 로그 기록
+                logging.error(f"[TIMEOUT] {code} → 응답 없음 (작업 실행 {PER_STOCK_TIMEOUT + 5}초 초과)")
             except Exception as e:
                 failed_count += 1
                 completed_count += 1
-                logging.error(f"[ERROR] {code} 예외 발생: {e}")
+                # 스레드 실행 중 발생한 기타 치명적 오류 로깅
+                logging.critical(f"[CRITICAL_ERROR] {code} 치명적 예외 발생: {e}")
 
     progress = 30.0 + (completed_count / total_count) * 70.0 if total_count > 0 else 0.0
     return completed_count, success_count, failed_count, total_count, progress
@@ -233,13 +253,7 @@ def main():
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     parser.add_argument("--history_years", type=int, default=DEFAULT_HISTORY_YEARS)
     parser.add_argument("--force", action="store_true")
-    parser.add_argument("--dart_api_key", type=str, default=None)
     args = parser.parse_args()
-
-    # ✅ Spring에서 넘어온 DART 키를 환경 변수에 반영
-    if args.dart_api_key:
-        os.environ["DART_API_KEY"] = args.dart_api_key
-        logging.info(f"[LOG] DART_API_KEY 인자 수신 및 환경 변수 설정 완료")
 
     start_time = time.time()
     stats = {"status": "failed", "success": 0, "failed": 0, "total": 0, "progress": 0.0}
@@ -250,11 +264,12 @@ def main():
         completed, success, failed, total, progress = download_and_save_stocks(krx_listing, args.workers, args.history_years, args.force)
         stats.update({"success": success, "failed": failed, "total": total, "progress": round(progress, 1)})
 
-        # ✅ 일부 실패는 정상 종료
+        # ✅ 일부 실패는 정상 종료 (completed == total을 기준으로 최종 status 결정)
         if completed == total:
             stats["status"] = "completed"
         else:
-            stats["status"] = "failed"
+            # 하나라도 미완료시 failed로 처리 (Timeout 포함)
+            stats["status"] = "failed" 
 
     except Exception as e:
         logging.critical(f"[ERROR] 실행 중 오류: {e}", exc_info=True)

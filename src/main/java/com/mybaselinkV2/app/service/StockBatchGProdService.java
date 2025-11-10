@@ -20,13 +20,12 @@ import java.util.regex.Pattern;
 
 /**
  * ===============================================================
- * 📊 StockBatchGProdService (v3.4 - DART Key 인자전달 완전판)
+ * 📊 StockBatchGProdService (v3.4 - 주가 시세 다운로드 전용)
  * ---------------------------------------------------------------
  * ✅ Python 멈춤(출력 無 15초↑) 자동 FAIL + 즉시 kill
  * ✅ waitFor 3분 초과 시 강제 종료
  * ✅ 실패/예외/타임아웃 시 [ERROR] 로그 자동 전송 (화면 표시)
  * ✅ 전역락 해제/좀비 방지 이중 보정
- * ✅ Spring opendart.dart_api_key → Python --dart_api_key 인자 전달
  * ===============================================================
  */
 @Service
@@ -45,9 +44,6 @@ public class StockBatchGProdService {
 
     @Value("${python.working.dir}")
     private String workingDir;
-
-    @Value("${opendart.dart_api_key:}")
-    private String dart_api_key;  // ✅ Spring 설정값 자동 주입
 
     private final AtomicBoolean activeLock = new AtomicBoolean(false);
     private final Map<String, Process> runningProcesses = new ConcurrentHashMap<>();
@@ -80,17 +76,32 @@ public class StockBatchGProdService {
         payload.put("globalStatus", running ? "RUNNING" : "IDLE");
         payload.put("globalRunner", currentRunner);
         payload.put("globalProgress", 0);
+
         sendTo(emitter, payload);
         return emitter;
     }
 
     private void sendTo(SseEmitter emitter, Map<String, Object> data) {
-        try { emitter.send(SseEmitter.event().name("status").data(data)); }
-        catch (Exception e) { emitters.remove(emitter); }
+        try {
+            emitter.send(SseEmitter.event().name("status").data(data));
+        } catch (Exception e) {
+        	log.warn("⚠️ SSE send 실패 (오류 아님, 정상 출력입니다. SSE 특성). {}", e.getMessage());
+            // ✅ 브라우저가 SSE 연결 끊으면 여기로 들어옴 (정상 동작)
+            // ✅ IOException: 현재 연결은 사용자의 호스트 시스템의 소프트웨어에 의해 중단되었습니다
+            // ✅ SSE 특성상 발생하는 자연스러운 예외 — 오류 아님
+            emitters.remove(emitter);
+        }
     }
 
     private void broadcast(Map<String, Object> data) {
-        for (SseEmitter e : new ArrayList<>(emitters)) sendTo(e, data);
+        for (SseEmitter e : new ArrayList<>(emitters)) {
+            try {
+                e.send(SseEmitter.event().name("status").data(data));
+            } catch (Exception ex) {
+                log.warn("⚠️ SSE broadcast 실패 (오류 아님, SSE 특성으로 정상 출력됨): {}", ex.getMessage());
+                emitters.remove(e);
+            }
+        }
     }
 
     // ===============================================================
@@ -108,10 +119,14 @@ public class StockBatchGProdService {
         currentTaskId = taskId;
         taskStatusService.reset(taskId);
 
-        broadcast(Map.of(
-                "status", "START", "runner", username, "progress", 0,
-                "globalStatus", "RUNNING", "globalRunner", username, "globalProgress", 0
-        ));
+        Map<String, Object> startPayload = new LinkedHashMap<>();
+        startPayload.put("status", "START");
+        startPayload.put("runner", username);
+        startPayload.put("progress", 0);
+        startPayload.put("globalStatus", "RUNNING");
+        startPayload.put("globalRunner", username);
+        startPayload.put("globalProgress", 0);
+        broadcast(startPayload);
 
         Process[] processRef = new Process[1];
 
@@ -126,12 +141,6 @@ public class StockBatchGProdService {
             cmd.add(String.valueOf(historyYears));
             if (force) cmd.add("--force");
 
-            // ✅ DART API Key 인자 전달
-            if (dart_api_key != null && !dart_api_key.isBlank()) {
-                cmd.add("--dart_api_key");
-                cmd.add(dart_api_key);
-            }
-
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.directory(new File(workingDir));
             pb.redirectErrorStream(true);
@@ -139,8 +148,7 @@ public class StockBatchGProdService {
 
             processRef[0] = pb.start();
             runningProcesses.put(taskId, processRef[0]);
-            log.info("🚀 [{}] Python 프로세스 시작됨 (dart_api_key 포함 여부: {})", taskId,
-                    (dart_api_key != null && !dart_api_key.isBlank()));
+            log.info("🚀 [{}] Python 프로세스 시작됨", taskId);
 
             Pattern pProgress = Pattern.compile("\\[PROGRESS]\\s*(\\d+(?:\\.\\d+)?)");
             Pattern pKrxTotal = Pattern.compile("\\[KRX_TOTAL]\\s*(\\d+)");
@@ -162,14 +170,16 @@ public class StockBatchGProdService {
                     try {
                         processRef[0].destroyForcibly();
                         taskStatusService.fail(taskId, "Python 로그 정지 감지됨 (hang)");
-                        broadcast(Map.of(
-                                "status", "FAILED",
-                                "progress", progress[0],
-                                "logs", List.of("[ERROR] Python 프로세스 비정상 종료 또는 중단 감지됨 (15초 무응답)"),
-                                "globalStatus", "FAILED",
-                                "globalRunner", currentRunner,
-                                "globalProgress", (int)Math.floor(progress[0])
-                        ));
+
+                        Map<String, Object> failPayload = new LinkedHashMap<>();
+                        failPayload.put("status", "FAILED");
+                        failPayload.put("progress", progress[0]);
+                        failPayload.put("logs", List.of("[ERROR] Python 프로세스 비정상 종료 또는 중단 감지됨 (15초 무응답)"));
+                        failPayload.put("globalStatus", "FAILED");
+                        failPayload.put("globalRunner", currentRunner);
+                        failPayload.put("globalProgress", (int)Math.floor(progress[0]));
+                        broadcast(failPayload);
+
                     } catch (Exception ex) {
                         log.error("❌ [{}] hang 감지 처리 중 예외: {}", taskId, ex.getMessage());
                     }
@@ -212,7 +222,9 @@ public class StockBatchGProdService {
                     payload.put("logs", new ArrayList<>(logs));
                     payload.put("globalStatus", "RUNNING");
                     payload.put("globalRunner", username);
-                    payload.put("globalProgress", Math.min(100, Math.max(0, (int)Math.floor(progress[0]))));
+                    payload.put("globalProgress",
+                            Math.min(100, Math.max(0, (int)Math.floor(progress[0]))));
+
                     broadcast(payload);
                     taskStatusService.updateProgress(taskId, progress[0], username);
                     logs.clear();
@@ -224,13 +236,18 @@ public class StockBatchGProdService {
             boolean finished = processRef[0].waitFor(Duration.ofMinutes(3).toSeconds(), TimeUnit.SECONDS);
             if (!finished) {
                 log.error("⏱ [{}] Python 실행 시간 초과 - 프로세스 강제 종료", taskId);
+
                 taskStatusService.fail(taskId, "Python 실행 시간 초과");
-                broadcast(Map.of(
-                        "status", "FAILED", "progress", progress[0],
-                        "logs", List.of("[ERROR] Python 실행 시간 초과 (3분 제한 초과)"),
-                        "globalStatus", "FAILED", "globalRunner", currentRunner,
-                        "globalProgress", (int)Math.floor(progress[0])
-                ));
+
+                Map<String, Object> failPayload = new LinkedHashMap<>();
+                failPayload.put("status", "FAILED");
+                failPayload.put("progress", progress[0]);
+                failPayload.put("logs", List.of("[ERROR] Python 실행 시간 초과 (3분 제한 초과)"));
+                failPayload.put("globalStatus", "FAILED");
+                failPayload.put("globalRunner", currentRunner);
+                failPayload.put("globalProgress", (int)Math.floor(progress[0]));
+                broadcast(failPayload);
+
                 processRef[0].destroyForcibly();
                 return;
             }
@@ -238,38 +255,47 @@ public class StockBatchGProdService {
             int exit = processRef[0].exitValue();
             if (exit != 0) {
                 log.error("❌ [{}] Python 비정상 종료(exitCode={})", taskId, exit);
+
                 taskStatusService.fail(taskId, "Python 비정상 종료(exit=" + exit + ")");
-                broadcast(Map.of(
-                        "status", "FAILED",
-                        "progress", progress[0],
-                        "logs", List.of("[ERROR] Python 비정상 종료 (exitCode=" + exit + ")"),
-                        "globalStatus", "FAILED",
-                        "globalRunner", currentRunner,
-                        "globalProgress", (int)Math.floor(progress[0])
-                ));
+
+                Map<String, Object> failPayload = new LinkedHashMap<>();
+                failPayload.put("status", "FAILED");
+                failPayload.put("progress", progress[0]);
+                failPayload.put("logs", List.of("[ERROR] Python 비정상 종료 (exitCode=" + exit + ")"));
+                failPayload.put("globalStatus", "FAILED");
+                failPayload.put("globalRunner", currentRunner);
+                failPayload.put("globalProgress", (int)Math.floor(progress[0]));
+                broadcast(failPayload);
+
                 return;
             }
 
             taskStatusService.complete(taskId);
-            broadcast(Map.of(
-                    "status", "COMPLETED", "progress", 100,
-                    "globalStatus", "COMPLETED",
-                    "globalRunner", currentRunner,
-                    "globalProgress", 100
-            ));
+
+            Map<String, Object> completePayload = new LinkedHashMap<>();
+            completePayload.put("status", "COMPLETED");
+            completePayload.put("progress", 100);
+            completePayload.put("globalStatus", "COMPLETED");
+            completePayload.put("globalRunner", currentRunner);
+            completePayload.put("globalProgress", 100);
+            broadcast(completePayload);
+
             log.info("✅ [{}] Python 정상 종료 및 완료", taskId);
 
         } catch (Exception e) {
             log.error("💥 [{}] 실행 중 예외 발생", taskId, e);
+
             taskStatusService.fail(taskId, e.getMessage());
-            broadcast(Map.of(
-                    "status", "FAILED",
-                    "error", e.getMessage(),
-                    "logs", List.of("[ERROR] Java 서비스 예외 발생: " + e.getMessage()),
-                    "globalStatus", "FAILED",
-                    "globalRunner", currentRunner,
-                    "globalProgress", 0
-            ));
+
+            Map<String, Object> failPayload = new LinkedHashMap<>();
+            failPayload.put("status", "FAILED");
+            failPayload.put("error", e.getMessage());
+            failPayload.put("logs", List.of("[ERROR] Java 서비스 예외 발생: " + e.getMessage()));
+            failPayload.put("globalStatus", "FAILED");
+            failPayload.put("globalRunner", currentRunner);
+            failPayload.put("globalProgress", 0);
+            broadcast(failPayload);
+
         } finally {
             try {
                 Process p = runningProcesses.remove(taskId);
@@ -284,7 +310,7 @@ public class StockBatchGProdService {
                 String prevRunner = currentRunner;
                 currentRunner = null;
                 currentTaskId = null;
-                globalStockService.releaseLock(taskId);
+                globalStockService.releaseLock("GPROD");
                 log.info("🔓 [{}] 전역 락 해제 완료 (prevRunner={})", taskId, prevRunner);
             }
         }
@@ -296,28 +322,40 @@ public class StockBatchGProdService {
     public boolean cancelTask(String taskId, String username) {
         if (!Objects.equals(taskId, currentTaskId)) return false;
         if (!Objects.equals(username, currentRunner)) return false;
+
         Process p = runningProcesses.remove(taskId);
         if (p != null && p.isAlive()) {
             p.destroyForcibly();
             log.warn("🟥 [{}] 프로세스 강제 취소됨 by {}", taskId, username);
         }
+
         taskStatusService.cancel(taskId);
-        broadcast(Map.of(
-                "status", "CANCELLED",
-                "logs", List.of("[LOG] 사용자에 의해 취소되었습니다."),
-                "globalStatus", "CANCELLED",
-                "globalRunner", username,
-                "globalProgress", 0
-        ));
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("status", "CANCELLED");
+        payload.put("logs", List.of("[LOG] 사용자에 의해 취소되었습니다."));
+        payload.put("globalStatus", "CANCELLED");
+        payload.put("globalRunner", username);
+        payload.put("globalProgress", 0);
+        broadcast(payload);
+
         activeLock.set(false);
         currentRunner = null;
         currentTaskId = null;
-        globalStockService.releaseLock(taskId);
+        globalStockService.releaseLock("GPROD");
+
         return true;
     }
 
-    private int safeInt(String s){ try{return Integer.parseInt(s.trim());}catch(Exception e){return 0;} }
-    private double safeDouble(String s){ try{return Double.parseDouble(s.trim());}catch(Exception e){return 0.0;} }
+    private int safeInt(String s){
+        try { return Integer.parseInt(s.trim()); }
+        catch(Exception e){ return 0; }
+    }
+
+    private double safeDouble(String s){
+        try { return Double.parseDouble(s.trim()); }
+        catch(Exception e){ return 0.0; }
+    }
 
     public boolean isLocked(){return activeLock.get();}
     public String getCurrentTaskId(){return currentTaskId;}

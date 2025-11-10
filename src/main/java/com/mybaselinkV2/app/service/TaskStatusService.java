@@ -92,8 +92,10 @@ public class TaskStatusService {
             return body;
         }
         body.put("status", s.getStatus());
-        Map<String,Object> result = new HashMap<>();
+
+        Map<String,Object> result = new LinkedHashMap<>();
         if (s.getResult() != null) result.putAll(s.getResult());
+
         body.put("result", result);
         return body;
     }
@@ -121,41 +123,46 @@ public class TaskStatusService {
 
     /** 진행률 갱신 + 러너 유지 */
     public void updateProgress(String taskId, double pct, String runner) {
-        Map<String,Object> result = new HashMap<>();
+        Map<String,Object> result = new LinkedHashMap<>();
         result.put("progress", pct);
         result.put("runner", runner);
+
         TaskStatus current = statusMap.get(taskId);
         if (current != null && current.getResult() != null) {
-            result.putAll(current.getResult()); // 기존 필드 유지
+            result.putAll(current.getResult());
             result.put("progress", pct);
             result.put("runner", runner);
         }
+
         setTaskStatus(taskId, new TaskStatus("IN_PROGRESS", result, null));
     }
 
     /** 완료 처리 */
     public void complete(String taskId) {
         TaskStatus current = statusMap.get(taskId);
-        Map<String,Object> result = new HashMap<>();
+        Map<String,Object> result = new LinkedHashMap<>();
         if (current != null && current.getResult() != null) result.putAll(current.getResult());
         result.put("progress", 100);
+
         setTaskStatus(taskId, new TaskStatus("COMPLETED", result, null));
     }
 
     /** 취소 처리 */
     public void cancel(String taskId) {
         TaskStatus current = statusMap.get(taskId);
-        Map<String,Object> result = new HashMap<>();
+        Map<String,Object> result = new LinkedHashMap<>();
         if (current != null && current.getResult() != null) result.putAll(current.getResult());
         result.put("progress", 0);
+
         setTaskStatus(taskId, new TaskStatus("CANCELLED", result, "사용자 취소"));
     }
 
     /** 실패 처리 */
     public void fail(String taskId, String err) {
         TaskStatus current = statusMap.get(taskId);
-        Map<String,Object> result = new HashMap<>();
+        Map<String,Object> result = new LinkedHashMap<>();
         if (current != null && current.getResult() != null) result.putAll(current.getResult());
+
         setTaskStatus(taskId, new TaskStatus("FAILED", result, err));
     }
 
