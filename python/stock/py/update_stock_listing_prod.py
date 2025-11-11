@@ -46,8 +46,8 @@ DEFAULT_HISTORY_YEARS = 3
 # 경로 설정
 # ==============================
 # BASE_DIR: 스크립트가 실행되는 현재 작업 디렉토리
-# BASE_DIR = Path(".").resolve() # <--- 이 부분을 주석 처리합니다.
-BASE_DIR = Path("D:/Test_scheduler_py").resolve() # <--- 이 라인으로 강제 지정합니다.
+# → 상위 2단계로 올라가면 /MyBaseLinkV2/python
+BASE_DIR = Path(__file__).resolve().parents[2]
 LOG_DIR = BASE_DIR / "log"
 DATA_DIR = BASE_DIR / "data" / "stock_data"
 LISTING_FILE = BASE_DIR / "data" / "stock_list" / "stock_listing.json"

@@ -1,8 +1,8 @@
 /* ===============================================================
-   ✅ commonModal.css (v1.1 - UX 및 스크롤 FIX 안정판)
+   ✅ commonModal.css (v1.0 - 2025.11 안정판)
    ---------------------------------------------------------------
-   - FIX: 모달 오픈 시 Body 스크롤 완전히 고정 (배경 스크롤 방지)
-   - FIX: 인풋 오류 시각적 피드백 강화
+   - 모든 레이어팝업(모달) + 내부 폼 구조 통합
+   - elegant-modal / header / body / footer / form-row 포함
    - 반응형 완전 대응 (360~1024px)
 ================================================================ */
 
@@ -21,9 +21,6 @@
   --modal-overlay-bg: rgba(255,255,255,0.7);
   --modal-spinner-border: #d1d5db;
   --modal-spinner-accent: #2563eb;
-  /* 🚩 NEW: 인풋 오류 상태 색상 */
-  --modal-input-error-border: #ef4444;
-  --modal-input-error-bg: #fef2f2;
 }
 
 body.dark-mode {
@@ -38,8 +35,7 @@ body.dark-mode {
   --modal-overlay-bg: rgba(17,24,39,0.85);
   --modal-spinner-border: #4b5563;
   --modal-spinner-accent: #3b82f6;
-  --modal-input-error-border: #f87171;
-  --modal-input-error-bg: #450a0a;
+  background: #111827;
   color: var(--modal-input-text);
 }
 
@@ -55,13 +51,7 @@ body.dark-mode {
   z-index: 4000;
 }
 .modal.active { display: flex; }
-
-/* 🚩 FIX: Body 스크롤 고정 (배경 스크롤 방지) */
-.modal-open {
-  overflow: hidden;
-  position: fixed; /* 뷰포트에 고정 */
-  width: 100%; /* 너비 유지 */
-}
+.modal-open { overflow: hidden; }
 
 /* 메인 카드 */
 .elegant-modal {
@@ -88,7 +78,6 @@ body.dark-mode {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--modal-border);
-  flex-shrink: 0; /* 헤더 크기 고정 */
 }
 .elegant-header h3 {
   margin: 0;
@@ -108,8 +97,7 @@ body.dark-mode {
   padding: 15px 18px;
   background: var(--modal-bg);
   max-height: 60vh;
-  overflow-y: auto; /* 모달 내부만 스크롤 되도록 */
-  flex-grow: 1; /* 남은 공간을 채우도록 허용 */
+  overflow-y: auto;
 }
 
 /* 내부 폼 (form-row 기반) */
@@ -125,8 +113,6 @@ body.dark-mode {
   font-size: 13px;
   color: var(--modal-label);
   font-weight: 600;
-  /* 🚩 FIX: required asterisk */
-  /* content: "*"; color: #ef4444; margin-left: 4px; */
 }
 .form-row input[type="text"],
 .form-row input[type="date"],
@@ -141,24 +127,13 @@ body.dark-mode {
   background: var(--modal-input-bg);
   color: var(--modal-input-text);
   outline: none;
-  transition: border-color .15s, box-shadow .15s, background .15s;
+  transition: border-color .15s, box-shadow .15s;
 }
-
-/* 🚩 NEW: 인풋 오류 시각적 피드백 강화 */
-.form-row input.input-error,
-.form-row select.input-error,
-.form-row textarea.input-error {
-  border-color: var(--modal-input-error-border);
-  background: var(--modal-input-error-bg);
-  box-shadow: 0 0 0 1px var(--modal-input-error-border);
-}
-
 .form-row input:focus,
 .form-row select:focus,
 .form-row textarea:focus {
   border-color: var(--modal-spinner-accent);
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
-  background: var(--modal-input-bg); /* 오류 배경색을 포커스 시 제거 */
 }
 .form-row textarea {
   resize: vertical;
@@ -169,18 +144,10 @@ body.dark-mode {
   align-items: flex-start;
 }
 .form-row.options label {
-  /* 🚩 FIX: 옵션 레이블은 텍스트 정렬을 왼쪽으로 변경 */
   text-align: left;
   flex: 0 0 auto;
   font-weight: 500;
   color: var(--modal-label);
-}
-.form-row.options .control-group {
-    /* 체크박스/라디오 그룹 전체 컨테이너 */
-    display: flex;
-    flex-direction: column; /* 세로로 쌓기 */
-    gap: 4px;
-    flex: 1;
 }
 .form-row.options input[type="checkbox"],
 .form-row.options input[type="radio"] {
@@ -197,7 +164,6 @@ body.dark-mode {
   justify-content: flex-end;
   gap: 8px;
   border-top: 1px solid var(--modal-border);
-  flex-shrink: 0; /* 푸터 크기 고정 */
 }
 
 /* 로딩 오버레이 */
@@ -231,24 +197,7 @@ body.dark-mode {
 @media (max-width: 480px) {
   .elegant-modal { width: 96vw; }
   .form-row { flex-direction: column; align-items: stretch; }
-  
-  /* 🚩 FIX: 레이블 정렬을 왼쪽으로 변경하고 인풋과 분리 */
-  .form-row label { 
-      text-align: left; 
-      flex: unset; 
-      margin-bottom: 3px; /* 레이블과 인풋 사이에 공간 추가 */
-  }
-  
-  /* 🚩 FIX: 옵션 행에서는 레이블에 마진을 주지 않음 */
-  .form-row.options label {
-      margin-bottom: 0;
-  }
-  
-  /* 🚩 FIX: 옵션 인풋 그룹은 수직 정렬 시 가로 공간을 다 사용해야 함 */
-  .form-row.options .control-group {
-      align-items: flex-start;
-      padding-top: 5px; /* 상단 레이블과의 간격 확보 */
-  }
+  .form-row label { text-align: left; flex: unset; }
 }
 @media (max-width: 360px) {
   .form-row label { font-size: 12px; }

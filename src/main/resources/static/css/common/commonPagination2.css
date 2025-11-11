@@ -1,0 +1,68 @@
+/* ===============================================
+   ✅ commonPagination.css (v1.0 - 2025.11 안정판)
+   ------------------------------------------------
+   - 페이징 버튼 정렬, 크기, 반응형
+=============================================== */
+
+/* ===============================================================
+   🌙 다크모드 대응 전역 변수 추가 (2025.11 통합)
+================================================================ */
+:root {
+  --page-bg: #ffffff;
+  --page-border: #d1d5db;
+  --page-text: #111827;
+  --page-active-bg: #2563eb;
+  --page-active-text: #ffffff;
+  --page-hover-bg: #f3f4f6;
+}
+body.dark-mode {
+  --page-bg: #1f2937;
+  --page-border: #374151;
+  --page-text: #f3f4f6;
+  --page-active-bg: #3b82f6;
+  --page-active-text: #f9fafb;
+  --page-hover-bg: #374151;
+  background: #111827;
+  color: var(--page-text);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.8rem;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.pagination button {
+  border: 1px solid var(--page-border);
+  background: var(--page-bg);
+  color: var(--page-text);
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.pagination button.active {
+  background: var(--page-active-bg);
+  color: var(--page-active-text);
+  border-color: var(--page-active-bg);
+}
+
+.pagination button:hover:not(.active) {
+  background: var(--page-hover-bg);
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .pagination { margin-top: 0.6rem; gap: 2px; }
+  .pagination button {
+    font-size: 0.7rem;
+    padding: 6px 10px;
+    min-width: 26px;
+  }
+}

@@ -6,7 +6,6 @@
 <title>MyBaseLink 로그인</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<!-- Favicon -->
 <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
 <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
 <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
@@ -38,11 +37,26 @@ body {
   color: #fff;
 }
 
+/* 추가: 로딩 오버레이 스타일 - 배경 클릭 방지 */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* 배경을 약간 어둡게 처리 */
+  z-index: 100; /* 모든 UI 위에 위치 */
+  display: none; /* 초기에는 숨김 */
+  cursor: wait; /* 커서를 로딩 모양으로 변경 */
+  pointer-events: auto; /* 클릭 이벤트를 막음 */
+}
+
+
 .login-container {
   width: 100%;
-  max-width: 340px; /* 로그인 컨테이너의 최대 너비 */
+  max-width: 340px; 
   margin: 0 5vw;
-  padding: 2rem 1.5rem; /* 좌우 패딩 1.5rem */
+  padding: 2rem 1.5rem; 
   background: rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.25);
@@ -53,29 +67,27 @@ body {
   box-sizing: border-box;
   border: 1px solid rgba(255,255,255,0.2);
   position: relative;
-  z-index: 2;
+  z-index: 2; /* 오버레이보다 낮게 설정하여 로그인 컨테이너는 보이게 함 */
 }
 
 /* ========================================= */
-/* 수정: .chart-container의 너비를 .login-container 내부 콘텐츠에 맞춤 */
+/* .chart-container 스타일 (이하 그대로 유지) */
 /* ========================================= */
 .chart-container {
-  width: 100%; /* 부모(body)의 100%를 따라가도록 설정 */
-  max-width: 340px; /* 로그인 컨테이너의 max-width와 동일하게 설정 (외곽선 제한) */
+  width: 100%; 
+  max-width: 340px; 
   height: 150px;
   margin: 0 auto 1.5px auto;
-  padding: 0 1.5rem; /* .login-container와 동일한 좌우 패딩을 적용하여 내부 여백 맞춤 */
-  box-sizing: border-box; /* padding이 max-width 안에 포함되도록 설정 */
+  padding: 0 1.5rem; 
+  box-sizing: border-box; 
   position: relative;
   z-index: 1;
 }
 
-/* 캔버스가 컨테이너 폭에 맞춰 늘어나도록 설정 */
 .chart-container canvas {
   width: 100%; 
   height: 100%;
 }
-/* ========================================= */
 
 #toggleRepeatIcon {
   position:absolute; top:5px; left:5px; font-size:22px;
@@ -138,12 +150,46 @@ button {
   font-size: 0.95rem;
   margin-top: 0.5rem;
   box-sizing: border-box;
+  opacity: 1;
+  pointer-events: auto;
 }
 
-button:hover {
+button:hover:not(:disabled) { 
   background: linear-gradient(90deg,#4b5563,#374151);
   transform: translateY(-2px);
 }
+
+/* ========================================= */
+/* 로딩 스피너 및 버튼 스타일 (이하 그대로 유지) */
+/* ========================================= */
+button.loading-btn {
+  background: #4b5563; 
+  cursor: not-allowed;
+  transform: none; 
+  opacity: 0.85;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  vertical-align: middle;
+  margin-right: 8px; 
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.button-text {
+  vertical-align: middle;
+}
+
+/* ========================================= */
 
 .login-footer {
   margin-top: 1rem;
@@ -166,24 +212,24 @@ button:hover {
 }
 
 /* ========================================= */
-/* 수정: 모바일에서 차트 컨테이너의 너비도 로그인 컨테이너에 맞게 유동적으로 제한 */
+/* 미디어 쿼리 (이하 그대로 유지) */
 /* ========================================= */
 @media (max-width:400px){
-  .login-container{padding:1.8rem 1.2rem;margin:0 6vw;} /* 좌우 패딩 1.2rem */
+  .login-container{padding:1.8rem 1.2rem;margin:0 6vw;}
   .input-group input, button{padding-left:14px;padding-right:40px;}
   .chart-container{
     max-width: 100%; 
-    padding: 0 1.2rem; /* 모바일에서 .login-container와 동일한 좌우 패딩 1.2rem 적용 */
+    padding: 0 1.2rem; 
   } 
 }
-/* ========================================= */
 </style>
 </head>
 
 <body>
 
+<div id="loadingOverlay"></div>
+
 <div class="chart-container">
-  <!-- 수정: width 속성을 제거하여 CSS의 100% 폭을 따라가도록 설정 -->
   <canvas id="candleChart" height="150"></canvas>
   <i id="toggleRepeatIcon" class="fas fa-pause-circle" title="반복 시작/정지"></i>
 </div>
@@ -201,7 +247,9 @@ button:hover {
     <i class="fas fa-lock"></i>
   </div>
 
-  <button id="loginBtn">로그인</button>
+  <button id="loginBtn">
+    <span class="button-text">로그인</span>
+  </button>
 
   <div class="login-footer">
     <p>계정이 없나요? <a href="#">회원가입</a></p>
@@ -209,7 +257,7 @@ button:hover {
 </div>
 
 <script>
-// ==================== 플래그 & 아이콘 ====================
+// ==================== 플래그 & 아이콘 (그대로 유지) ====================
 let repeatChart = true;
 let animationId = null;
 let chartOpacity = 0.7;
@@ -240,30 +288,99 @@ icon.addEventListener("click", ()=>{
   }
 });
 
-// ==================== 로그인 ====================
-document.getElementById("loginBtn").addEventListener("click", async ()=>{
+// ==================== 로그인 (수정된 로직) ====================
+const loginBtn = document.getElementById("loginBtn");
+const buttonText = loginBtn.querySelector(".button-text");
+const loadingOverlay = document.getElementById("loadingOverlay"); // 오버레이 요소
+
+/** 로딩 스피너를 표시하고 버튼을 비활성화하며, 오버레이를 고 배경 클릭을 막습니다. */
+function showLoading() {
+  loginBtn.classList.add("loading-btn");
+  loginBtn.disabled = true;
+  buttonText.innerHTML = '<div class="spinner"></div> 로딩 중...';
+  loadingOverlay.style.display = 'block'; // 오버레이 표시
+}
+
+/** 버튼을 초기 상태로 되돌리고 활성화하며, 오버레이를 끕니다. */
+function hideLoading() {
+  loginBtn.classList.remove("loading-btn");
+  loginBtn.disabled = false;
+  buttonText.innerHTML = '로그인';
+  loginBtn.style.background = ''; // CSS 그라디언트로 복귀
+  loadingOverlay.style.display = 'none'; // 오버레이 숨김
+}
+
+
+loginBtn.addEventListener("click", async ()=>{
   const username=document.getElementById("username").value.trim();
   const password=document.getElementById("password").value.trim();
-  // alert() 대신 커스텀 UI를 사용해야 하지만, 기존 로직 유지를 위해 그대로 둡니다.
-  if(!username||!password){alert("아이디와 비밀번호를 입력하세요."); return;}
+  
+  if(!username||!password){
+    alert("아이디와 비밀번호를 입력하세요."); 
+    return;
+  }
+
+  showLoading(); // 로딩 스피너 표시 및 오버레이 활성화
+
   try{
     const res=await fetch("/auth/login",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body: JSON.stringify({username,password})
     });
+
     if(res.ok){
+      // 로그인 성공 처리
       const data=await res.json();
       localStorage.setItem("token",data.token);
       localStorage.setItem("username",data.username);
       localStorage.setItem("sessionMillis",data.sessionMillis);
       localStorage.setItem("serverTime",data.serverTime);
-      location.href="/pages/main/base";
-    } else { alert("로그인 실패 ❌"); }
-  }catch(err){console.error(err); alert("서버 오류가 발생했습니다.");}
+      
+      // 로딩 버튼에 성공 UI 표시 (오버레이는 유지)
+      loginBtn.classList.remove("loading-btn");
+      loginBtn.disabled = true; // 성공 메시지를 보여주는 동안 클릭 방지
+      loginBtn.style.background = '#10b981'; // 초록색 배경
+      buttonText.innerHTML = '<i class="fas fa-check-circle"></i> 로그인 성공!';
+      
+      // 1초(1000ms) 후 페이지 이동 및 오버레이 제거
+      setTimeout(() => {
+        // 오버레이 제거는 페이지 이동 직전에만 필요하지만, 안전을 위해 호출합니다.
+        loadingOverlay.style.display = 'none'; 
+        location.href="/pages/main/base";
+      }, 1000); // 1초 대기
+
+    } else { 
+      // 로그인 실패 처리
+      // 실패 시 에러 메시지 표시
+      loginBtn.classList.remove("loading-btn");
+      loginBtn.disabled = true; 
+      loginBtn.style.background = '#ef4444'; // 빨간색 배경
+      buttonText.innerHTML = '<i class="fas fa-times-circle"></i> 로그인 실패 ❌';
+      
+      // 1.5초 후 버튼 초기화 및 오버레이 제거
+      setTimeout(() => {
+        hideLoading(); 
+      }, 1500); 
+    }
+  }catch(err){
+    // 서버 오류 처리
+    console.error(err); 
+    
+    loginBtn.classList.remove("loading-btn");
+    loginBtn.disabled = true; 
+    loginBtn.style.background = '#ef4444'; 
+    buttonText.innerHTML = '<i class="fas fa-times-circle"></i> 서버 오류 ❌';
+    
+    // 1.5초 후 버튼 초기화 및 오버레이 제거
+    setTimeout(() => {
+      hideLoading(); 
+    }, 1500);
+  }
 });
 
-// ==================== 봉차트 ====================
+
+// ==================== 봉차트 (이하 그대로 유지) ====================
 const candleCount=13;
 let candles=[],index=0,fadeOpacity=chartOpacity;
 const canvasContainer = document.querySelector('.chart-container');
@@ -273,20 +390,17 @@ const width = 15;
 
 /** 캔버스 크기를 컨테이너에 맞게 조절하고, 차트를 다시 그립니다. */
 function resizeCanvas() {
-    // 캔버스의 내부 픽셀 크기를 컨테이너 크기에 맞춥니다.
     canvas.width = canvasContainer.clientWidth;
-    canvas.height = 150; // 높이는 고정
+    canvas.height = 150; 
 }
 
 // 초기 크기 설정 및 리사이즈 이벤트 리스너 추가
 resizeCanvas();
 window.addEventListener('resize', () => {
     resizeCanvas();
-    // 캔버스 크기가 변경되면 차트 데이터를 리셋하고 다시 그립니다.
     resetCandles(); 
-    // resetCandles() 내부에서 index, fadeOpacity 등이 초기화됩니다.
     if(animationId === null) {
-      drawCandles(); // 정지 상태였다면 다시 시작
+      drawCandles(); 
     }
 });
 
@@ -306,8 +420,8 @@ function resetCandles(){
 }
 
 function drawCandles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height); // 동적 width 사용
-  const spacing=(canvas.width-candleCount*width)/(candleCount-1); // 동적 width 사용
+  ctx.clearRect(0,0,canvas.width,canvas.height); 
+  const spacing=(canvas.width-candleCount*width)/(candleCount-1); 
 
   // 봉 그리기
   for(let i=0;i<=index;i++){
@@ -322,7 +436,7 @@ function drawCandles(){
   }
 
   // 라인 그라디언트
-  const gradient=ctx.createLinearGradient(0,0,canvas.width,0); // 동적 width 사용
+  const gradient=ctx.createLinearGradient(0,0,canvas.width,0); 
   gradient.addColorStop(0,"rgba(248,113,113,"+fadeOpacity+")");
   gradient.addColorStop(0.5,"rgba(59,130,246,"+fadeOpacity+")");
   gradient.addColorStop(1,"rgba(248,113,113,"+fadeOpacity+")");
@@ -343,9 +457,9 @@ function drawCandles(){
   // 마지막 화살표 + 반짝임 전체
   if(index>=candleCount-1){
     const last=candles[candleCount-1];
-    const lx=canvas.width-width/2-1; // 동적 width 사용
+    const lx=canvas.width-width/2-1; 
     const ly=canvas.height-last.currentHeight-10;
-    const arrowWidth=Math.min(22,canvas.width-lx-2); // 동적 width 사용
+    const arrowWidth=Math.min(22,canvas.width-lx-2); 
     const arrowHeight=14;
 
     const glowAlpha=0.5+0.5*Math.sin(Date.now()/100);

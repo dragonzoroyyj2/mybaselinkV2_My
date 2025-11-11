@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 AthenaAI 배치 업데이트</title> 
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --main-bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color-primary: #111827;
+            --text-color-secondary: #6b7280;
+            --border-color-default: #d1d5db;
+            --input-bg: #ffffff;
+            --progress-bar-bg: #e5e7eb;
+
+            --log-box-bg: #111;
+            --log-text-default: #e0e0e0;
+            --log-text-info: #9ca3af;
+            --log-text-progress: #60a5fa;
+            --log-text-warning: #f59e0b;
+            --log-text-error: #ef4444;
+            --log-text-complete: #22c55e;
+
+            --card-border: #d1d5db;
+            --error-card-bg: #fff;
+            --error-card-border: #e5e7eb;
+            --error-card-text: #374151;
+            --error-card-hover: #fee2e2;
+            --error-card-header: #b91c1c;
+        }
+
+        /* 💡 드래그 중인 요소 스타일 */
+        .dragging {
+            opacity: 0.4;
+            box-shadow: none !important; 
+        }
+
+        /* 💡 드롭 영역 강조 스타일 */
+        .drag-over {
+            border: 4px dashed #6366f1 !important;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+        
+        /* ✅ [개선] 카드 선택 시 레이아웃 흔들림(울렁거림) 제거 (border 3px로 고정) */
+        .option-card {
+            border: 3px solid var(--border-color-default); /* 1px 대신 3px로 고정하여 CLS 방지 */
+            border-radius: 8px;
+            padding: 16px;
+            background-color: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            height: 100%; 
+        }
+        .option-card:hover {
+            border-color: #a5b4fc;
+        }
+        input[type="radio"]:checked + .option-card {
+            border-color: #6366f1; /* 테두리 색상만 변경 */
+            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2);
+            background-color: #f7f9fd; /* 은은한 배경색 */
+        }
+
+        /* ✅ MA 20일선 시각적 수정 */
+        /* disabled 되어도 체크 표시가 명확하게 보이도록 강조 */
+        #ma20:checked:disabled {
+            background-color: #6366f1 !important; /* Indigo-600 */
+            border-color: #4f46e5 !important;
+            color: #ffffff !important; /* 체크 마크 색상 */
+        }
+        
+        /* ✅ 섹션 토글 개선: max-height 트랜지션 및 overflow: hidden */
+        .section-content-toggle {
+            transition: max-height 0.35s ease-out; 
+            overflow: hidden;
+            padding-bottom: 0 !important; 
+        }
+        .section-content-inner-padding {
+            padding-bottom: 1rem; 
+        }
+
+
+        .global-status-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .global-status-header {
+            font-weight: 600;
+            color: var(--text-color-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+        }
+        .global-status-body {
+            font-size: .9rem;
+            color: var(--text-color-secondary);
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+        }
+        .global-status-progress {
+            width: 100%;
+            height: 10px;
+            background: var(--progress-bar-bg);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .global-status-progress div {
+            height: 100%;
+            width: 0%;
+            background: #2563eb;
+            transition: width .25s;
+        }
+
+        .status-idle{color:#6b7280;}
+        .status-running{color:#2563eb;}
+        .status-completed{color:#22c55e;}
+        .status-failed{color:#ef4444;}
+        .status-cancelled{color:#f59e0b;}
+        .status-locked{color:#9333ea;} 
+        
+        @keyframes blink {0%,100%{opacity:1}50%{opacity:.35}}
+        .blinking{animation:blink 1.2s infinite;}
+        
+        /* ===============================================================
+           ✅ 추가: 차트 캔버스 사이즈/툴바 (이미지 대비 교체용)
+           ---------------------------------------------------------------
+           - 기존 <img id="chartImage"> 는 Fallback 으로 유지(숨김/표시)
+           - 차트 캔버스는 반응형 100%로 표시
+           - 툴바(리셋/확대/이동 안내)는 최소한으로 추가
+        =============================================================== */
+        .chart-canvas-wrap{width:100%; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:12px;}
+        .chart-toolbar{display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-bottom:8px;}
+        .chart-toolbar button{font-size:.85rem; padding:.35rem .6rem; border:1px solid #d1d5db; border-radius:8px;}
+        .chart-toolbar .hint{margin-right:auto; font-size:.8rem; color:#6b7280;}
+        #chartCanvas, #macdCanvas{width:100%; height:360px;}
+        @media (max-width: 640px){
+          #chartCanvas, #macdCanvas{height:280px;}
+        }
+    </style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <!-- ✅ 추가: 확대/이동 플러그인 (차트 상호작용 강화) -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+
+    <div class="page-header">
+      <div class="page-title">
+        <h2>📄 국내 주식 패턴 분석 및 시뮬레이션</h2>
+      </div>
+      <div class="breadcrumb">
+        <i class="fas fa-folder-open"></i>
+        <span>시스템 / 분석 도구 (AthenaAi)</span>
+      </div>
+    </div>
+
+    <!-- ✅ 전역(Global) 상태 카드 -->
+    <div class="global-status-card">
+        <div class="global-status-header">
+          🌐 AthenaAI 배치 진행 상태
+          <span id="globalStatusText" class="status-idle">대기중</span>
+        </div>
+
+        <div class="global-status-body">
+          <div>실행자: <span id="globalRunner">미연결</span></div>
+          <div>전체 진행률: <span id="globalProgressLabel">0%</span></div>
+        </div>
+
+        <div class="global-status-progress">
+            <div id="globalProgressBar"></div>
+        </div>
+    </div>
+    
+        <!-- ✅ 분석 옵션 섹션 -->
+    <div class="card mb-8">
+        <form id="analysisForm">
+
+            <!-- ✅ 1. 분석 유형 선택 (순서 변경 가능) -->
+            <button type="button"
+                    class="w-full text-left flex justify-between items-center text-2xl font-bold text-gray-700 mt-0 mb-5 border-b pb-3 hover:text-indigo-600 transition duration-150"
+                    onclick="toggleSection('analysisTypeContent', this)">
+                <span>1. 분석 유형 선택 (순서 변경 가능)</span>
+                <span id="analysisTypeArrow" class="text-3xl transition-transform duration-300 transform">▾</span>
+            </button>
+
+            <div id="analysisTypeContent" class="section-content-toggle">
+                <div class="section-content-inner-padding">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                        <!-- MA 분석 (Draggable) -->
+                        <label for="maRadio" class="block option-card-wrapper" draggable="true">
+                            <input type="radio" name="analysisType" id="maRadio" value="ma"
+                                   class="hidden" checked onclick="toggleMaPeriods()">
+                            <div class="option-card">
+                                <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2 text-indigo-500">📉</span> 이동평균선(MA) 분석 (기본)
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">장기 하락 배열 종목 탐색</p>
+
+                                <!-- MA 기간 -->
+                                <div id="maPeriodsContainer"
+                                     class="ml-0 mt-3 p-3 bg-indigo-100/50 rounded-lg transition-all duration-300">
+                                    <h4 class="font-semibold text-indigo-700 mb-2 text-sm">
+                                        MA 기간 선택 (하락 배열 확인):
+                                    </h4>
+
+                                    <div class="flex flex-wrap gap-x-4 gap-y-2 items-center">
+                                        <!-- ✅ MA 20일선 체크 표시 시각화 수정 반영 -->
+                                        <input type="checkbox" name="maPeriods" value="20" id="ma20"
+                                               checked disabled class="rounded text-indigo-600 focus:ring-0">
+                                        <label for="ma20" class="text-sm text-gray-700 font-extrabold">20일선 (필수)</label>
+                                        
+                                        <input type="checkbox" name="maPeriods" value="60" id="ma60"
+                                               checked class="rounded text-indigo-600">
+                                        <label for="ma60" class="text-sm">60일선</label>
+
+                                        <input type="checkbox" name="maPeriods" value="200" id="ma200"
+                                               checked class="rounded text-indigo-600">
+                                        <label for="ma200" class="text-sm">200일선</label>
+                                        
+                                        <input type="checkbox" name="maPeriods" value="500" id="ma500"
+                                               checked class="rounded text-indigo-600">
+                                        <label for="ma500" id="ma500Label" class="text-sm">500일선</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Double Bottom (Draggable) -->
+                        <label for="doubleBottomRadio" class="block option-card-wrapper" draggable="true">
+                            <input type="radio" name="analysisType" id="doubleBottomRadio"
+                                   value="double_bottom" class="hidden" onclick="toggleMaPeriods()">
+                            <div class="option-card">
+                                <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2 text-green-500">📈</span> 이중바닥 (W자형 패턴)
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">강력한 추세 반전 탐색</p>
+                            </div>
+                        </label>
+
+                        <!-- Triple Bottom (Draggable) -->
+                        <label for="tripleBottomRadio" class="block option-card-wrapper" draggable="true">
+                            <input type="radio" name="analysisType" id="tripleBottomRadio"
+                                   value="triple_bottom" class="hidden" onclick="toggleMaPeriods()">
+                            <div class="option-card">
+                                <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2 text-green-500">📊</span> 삼중바닥 패턴
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">바닥 다지기 종목 탐색</p>
+                            </div>
+                        </label>
+
+                        <!-- Cup & Handle (Draggable) -->
+                        <label for="cupAndHandleRadio" class="block option-card-wrapper" draggable="true">
+                            <input type="radio" name="analysisType" id="cupAndHandleRadio"
+                                   value="cup_and_handle" class="hidden" onclick="toggleMaPeriods()">
+                            <div class="option-card">
+                                <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2 text-amber-500">☕</span> 컵앤핸들 패턴
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">돌파 직전 종목 탐색</p>
+                            </div>
+                        </label>
+
+                        <!-- Decline 5 Days (Draggable) -->
+                        <label for="decline5dRadio" class="block option-card-wrapper" draggable="true">
+                            <input type="radio" name="analysisType" id="decline5dRadio"
+                                   value="decline_5d" class="hidden" onclick="toggleMaPeriods()">
+                            <div class="option-card">
+                                <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2 text-red-600">🔻</span> 단기 급락주 (5일 연속 하락)
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">과대 낙폭주 탐색</p>
+                            </div>
+                        </label>
+
+                        <!-- Decline 20 Days (Draggable) -->
+                        <label for="decline20dRadio" class="block option-card-wrapper" draggable="true">
+                            <input type="radio" name="analysisType" id="decline20dRadio"
+                                   value="decline_20d" class="hidden" onclick="toggleMaPeriods()">
+                            <div class="option-card">
+                                <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2 text-red-700">⬇️</span> 중기 연속 하락 (20일)
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">한 달간 반등 없는 종목 탐색</p>
+                            </div>
+                        </label>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ 2. 실행 옵션 설정 (mt-8 -> mt-6로 간격 축소) -->
+            <button type="button"
+                    class="w-full text-left flex justify-between items-center text-2xl font-bold text-gray-700 mt-6 mb-5 border-b pb-3 hover:text-indigo-600 transition duration-150"
+                    onclick="toggleSection('filteringOptionsContent', this)">
+                <span>2. 실행 옵션 설정</span>
+                <span id="filteringOptionsArrow" class="text-3xl transition-transform duration-300 transform">▾</span>
+            </button>
+
+            <div id="filteringOptionsContent" class="section-content-toggle">
+                <div class="section-content-inner-padding">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                        <!-- 워커수 -->
+                        <div class="p-4 bg-white rounded-lg border border-purple-200 shadow-sm flex items-center">
+                            <span class="mr-3 text-purple-700 font-bold">🛠️ 작업자 수:</span>
+                            <input type="number" id="workerCount" value="8" min="1" max="16"
+                                   class="w-16 px-3 py-1 border border-purple-300 rounded-lg text-center font-bold text-lg focus:ring-purple-500">
+                            <span class="ml-2 text-purple-800 font-semibold">개</span>
+                        </div>
+
+                        <!-- 빈 공간을 채우기 위한 더미 (레이아웃 유지를 위해) -->
+                        <div class="hidden md:block"></div>
+                        <div class="hidden md:block"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ 3. 결과 표시 개수 (mt-8 -> mt-6로 간격 축소) -->
+            <button type="button"
+                    class="w-full text-left flex justify-between items-center text-2xl font-bold text-gray-700 mt-6 mb-5 border-b pb-3 hover:text-indigo-600 transition duration-150"
+                    onclick="toggleSection('topNCountContent')">
+                <span>3. 결과 표시 개수 설정</span>
+                <span id="topNCountArrow" class="text-3xl transition-transform duration-300 transform">▾</span>
+            </button>
+
+            <div id="topNCountContent" class="section-content-toggle">
+                <div class="section-content-inner-padding">
+                    <div class="flex items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <label for="topNCount"
+                               class="text-lg text-gray-700 font-medium mr-4">
+                            상위 종목 개수(N):
+                        </label>
+
+                        <input type="number" id="topNCount" value="10" min="1" max="50"
+                               class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-center font-bold text-xl">
+
+                        <span class="ml-4 text-gray-500 text-sm">1~50 사이</span>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+        <!-- ✅ 실행 / 취소 버튼 -->
+        <div class="run-controls-wrapper mt-8 flex space-x-4">
+
+            <button type="button" id="runAnalysisBtn"
+                    onclick="runAnalysis()"
+                    class="flex-grow px-6 py-3 bg-indigo-600 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                🚀 분석 실행 및 유망 종목 찾기
+            </button>
+
+            <button type="button" id="btnCancel"
+                    onclick="cancelAnalysis()"
+                    class="px-6 py-3 bg-red-600 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-red-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled>
+                ❌ 취소
+            </button>
+
+        </div>
+
+    </div>
+    
+    
+        <!-- ✅ 결과 영역 -->
+    <div class="card mb-10">
+
+        <!-- 화면 상단 제목 -->
+        <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+            📊 분석 결과
+        </h3>
+
+        <!-- ✅ 결과 테이블 -->
+        <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+            <table class="min-w-full bg-white text-gray-800" id="resultTable">
+                <thead class="bg-gray-100 border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">종목코드</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">종목명</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">신호 강도 / 수동 검토</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">MA 배열</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">차트 확인</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- ✅ 결과 없음 -->
+        <div id="noResultBox" class="hidden p-6 text-center text-gray-500 text-lg">
+            분석된 결과가 없습니다.
+        </div>
+
+    </div>
+
+    <!-- ✅ 로그 영역 -->
+    <div class="card mb-14">
+        <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+            🪵 실시간 로그
+            <button id="copyLogBtn" class="ml-4 px-3 py-1 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition duration-200">
+                복사
+            </button>
+        </h3>
+
+        <div id="logBox"
+             class="h-64 bg-black text-green-300 text-sm p-3 rounded-md overflow-y-auto font-mono">
+            <p class="opacity-70">로그 대기중...</p>
+        </div>
+    </div>
+
+    <!-- ✅ 차트 모달 -->
+    <div id="chartModal"
+         class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl p-4 max-w-4xl w-full relative">
+
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-700">📈 차트</h3>
+                <button onclick="closeChartModal()"
+                        class="text-gray-600 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+
+            <!-- ✅ 차트 이미지 (Fallback 용도) -->
+            <img id="chartImage" src="" class="w-full rounded-lg shadow-md mb-4" style="display:none;">
+
+            <!-- ✅ 차트 캔버스(가격/MA + MACD) -->
+            <div class="chart-canvas-wrap">
+              <div class="chart-toolbar">
+                <span class="hint">마우스 휠 확대 · 드래그 이동 · 더블클릭 리셋</span>
+                <button type="button" id="btnResetZoom">리셋</button>
+              </div>
+              <canvas id="chartCanvas"></canvas>
+            </div>
+            <div class="chart-canvas-wrap mt-3">
+              <canvas id="macdCanvas"></canvas>
+            </div>
+            
+            <!-- ✅ 분석 결과 업데이트 시뮬레이션 영역 (차트 분석 후 테이블 업데이트 기능) -->
+            <div id="manualReviewArea" class="p-4 bg-gray-50 border border-gray-200 rounded-lg mt-4">
+                <p class="text-sm text-gray-600 mb-3">
+                    ✍️ <strong>수동 검토:</strong> 차트를 확인한 후, 이 종목에 대한 <strong>수동 검토 상태</strong>를 테이블에 반영할 수 있습니다.
+                </p>
+                <div class="flex justify-end">
+                    <button id="updateResultBtn"
+                            class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200"
+                            onclick="updateResultStatus()">
+                        ⭐ 유망 종목으로 수동 업데이트 (테이블에 반영)
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+<th:block layout:fragment="pageScript">
+<script>
+(function () {
+
+  /* ================================
+     ✅ 요소 선택 (HTML 실제 id 기준)
+  ================================== */
+  const $runBtn = document.getElementById("runAnalysisBtn");
+  const $cancelBtn = document.getElementById("btnCancel");
+
+  const $analysisForm = document.getElementById("analysisForm");
+  const $log = document.getElementById("logBox");
+  const $copyLogBtn = document.getElementById("copyLogBtn");
+
+  const $resultTableBody = document.getElementById("resultTableBody");
+  const $noResultBox = document.getElementById("noResultBox");
+
+  const $chartModal = document.getElementById("chartModal");
+  const $chartImage = document.getElementById("chartImage");
+  const $modalTitle = document.getElementById("modalTitle");
+
+  const $globalStatusText = document.getElementById("globalStatusText");
+  const $globalRunner = document.getElementById("globalRunner");
+  const $globalProgressLabel = document.getElementById("globalProgressLabel");
+  const $globalProgressBar = document.getElementById("globalProgressBar");
+
+  const $analysisTypeContent = document.getElementById('analysisTypeContent');
+  const $filteringOptionsContent = document.getElementById('filteringOptionsContent');
+  const $topNCountContent = document.getElementById('topNCountContent');
+
+  /* ================================
+     ✅ 추가: 차트 DOM 요소/상태
+     - 오직 클라이언트 사이드 렌더 (서버 변경 無)
+     - JSON 실패 시 자동 Fallback(기존 이미지)
+  ================================== */
+  const $priceCanvas = document.getElementById('chartCanvas');
+  const $macdCanvas  = document.getElementById('macdCanvas');
+  const $btnResetZoom = document.getElementById('btnResetZoom');
+  let priceChart = null;
+  let macdChart  = null;
+
+  let currentTaskId = null;
+  let es = null;
+  let currentUser = "미연결"; // 초기 사용자 ID
+  let $currentRow = null; 
+  let globalStatus = "IDLE"; 
+
+
+  /* ================================
+     ✅ 분석 유형 선택 및 매개변수
+  ================================== */
+  function getSelectedPattern() {
+    const checked = document.querySelector("input[name='analysisType']:checked");
+    return checked ? checked.value : "ma";
+  }
+  
+  function getMaPeriods() {
+    // 파이썬 백엔드 매개변수 형식에 맞게 콤마(,)로 구분된 문자열 생성
+    const maPeriodsElements = document.querySelectorAll('input[name="maPeriods"]:checked');
+    const maPeriods = Array.from(maPeriodsElements)
+        .map(el => el.value)
+        .filter((value, index, self) => self.indexOf(value) === index) 
+        .sort((a, b) => parseInt(a) - parseInt(b))
+        .join(',');
+        
+    return maPeriods; // 예: "20,60,200"
+  }
+
+
+  /* ================================
+     ✅ MA 체크박스 표시/숨김
+  ================================== */
+  window.toggleMaPeriods = function () {
+    const isMA = document.getElementById("maRadio").checked;
+    const box = document.getElementById("maPeriodsContainer");
+    
+    // MA가 아닌 패턴을 선택하면 MA 기간 입력 필드를 잠그고 숨김
+    const inputs = box.querySelectorAll('input[type="checkbox"]');
+    inputs.forEach(input => {
+        // MA 20일선은 HTML에서 이미 disabled 되어 있으므로, 여기서 상태를 변경하지 않습니다.
+        if (input.id === 'ma20') return; 
+
+        if (isMA) {
+            input.disabled = false;
+        } else {
+            input.disabled = true;
+        }
+    });
+
+    box.style.display = isMA ? "block" : "none";
+  };
+  
+  /* ================================
+     ✅ 섹션 토글 개선 (maxHeight 기반)
+  ================================== */
+  window.toggleSection = function (contentId) {
+    const buttonElement = event.currentTarget;
+    const content = document.getElementById(contentId);
+    const arrow = buttonElement.querySelector('span:last-child');
+    
+    const isClosed = content.style.maxHeight === '0px';
+
+    if (isClosed) {
+        content.style.maxHeight = content.scrollHeight + "px";
+        arrow.classList.add('rotate-180');
+        setTimeout(() => {
+            if (content.style.maxHeight !== '0px') {
+                content.style.maxHeight = null; 
+            }
+        }, 400); 
+    } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        requestAnimationFrame(() => {
+            content.style.maxHeight = '0px';
+        });
+        arrow.classList.remove('rotate-180');
+    }
+  };
+
+
+  /* ================================
+     ✅ 드래그 앤 드롭 기능 (분석 유형)
+  ================================== */
+  let dragSrcEl = null;
+
+  window.handleDragStart = function (e) {
+    dragSrcEl = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+    this.classList.add('dragging');
+  };
+
+  window.handleDragOver = function (e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  window.handleDragEnter = function (e) {
+    this.classList.add('drag-over');
+  };
+
+  window.handleDragLeave = function (e) {
+    this.classList.remove('drag-over');
+  };
+
+  window.handleDrop = function (e) {
+    e.stopPropagation();
+    this.classList.remove('drag-over');
+
+    if (dragSrcEl !== this) {
+      const container = document.getElementById("analysisTypeContent").querySelector('.grid');
+      if (dragSrcEl.compareDocumentPosition(this) & Node.DOCUMENT_POSITION_FOLLOWING) {
+        container.insertBefore(dragSrcEl, this.nextSibling);
+      } else {
+        container.insertBefore(dragSrcEl, this);
+      }
+    }
+    return false;
+  };
+
+  window.handleDragEnd = function (e) {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.option-card-wrapper').forEach(item => {
+      item.classList.remove('drag-over');
+    });
+  };
+
+  function attachDragListeners() {
+      document.querySelectorAll('#analysisTypeContent label.option-card-wrapper').forEach(item => {
+        item.ondragstart = window.handleDragStart;
+        item.ondragover = window.handleDragOver;
+        item.ondragenter = window.handleDragEnter;
+        item.ondragleave = window.handleDragLeave;
+        item.ondrop = window.handleDrop;
+        item.ondragend = window.handleDragEnd;
+      });
+  }
+
+  /* ================================
+     ✅ 버튼 상태 및 전역 상태 업데이트
+  ================================== */
+  function updateButtonState(status, runner) {
+      const S = (status || "IDLE").toUpperCase();
+      const isRunning = ["START", "IN_PROGRESS", "RUNNING"].includes(S);
+      const isOwner = (runner === currentUser);
+      
+      globalStatus = S;
+
+      if (!isRunning) {
+          $runBtn.disabled = false;
+      } else if (isRunning && !isOwner) {
+          $runBtn.disabled = true;
+      } else if (isRunning && isOwner) {
+          $runBtn.disabled = true;
+      }
+      
+      const inputs = $analysisForm.querySelectorAll('input, select:not([disabled])');
+      inputs.forEach(input => {
+          if (input.id === 'ma20') return; 
+          input.disabled = isRunning;
+      });
+      toggleMaPeriods(); 
+
+      $cancelBtn.disabled = !(isRunning && isOwner); 
+  }
+
+  function updateGlobalState(st, runner, progress) {
+    const S = (st || "IDLE").toUpperCase();
+    let displayText = S;
+    if (S === "RUNNING" && runner !== currentUser) {
+        displayText = "다른 사용자 실행 중 (잠김)";
+        $globalStatusText.classList.add("status-locked");
+    } else {
+        $globalStatusText.classList.remove("status-locked");
+    }
+
+    $globalStatusText.textContent = displayText;
+    $globalRunner.textContent = runner || "미연결";
+
+    let pct = 0;
+    if (S === "COMPLETED") {
+        pct = 100;
+    } else if (S === "RUNNING") {
+        pct = Math.min(100, Math.max(0, Math.floor(progress || 0)));
+    } else {
+        pct = 0; 
+    }
+    
+    $globalProgressLabel.textContent = pct + "%";
+    $globalProgressBar.style.width = pct + "%";
+
+    $globalStatusText.className = "";
+    if (S === "RUNNING" && runner === currentUser) $globalStatusText.classList.add("status-running", "blinking");
+    else if (S === "RUNNING" && runner !== currentUser) $globalStatusText.classList.add("status-locked");
+    else if (S === "COMPLETED") $globalStatusText.classList.add("status-completed");
+    else if (S === "FAILED") $globalStatusText.classList.add("status-failed");
+    else if (S === "CANCELLED") $globalStatusText.classList.add("status-cancelled");
+    else $globalStatusText.classList.add("status-idle");
+  }
+
+  /* ================================
+     ✅ 로그인 사용자 (임시 ID)
+  ================================== */
+  async function initCurrentUser() {
+    const id = "user_" + Math.random().toString(36).substring(2, 8);
+    currentUser = id;
+    return id;
+  }
+
+  /* ================================
+     ✅ 로그
+  ================================== */
+  function appendLog(line) {
+    if (!line) return;
+    const p = document.createElement("p");
+    
+    if (line.includes("[ERROR]") || line.includes("FATAL") || line.includes("실패")) {
+        p.className = 'text-red-500';
+    } else if (line.includes("WARNING")) {
+        p.className = 'text-yellow-500';
+    } else if (line.includes("COMPLETED") || line.includes("성공")) {
+        p.className = 'text-green-500 font-extrabold text-lg'; 
+    } else if (line.includes("[LOG]") || line.includes("요청")) {
+        p.className = 'text-blue-400';
+    } else {
+        p.className = 'text-gray-300';
+    }
+    
+    p.textContent = line;
+    $log.appendChild(p);
+    $log.scrollTop = $log.scrollHeight;
+  }
+
+  /* ================================
+     ✅ 로그 복사
+  ================================== */
+  $copyLogBtn.onclick = () => {
+    const t = Array.from($log.querySelectorAll("p"))
+      .map(p => p.textContent)
+      .join("\n");
+
+    if (t.trim() === '로그 대기중...') {
+        appendLog("[LOG] 🚫 복사할 로그가 없습니다.");
+        return;
+    }
+    
+    navigator.clipboard.writeText(t)
+      .then(() => appendLog("[LOG] 📋 로그 복사 완료"));
+  };
+
+  /* ================================
+     ✅ 결과 테이블 렌더링
+  ================================== */
+  function renderResults(list) {
+    $resultTableBody.innerHTML = "";
+
+    if (!list || list.length === 0) {
+      $noResultBox.classList.remove("hidden");
+      return;
+    }
+    $noResultBox.classList.add("hidden");
+
+    list.forEach((item) => {
+      const rowId = `result-row-${item.ticker}`;
+      const tr = document.createElement("tr");
+      tr.id = rowId; 
+      tr.className = 'hover:bg-gray-100 transition duration-100'; 
+      tr.innerHTML = `
+        <td class="px-4 py-2 border">${item.ticker || "-"}</td>
+        <td class="px-4 py-2 border">${item.name || "-"}</td>
+        <td class="px-4 py-2 border font-bold">${item.score || "-"}</td>
+        <td class="px-4 py-2 border">${item.ma_pattern || "-"}</td>
+        <td class="px-4 py-2 border text-center">
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  onclick="showChart('${item.ticker}', '${item.name}', '${rowId}')">보기</button>
+        </td>
+      `;
+      $resultTableBody.appendChild(tr);
+    });
+    
+    appendLog(`[LOG] ✅ 최종 분석 결과 ${list.length}개 항목 테이블 업데이트 완료.`);
+  }
+
+  /* ============================================================
+     ✅ 차트 렌더링(Chart.js) — 기존 이미지와 호환 Fallback
+     ------------------------------------------------------------
+     - 서버에 변경 없이 /chart?mode=chart_data 로 JSON 요청 시도
+     - 실패/비JSON 응답이면 기존 이미지 표시로 자동 복귀
+     - 확대/이동 활성화 (wheel/drag), 더블클릭/버튼으로 리셋
+  ============================================================ */
+  function destroyCharts() {
+    try { if (priceChart) { priceChart.destroy(); priceChart = null; } } catch(e){}
+    try { if (macdChart)  { macdChart.destroy();  macdChart  = null; } } catch(e){}
+  }
+
+  function toLine(ds, key) {
+    if (!Array.isArray(ds)) return [];
+    return ds.map(d => ({ x: d.x, y: d[key] ?? d.y ?? null })).filter(p => p.y !== null && p.y !== undefined);
+  }
+
+  function toXY(ds) {
+    if (!Array.isArray(ds)) return [];
+    return ds.map(d => ({ x: d.x, y: d.y })).filter(p => p.y !== null && p.y !== undefined);
+  }
+
+  function color(op) {
+    // Base indigo-ish set without forcing specific colors too much
+    const c = 'rgba(37, 99, 235,' + (op ?? 1) + ')'; 
+    return c;
+  }
+
+  function buildPriceChart(ctx, payload) {
+    const closes = payload.ohlcv_data ? payload.ohlcv_data.map(d => ({ x: d.x, y: d.c })) : [];
+    const ma20  = payload.ma_data && payload.ma_data.MA20  ? toXY(payload.ma_data.MA20)  : [];
+    const ma50  = payload.ma_data && payload.ma_data.MA50  ? toXY(payload.ma_data.MA50)  : [];
+    const ma200 = payload.ma_data && payload.ma_data.MA200 ? toXY(payload.ma_data.MA200) : [];
+
+    // 패턴/크로스 포인트 (산점도)
+    const cross = Array.isArray(payload.cross_points) ? payload.cross_points.map(p => ({x:p.x, y:p.y, type:p.type})) : [];
+    const pats  = Array.isArray(payload.pattern_points) ? payload.pattern_points.map(p => ({x:p.x, y:p.y, type:p.type, status:p.status})) : [];
+
+    priceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          { label: 'Close', data: closes, parsing:false, pointRadius:0, borderWidth:1.5, borderColor: '#111827' },
+          { label: 'MA20',  data: ma20,  parsing:false, pointRadius:0, borderWidth:1.2, borderColor: '#22c55e' },
+          { label: 'MA50',  data: ma50,  parsing:false, pointRadius:0, borderWidth:1.2, borderColor: '#f59e0b' },
+          { label: 'MA200', data: ma200, parsing:false, pointRadius:0, borderWidth:1.2, borderColor: '#3b82f6' },
+          // 골든/데드 크로스 포인트
+          { label: 'Cross', type:'scatter', data: cross, parsing:false, pointRadius:4, pointBackgroundColor:'#ef4444', showLine:false },
+          // 패턴 넥라인 등 표시
+          { label: 'Pattern', type:'scatter', data: pats, parsing:false, pointRadius:4, pointBackgroundColor:'#8b5cf6', showLine:false }
+        ]
+      },
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{ mode:'nearest', intersect:false },
+        scales:{
+          x:{ type:'time', time:{ tooltipFormat:'yyyy-MM-dd' }, grid:{ display:false } },
+          y:{ beginAtZero:false, ticks:{ callback:v => v.toLocaleString() } }
+        },
+        plugins:{
+          legend:{ display:true, position:'top' },
+          tooltip:{ callbacks:{
+            label: (ctx)=>{
+              const d = ctx.raw;
+              if (ctx.dataset.type === 'scatter' && d && (d.type || d.status)) {
+                return `${ctx.dataset.label}: ${d.type || ''} ${d.status ? '('+d.status+')' : ''}  y=${d.y?.toLocaleString?.()}`;
+              }
+              return `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString?.()}`;
+            }
+          }},
+          zoom:{
+            pan:{ enabled:true, mode:'xy' },
+            zoom:{ wheel:{ enabled:true }, pinch:{ enabled:true }, mode:'xy' }
+          }
+        }
+      }
+    });
+  }
+
+  function buildMacdChart(ctx, payload) {
+    const macd = payload.macd_data && payload.macd_data.MACD ? toXY(payload.macd_data.MACD) : [];
+    const signal = payload.macd_data && payload.macd_data.Signal ? toXY(payload.macd_data.Signal) : [];
+    const hist = payload.macd_data && payload.macd_data.Histogram ? toXY(payload.macd_data.Histogram) : [];
+
+    macdChart = new Chart(ctx, {
+      data: {
+        labels: (macd || []).map(p=>p.x),
+        datasets: [
+          { type:'line', label:'MACD',   data: macd,   parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#111827' },
+          { type:'line', label:'Signal', data: signal, parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#f43f5e' },
+          { type:'bar',  label:'Hist',   data: hist,   parsing:false }
+        ]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{ mode:'nearest', intersect:false },
+        scales:{
+          x:{ type:'time', time:{ tooltipFormat:'yyyy-MM-dd' }, grid:{ display:false } },
+          y:{ beginAtZero:false }
+        },
+        plugins:{
+          legend:{ display:true, position:'top' },
+          tooltip:{ enabled:true },
+          zoom:{
+            pan:{ enabled:true, mode:'x' },
+            zoom:{ wheel:{ enabled:true }, pinch:{ enabled:true }, mode:'x' }
+          }
+        }
+      }
+    });
+  }
+
+  async function tryRenderChartsByJson(ticker, name){
+    // ✅ 서버 변경 없이 기존 /chart 엔드포인트에 mode=chart_data 쿼리만 추가
+    //    - 서버가 JSON을 지원하면 차트 렌더, 아니면 예외 → Fallback(이미지)
+    const url = `/api/stock/batch/athena/chart?ticker=${encodeURIComponent(ticker)}&mode=chart_data&ts=${Date.now()}`;
+    const res = await fetch(url, { headers: { 'Accept':'application/json' } });
+    const ct = res.headers.get('Content-Type') || '';
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!ct.includes('application/json')) throw new Error('Not JSON');
+
+    const payload = await res.json();
+
+    // ✅ 차트 모드로 전환: 이미지 숨김
+    $chartImage.style.display = 'none';
+
+    // 이전 차트 파괴 후 렌더
+    destroyCharts();
+    buildPriceChart($priceCanvas.getContext('2d'), payload);
+    buildMacdChart($macdCanvas.getContext('2d'), payload);
+
+    // 리셋 버튼 핸들러 (가격/맥디 모두 리셋)
+    $btnResetZoom.onclick = () => {
+      try { priceChart.resetZoom(); } catch(e){}
+      try { macdChart.resetZoom(); } catch(e){}
+    };
+
+    appendLog(`[LOG] 📈 차트 데이터(JSON) 로드 및 렌더링 완료: ${ticker} - ${name}`);
+  }
+
+  /* ================================
+     ✅ 차트 모달 및 수동 검토
+     - showChart(): JSON 차트 시도 → 실패 시 기존 이미지 Fallback
+  ================================== */
+  window.showChart = async (ticker, name, rowId) => {
+    $currentRow = document.getElementById(rowId);
+    $modalTitle.textContent = `📈 ${ticker} - ${name}`;
+    $chartModal.classList.remove("hidden");
+
+    try {
+      await tryRenderChartsByJson(ticker, name);
+    } catch (err) {
+      // 🔁 Fallback: 기존 이미지 방식 유지
+      destroyCharts();
+      $chartImage.style.display = ''; 
+      $chartImage.src = `/api/stock/batch/athena/chart?ticker=${encodeURIComponent(ticker)}&ts=${Date.now()}`;
+      appendLog(`[LOG] ℹ️ 서버 JSON 차트 데이터가 없어 기존 이미지로 표시합니다. (${ticker})`);
+    }
+  };
+
+  window.closeChartModal = () => {
+    $chartModal.classList.add("hidden");
+    $chartImage.src = "";
+    destroyCharts();
+    $currentRow = null;
+  };
+  
+  window.updateResultStatus = function() {
+      if ($currentRow) {
+          const scoreCell = $currentRow.cells[2]; 
+          
+          if (scoreCell.innerHTML.includes('수동 검토 완료')) {
+              closeChartModal();
+              return;
+          }
+
+          const originalContent = scoreCell.textContent;
+          scoreCell.innerHTML = `
+            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
+              ⭐ 수동 검토 완료
+            </span> 
+            ${originalContent}
+          `;
+
+          $currentRow.classList.add('bg-green-50');
+          $currentRow.classList.remove('hover:bg-gray-100'); 
+          $currentRow.classList.add('transition-colors', 'duration-500');
+
+          const ticker = $currentRow.cells[0].textContent;
+          appendLog(`[UPDATE] ${ticker} 종목이 수동 검토 완료(유망 종목)로 표시되었습니다.`);
+      }
+      closeChartModal();
+  };
+
+  /* ================================
+     ✅ SSE 연결 및 상태 처리
+  ================================== */
+  function connectSSE() {
+    if (es) { try { es.close(); } catch {} }
+    
+    appendLog(`[LOG] SSE 연결 시도. 현재 사용자 ID: ${currentUser}`);
+
+    es = new EventSource("/api/stock/batch/athena/sse");
+
+    es.onopen = () => {
+        appendLog("[LOG] SSE 연결 성공.");
+    };
+
+    es.addEventListener("status", (ev) => {
+      const d = JSON.parse(ev.data || "{}");
+      
+      if (d.globalStatus) {
+        updateGlobalState(d.globalStatus, d.globalRunner, d.globalProgress);
+        updateButtonState(d.globalStatus, d.globalRunner); 
+      }
+      
+      if (Array.isArray(d.logs))
+        d.logs.forEach(line => appendLog(line));
+
+      if (Array.isArray(d.results)) {
+        renderResults(d.results);
+      }
+      
+      if (d.taskId) currentTaskId = d.taskId;
+    });
+
+    es.onerror = () => {
+      appendLog("[ERROR] SSE 연결 오류 발생. 2초 후 재연결 시도.");
+      try { es.close(); } catch {}
+      es = null;
+      updateButtonState("IDLE", currentUser); 
+      setTimeout(connectSSE, 2000);
+    };
+  }
+
+  /* ================================
+     ✅ 실행
+  ================================== */
+  window.runAnalysis = async () => {
+    if ($runBtn.disabled) {
+        if (globalStatus === 'RUNNING' && $globalRunner.textContent !== currentUser) {
+            appendLog("[ERROR] ⚠️ 다른 사용자(" + $globalRunner.textContent + ")가 이미 분석을 실행 중입니다. 잠시 후 다시 시도해주세요.");
+        } else {
+            appendLog("[ERROR] ⚠️ 현재 분석 실행이 불가능한 상태입니다. 상태를 확인해주세요.");
+        }
+        return; 
+    }
+    
+    updateButtonState("RUNNING", currentUser);
+    $log.innerHTML = `<p class="opacity-70">분석 요청 시작...</p>`;
+    $resultTableBody.innerHTML = "";
+    $noResultBox.classList.add("hidden");
+
+    const pattern = getSelectedPattern();
+    const workers = document.getElementById("workerCount").value;
+    const topN = document.getElementById("topNCount").value;
+    const maPeriods = getMaPeriods(); // "20,60,200"
+
+    const url = `/api/stock/batch/athena/start`
+      + `?pattern=${pattern}`
+      + `&workers=${workers}`
+      + `&maPeriods=${maPeriods}` 
+      + `&topN=${topN}`
+      + `&symbol=`;
+
+    try {
+        const res = await fetch(url, { method: "POST" });
+        if (res.ok) {
+          const d = await res.json();
+          currentTaskId = d.taskId;
+          appendLog(`🟢 실행 요청 성공. 작업자: ${d.runner}. SSE를 통해 상태 추적`);
+        } else {
+          const err = await res.json();
+          const errorMsg = err.error || res.statusText;
+          
+          if (errorMsg.includes('다른 사용자가 이미 실행 중입니다.')) {
+              const otherRunner = err.runner || '알 수 없음';
+              appendLog(`[ERROR] 🚨 실행 실패: 다른 사용자(${otherRunner})가 이미 분석을 선점했습니다.`);
+              updateGlobalState("RUNNING", otherRunner, 0);
+              updateButtonState("RUNNING", otherRunner);
+          } else {
+              appendLog(`⚠️ 실행 실패 (${res.status}): ${errorMsg}`);
+              updateButtonState("IDLE", currentUser); 
+          }
+        }
+    } catch (e) {
+        appendLog(`[ERROR] 분석 실행 중 네트워크 오류: ${e.message}`);
+        updateButtonState("IDLE", currentUser);
+    }
+  };
+
+  /* ================================
+     ✅ 취소 (409 시 상태 리셋)
+  ================================== */
+  window.cancelAnalysis = async () => {
+    if (!currentTaskId || $cancelBtn.disabled) return;
+    
+    $cancelBtn.disabled = true;
+    appendLog("🔴 취소 요청 전송 중...");
+
+    try {
+        const res = await fetch(`/api/stock/batch/athena/cancel/${currentTaskId}`, { method: "POST" });
+        if (res.ok) {
+          appendLog("🟥 작업 취소 요청됨. 상태 업데이트 대기 중...");
+        } else {
+            let errorMsg = res.statusText;
+            
+            if (res.status === 409) {
+                errorMsg = "작업이 이미 완료, 실패 또는 취소되었습니다. 최종 상태에서는 취소할 수 없습니다.";
+                updateGlobalState("IDLE", currentUser, 0); 
+                updateButtonState("IDLE", currentUser);
+                currentTaskId = null;
+            } else {
+                try {
+                    const err = await res.json();
+                    errorMsg = err.error || errorMsg;
+                } catch (e) {}
+            }
+            
+            appendLog(`⚠️ 취소 요청 실패 (${res.status}): ${errorMsg}`);
+            if (res.status !== 409) {
+                $cancelBtn.disabled = false;
+                updateButtonState(globalStatus, $globalRunner.textContent);
+            }
+        }
+    } catch (e) {
+        appendLog(`[ERROR] 취소 요청 중 네트워크 오류: ${e.message}`);
+        $cancelBtn.disabled = false;
+        updateButtonState(globalStatus, $globalRunner.textContent);
+    }
+  };
+
+  /* ================================
+     ✅ 초기 실행 및 상태 설정
+  ================================== */
+  function setInitialSectionState() {
+      $analysisTypeContent.style.maxHeight = null; 
+      document.getElementById('analysisTypeArrow').classList.add('rotate-180');
+      
+      $filteringOptionsContent.style.maxHeight = '0px'; 
+      document.getElementById('filteringOptionsArrow').classList.remove('rotate-180'); 
+
+      $topNCountContent.style.maxHeight = null; 
+      document.getElementById('topNCountArrow').classList.add('rotate-180');
+  }
+
+  (async function init() {
+    await initCurrentUser();
+    connectSSE();
+    attachDragListeners();
+    toggleMaPeriods();
+    setInitialSectionState();
+    updateButtonState(globalStatus, $globalRunner.textContent);
+  })();
+
+})();
+</script>
+</th:block>
+
+    </div>
+  </div>
+ </body>
+</html>

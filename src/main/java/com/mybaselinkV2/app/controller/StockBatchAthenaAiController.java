@@ -15,11 +15,11 @@ import java.util.UUID;
 
 /**
  * ===============================================================
- * 📊 StockBatchAthenaAiController (v3.6 - 실전 완전판)
+ * 📊 StockBatchAthenaAiController (v4.0 - analyze + chart 완전체)
  * ---------------------------------------------------------------
- * ✅ /api/stock/batch/athena/**
- * ✅ GlobalStockService 락 연동
- * ✅ SSE 기반 진행률/로그/취소 완전 대응
+ * ✅ analyze: 기존 락 + SSE + 비동기
+ * ✅ chart: 락 없음, SSE 없음, 즉시 JSON 반환
+ * ✅ Service v4.0 과 100% 동기화
  * ===============================================================
  */
 @RestController
@@ -40,21 +40,49 @@ public class StockBatchAthenaAiController {
         this.taskStatusService = taskStatusService;
     }
 
-    // 🚀 분석 시작
+    // ===============================================================
+    // ✅ chart 모드: 단일 종목 차트 JSON 즉시 반환
+    // ===============================================================
+    @GetMapping("/chart")
+    public ResponseEntity<?> chart(
+            @RequestParam String symbol,
+            @RequestParam(defaultValue = "20,50,200") String maPeriods,
+            @RequestParam(defaultValue = "120") int chartPeriod
+    ) {
+        try {
+            log.info("📈 Chart 요청: symbol={}, ma={}, period={}", symbol, maPeriods, chartPeriod);
+
+            Map<String, Object> json = athenaService.runChartMode(symbol, maPeriods, chartPeriod);
+
+            return ResponseEntity.ok(json);
+
+        } catch (Exception e) {
+            log.error("❌ Chart 요청 실패: {}", e.getMessage());
+            LinkedHashMap<String, Object> body = new LinkedHashMap<>();
+            body.put("error", "Chart 모드 실패: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(body);
+        }
+    }
+
+    // ===============================================================
+    // ✅ analyze 시작
+    // ===============================================================
     @PostMapping("/start")
-    public ResponseEntity<?> start(Authentication auth,
-                                   @RequestParam(defaultValue = "ma") String pattern,
-                                   @RequestParam(defaultValue = "8") int workers,
-                                   @RequestParam(defaultValue = "5") int years,
-                                   @RequestParam(defaultValue = "false") boolean excludeNeg) {
+    public ResponseEntity<?> start(
+            Authentication auth,
+            @RequestParam(defaultValue = "ma") String pattern,
+            @RequestParam(defaultValue = "8") int workers,
+            @RequestParam(defaultValue = "20,50,200") String maPeriods,
+            @RequestParam(defaultValue = "10") int topN,
+            @RequestParam(defaultValue = "") String symbol
+    ) {
 
         String username = (auth != null && auth.getName() != null) ? auth.getName() : "anonymous";
         String taskId = UUID.randomUUID().toString();
 
-        log.info("🟢 [{}] AthenaAI 실행 요청 by {} (pattern={}, workers={}, years={}, excludeNeg={})",
-                taskId, username, pattern, workers, years, excludeNeg);
+        log.info("🟢 [{}] AthenaAI 실행 요청 by {} (pattern={}, workers={}, maPeriods={}, topN={}, symbol={})",
+                taskId, username, pattern, workers, maPeriods, topN, symbol);
 
-        // ✅ 이미 실행 중인지 체크
         if (athenaService.isLocked()) {
             String runner = athenaService.getCurrentRunner();
             LinkedHashMap<String, Object> body = new LinkedHashMap<>();
@@ -63,7 +91,15 @@ public class StockBatchAthenaAiController {
         }
 
         try {
-            athenaService.startUpdate(taskId, pattern, excludeNeg, workers, years, username);
+            athenaService.startUpdate(
+                    taskId,
+                    pattern,
+                    maPeriods,
+                    workers,
+                    topN,
+                    symbol,
+                    username
+            );
 
             LinkedHashMap<String, Object> body = new LinkedHashMap<>();
             body.put("taskId", taskId);
@@ -76,14 +112,17 @@ public class StockBatchAthenaAiController {
             return ResponseEntity.status(409).body(body);
 
         } catch (Exception e) {
-            log.error("⚠️ [{}] AthenaAI 실행 중 예외", taskId, e);
+            log.error("⚠️ [{}] AthenaAI 실행 예외", taskId, e);
             LinkedHashMap<String, Object> body = new LinkedHashMap<>();
             body.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(body);
         }
     }
 
-    // ⏹️ 취소
+
+    // ===============================================================
+    // ✅ 취소
+    // ===============================================================
     @PostMapping("/cancel/{taskId}")
     public ResponseEntity<?> cancel(Authentication auth, @PathVariable String taskId) {
 
@@ -94,11 +133,11 @@ public class StockBatchAthenaAiController {
             boolean cancelled = athenaService.cancelTask(taskId, username);
 
             if (!cancelled) {
-                String currentRunner = athenaService.getCurrentRunner() != null
+                LinkedHashMap<String, Object> body = new LinkedHashMap<>();
+                String runner = athenaService.getCurrentRunner() != null
                         ? athenaService.getCurrentRunner() : "IDLE";
 
-                LinkedHashMap<String, Object> body = new LinkedHashMap<>();
-                body.put("error", "취소 실패: 현재 실행자(" + currentRunner + ")가 아니거나 이미 종료된 작업입니다.");
+                body.put("error", "취소 실패: 현재 실행자(" + runner + ")가 아님");
                 return ResponseEntity.status(409).body(body);
             }
 
@@ -108,7 +147,7 @@ public class StockBatchAthenaAiController {
             return ResponseEntity.ok(body);
 
         } catch (Exception e) {
-            log.error("❌ [{}] AthenaAI 취소 실패", taskId, e);
+            log.error("❌ [{}] AthenaAI 취소 오류", taskId, e);
             LinkedHashMap<String, Object> body = new LinkedHashMap<>();
             body.put("cancelled", false);
             body.put("error", e.getMessage());
@@ -116,7 +155,9 @@ public class StockBatchAthenaAiController {
         }
     }
 
-    // 🔍 현재 상태 조회
+    // ===============================================================
+    // ✅ active 조회
+    // ===============================================================
     @GetMapping("/active")
     public ResponseEntity<?> active() {
 
@@ -132,8 +173,8 @@ public class StockBatchAthenaAiController {
 
         double progress = 0;
         if (snap != null && snap.get("result") instanceof Map result) {
-            if (result.get("progress") instanceof Number) {
-                progress = ((Number) result.get("progress")).doubleValue();
+            if (result.get("progress") instanceof Number n) {
+                progress = n.doubleValue();
             }
         }
 

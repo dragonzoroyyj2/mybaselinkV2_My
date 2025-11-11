@@ -1,45 +1,13 @@
 /* ===============================================================
-   ✅ commonLeft.css (v1.3 - UX/계층 명확성 및 FIX)
+   ✅ commonLeft.css (v1.2 - 2025.11 완전 안정판)
    ---------------------------------------------------------------
    - 좌측 사이드바 / 서브메뉴 / 토글 / 다단계 5단 완전 대응
-   - FIX: 1단계 링크와 토글 링크의 스타일 미세 분리
-   - FIX: 메뉴 깊이에 따른 폰트 두께 조정
+   - 라이트/다크 모드 완전 호환
+   - 반응형 슬라이드 (모바일)
 ================================================================ */
 
 /* ---------------------------------------------------------------
-   🔹 전역 변수 (색상 정의)
----------------------------------------------------------------- */
-:root {
-  /* 라이트 모드 */
-  --sidebar-bg: #ffffff;
-  --sidebar-border: #e5e7eb;
-  --sidebar-text: #1f2937;
-  --sidebar-hover-bg: #f3f4f6;
-  --sidebar-active-bg: #e5e7eb;
-  --sidebar-level-1-bg: #f9fafb; /* 1단계 submenu */
-  --sidebar-level-2-bg: #f3f4f6; /* 2단계 submenu */
-  --sidebar-level-3-bg: #e5e7eb; /* 3단계 submenu */
-  --sidebar-level-4-bg: #e0e0e0; /* 4단계 submenu */
-  --sidebar-level-5-bg: #d6d6d6; /* 5단계 submenu */
-}
-
-body.dark-mode {
-  /* 다크 모드 */
-  --sidebar-bg: #1e293b;
-  --sidebar-border: #334155;
-  --sidebar-text: #e2e8f0;
-  --sidebar-hover-bg: #334155;
-  --sidebar-active-bg: rgba(37, 99, 235, 0.2);
-  --sidebar-active-text: #93c5fd;
-  --sidebar-level-1-bg: #273449; /* 1단계 submenu */
-  --sidebar-level-2-bg: #334155; /* 2단계 submenu */
-  --sidebar-level-3-bg: #2b364a; /* 3단계 submenu */
-  --sidebar-level-4-bg: #222c3f; /* 4단계 submenu */
-  --sidebar-level-5-bg: #1b2435; /* 5단계 submenu */
-}
-
-/* ---------------------------------------------------------------
-   🔹 사이드바 컨테이너
+   🌞 라이트 모드 기본
 ---------------------------------------------------------------- */
 .sidebar {
   position: fixed;
@@ -47,8 +15,8 @@ body.dark-mode {
   left: 0;
   width: 240px;
   height: calc(100vh - 50px);
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
   overflow-y: auto;
   transition: transform 0.25s ease, background 0.25s ease;
@@ -60,8 +28,12 @@ body.dark-mode {
   transform: translateX(-100%);
 }
 
-/* 🌙 다크 모드 그림자 보강 */
+/* ---------------------------------------------------------------
+   🌙 다크 모드
+---------------------------------------------------------------- */
 body.dark-mode .sidebar {
+  background: #1e293b;
+  border-right-color: #334155;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.6);
 }
 
@@ -91,7 +63,7 @@ body.dark-mode .sidebar {
 }
 
 body.dark-mode .sidebar li {
-  border-bottom: 1px solid var(--sidebar-border);
+  border-bottom: 1px solid #334155;
 }
 
 .sidebar a {
@@ -99,43 +71,45 @@ body.dark-mode .sidebar li {
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
-  color: var(--sidebar-text);
+  color: #1f2937;
   text-decoration: none;
   font-size: 14px;
   border-radius: 6px;
   transition: background 0.15s ease, color 0.15s ease;
-  font-weight: 500; /* 🚩 FIX: 기본 두께 조정 */
 }
 
 .sidebar a i {
   width: 18px;
   text-align: center;
   font-size: 14px;
-  flex-shrink: 0;
 }
 
 /* ---------------------------------------------------------------
-   🔹 hover / active
+   🔹 hover / active (회색톤 강조 개선)
 ---------------------------------------------------------------- */
 .sidebar a:hover {
-  background: var(--sidebar-hover-bg);
-  color: var(--sidebar-text);
+  background: #f3f4f6;
+  color: #1f2937;
 }
 
-/* ✅ 활성 메뉴: 기본 (1단계) */
+/* ✅ 활성 메뉴: 블루 → 회색 강조로 변경 */
 .sidebar a.active {
-  background: var(--sidebar-active-bg);
-  color: var(--sidebar-text);
-  font-weight: 700; /* 🚩 FIX: 활성 메뉴 강조 */
+  background: #e5e7eb;
+  color: #1f2937;
+  font-weight: 600;
 }
 
 /* 🌙 다크 모드 hover / active */
+body.dark-mode .sidebar a {
+  color: #e2e8f0;
+}
 body.dark-mode .sidebar a:hover {
-  background: var(--sidebar-hover-bg);
+  background: #334155;
+  color: #e2e8f0;
 }
 body.dark-mode .sidebar a.active {
-  background: var(--sidebar-active-bg);
-  color: var(--sidebar-active-text);
+  background: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
 }
 
 /* ---------------------------------------------------------------
@@ -143,42 +117,61 @@ body.dark-mode .sidebar a.active {
 ---------------------------------------------------------------- */
 .submenu {
   display: none;
-  background: var(--sidebar-level-1-bg);
+  background: #f9fafb;
 }
 .has-submenu.open > .submenu {
   display: block;
-}
-
-/* 🚩 FIX: 서브메뉴 진입시 폰트 두께 완화 */
-.submenu a {
-  font-weight: 400; 
 }
 
 /* 1단계 */
 .submenu a {
   padding-left: 34px;
   font-size: 13px;
-  background: var(--sidebar-level-1-bg);
+  background: #f9fafb;
 }
 /* 2단계 */
 .submenu .submenu a {
   padding-left: 54px;
-  background: var(--sidebar-level-2-bg);
+  background: #f3f4f6;
 }
 /* 3단계 */
 .submenu .submenu .submenu a {
   padding-left: 74px;
-  background: var(--sidebar-level-3-bg);
+  background: #e5e7eb;
 }
 /* 4단계 */
 .submenu .submenu .submenu .submenu a {
   padding-left: 94px;
-  background: var(--sidebar-level-4-bg);
+  background: #e0e0e0;
 }
 /* 5단계 */
 .submenu .submenu .submenu .submenu .submenu a {
   padding-left: 114px;
-  background: var(--sidebar-level-5-bg);
+  background: #d6d6d6;
+}
+
+/* ✅ 다크모드 서브메뉴 배경 */
+body.dark-mode .submenu {
+  background: #273449;
+}
+body.dark-mode .submenu a {
+  background: #273449;
+  color: #e2e8f0;
+}
+body.dark-mode .submenu a:hover {
+  background: #334155;
+}
+body.dark-mode .submenu .submenu a {
+  background: #334155;
+}
+body.dark-mode .submenu .submenu .submenu a {
+  background: #2b364a;
+}
+body.dark-mode .submenu .submenu .submenu .submenu a {
+  background: #222c3f;
+}
+body.dark-mode .submenu .submenu .submenu .submenu .submenu a {
+  background: #1b2435;
 }
 
 /* ---------------------------------------------------------------
@@ -187,13 +180,7 @@ body.dark-mode .sidebar a.active {
 .toggle-icon {
   margin-left: auto;
   transition: transform 0.2s ease;
-  flex-shrink: 0;
 }
-.has-submenu > a {
-  /* 🚩 FIX: 토글 아이콘 공간 확보 */
-  justify-content: space-between; 
-}
-
 .has-submenu.open > a .toggle-icon {
   transform: rotate(90deg);
 }
@@ -204,7 +191,7 @@ body.dark-mode .sidebar a.active {
 @media (max-width: 768px) {
   .sidebar {
     width: 230px;
-    /* transform: translateX(-100%); (CSS 상단에 정의됨) */
+    transform: translateX(-100%);
   }
   .sidebar.open {
     transform: translateX(0);

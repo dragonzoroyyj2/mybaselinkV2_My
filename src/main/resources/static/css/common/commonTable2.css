@@ -1,9 +1,12 @@
 /* ===============================================================
-   ✅ commonTable.css (v1.6 - Sticky FIX 및 정렬 개선 안정판)
+   ✅ commonTable.css (v1.5 - 2025.11 실전 완전 안정판)
    ---------------------------------------------------------------
-   - FIX: 테이블 기본 콘텐츠 정렬을 'left'로 변경하여 가독성 향상
-   - FIX: Sticky 헤더 Z-index 및 시각적 안정성 확보
-   - FIX: 체크박스 열 너비 고정 선택자 정밀화
+   - 헤더 고정 (sticky)
+   - 세로 + 가로 스크롤 완벽 지원
+   - 체크박스 열 정렬 고정
+   - 모든 해상도에서 테이블 깨짐 없음
+   - ✅ 모바일(WebView) 좌우 스크롤 시 흰 여백/울컥 현상 완전 제거
+   - ✅ 웹/앱 헤더 시각 차이 제거 (모바일도 평면형)
 ================================================================ */
 
 /* 🌙 다크모드 변수는 이전 버전 그대로 유지 */
@@ -18,8 +21,6 @@
   --table-overlay-bg: rgba(255,255,255,0.8);
   --table-spinner-border: #d1d5db;
   --table-spinner-accent: #2563eb;
-  /* 🚩 NEW: 전역 오버레이 배경색 (더 어둡게) */
-  --global-overlay-bg: rgba(0,0,0,0.4);
 }
 
 body.dark-mode {
@@ -33,7 +34,6 @@ body.dark-mode {
   --table-overlay-bg: rgba(17,24,39,0.85);
   --table-spinner-border: #4b5563;
   --table-spinner-accent: #3b82f6;
-  --global-overlay-bg: rgba(17,24,39,0.7);
   background: #111827;
   color: var(--table-text);
 }
@@ -60,7 +60,7 @@ table {
   border-collapse: collapse;
   background: var(--table-bg);
   table-layout: auto;
-  border-spacing: 0; 
+  border-spacing: 0; /* ✅ iOS 구분선 틈 제거 */
 }
 
 /* ✅ 헤더 고정 */
@@ -73,9 +73,9 @@ thead th {
   top: 0;
   background: var(--table-header-bg);
   color: var(--table-header-text);
-  z-index: 3; /* 🚩 FIX: Z-index를 3으로 높여 다른 내부 요소보다 위에 오게 함 */
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* ✅ 아래쪽 섀도우를 추가하여 분리감을 확실히 함 */
-  border-right: none; 
+  z-index: 2;
+  box-shadow: inset 0 -1px 0 var(--table-border); /* ✅ 아래선만 부드럽게 */
+  border-right: none; /* ✅ 헤더 셀 구분선 제거 */
   border-bottom: 1px solid var(--table-border);
 }
 
@@ -83,21 +83,15 @@ thead th {
 th, td {
   border-bottom: 1px solid var(--table-border);
   padding: 10px 8px;
-  text-align: left; /* 🚩 FIX: 기본 콘텐츠 정렬을 left로 변경 */
+  text-align: center;
   white-space: nowrap;
   vertical-align: middle;
   color: var(--table-text);
 }
 
-/* 🚩 NEW: 숫자/중앙 정렬이 필요한 셀을 위한 유틸리티 클래스 */
-td.text-center, th.text-center { text-align: center; }
-td.text-right, th.text-right { text-align: right; }
-
-
 th {
   font-weight: 600;
   font-size: 13px;
-  text-align: center; /* 🚩 FIX: 헤더는 여전히 중앙 정렬이 깔끔함 */
 }
 
 td {
@@ -122,7 +116,6 @@ td a:hover { text-decoration: underline; }
   color: #6b7280;
   font-size: 13px;
   padding: 30px 0;
-  text-align: center; /* 데이터 없음 메시지는 중앙 정렬 */
 }
 
 /* ✅ 체크박스 */
@@ -133,11 +126,8 @@ input[type="checkbox"] {
 }
 
 /* ✅ 체크박스 열 폭 고정 */
-/* 🚩 FIX: .checkbox-col 클래스 사용을 권장하지만, 기존 선택자 유지 시 구체화 */
-.table-container th.checkbox-col,
-.table-container td.checkbox-col,
-.table-container th:first-child:has(input[type="checkbox"]), /* 체크박스를 포함하는 첫 번째 TH/TD만 */
-.table-container td:first-child:has(input[type="checkbox"]) {
+.table-container th:first-child,
+.table-container td:first-child {
   width: 40px;
   min-width: 40px;
   text-align: center;
@@ -185,7 +175,7 @@ input[type="checkbox"] {
   display: none;
   justify-content: center;
   align-items: center;
-  background: var(--global-overlay-bg); /* 🚩 FIX: 전역 오버레이 변수 사용 */
+  background: var(--table-overlay-bg);
   z-index: 9999;
 }
 

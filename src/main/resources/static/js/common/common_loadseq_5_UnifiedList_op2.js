@@ -1,10 +1,10 @@
 /* ===============================================================
-   ✅ common_loadseq_5_UnifiedList_op.js (v1.5 - 최종 이벤트 먹통 FIX)
+   ✅ common_loadseq_5_UnifiedList_op.js (v1.0)
    ---------------------------------------------------------------
-   [핵심 수정 사항]
-   - closeAllModals에서 body 잠금 해제 및 오버레이 제거 로직 삭제.
-   - saveData, updateData, deleteSelected, downloadExcel의 finally 블록에서 
-     Body 잠금 해제와 전역 오버레이 제거를 강제로 일원화하여 이벤트 차단 문제를 해결.
+   - 모든 HTML 입력태그 자동 매핑 (input, select, textarea 등)
+   - 팝업 닫기/저장/수정/엑셀/삭제 후에도 클릭 정상 ✅
+   - overlay 중복 및 pointer-events 차단 완전 제거
+   - 기존 기능 완전 유지 (v1.7 기반)
 ================================================================ */
 
 function initUnifiedList(config) {
@@ -51,6 +51,11 @@ class UnifiedList {
 
   /* ----------------------------------------------------------
      📥 리스트 조회 (v1.1 수정판)
+     ----------------------------------------------------------
+     - ✅ mode: "client" 일 경우 최초 1회만 서버 요청 (캐시 후 로컬 페이징)
+     - ✅ mode: "server" 일 경우 매 페이지마다 서버 요청
+     - ✅ 로딩 오버레이를 항상 '테이블 기준 중앙'에 표시 (모바일·웹 동일)
+     - ✅ overlay 중복 방지 및 pointer-events 완전 제거
   ---------------------------------------------------------- */
   async loadList(page = 0, _env = "web", search = "") {
     // 🔹 검색어 유지 로직
@@ -132,6 +137,8 @@ class UnifiedList {
       }, delay);
     }
   }
+
+
 
   _renderClientData() {
     const tbody = document.querySelector(this.config.tableBodySelector);
@@ -300,9 +307,6 @@ class UnifiedList {
     modal.classList.add("active");
     document.body.classList.add("modal-open");
 
-    // 🚩 FIX: 팝업 열릴 때, 추가 모달의 필드 강제 초기화 (이전 데이터 잔상 방지)
-    this._resetFormFields(modal);
-
     const saveBtn = modal.querySelector("#saveBtn");
     if (saveBtn && !saveBtn._hasHandler) {
       saveBtn.addEventListener("click", () => this.saveData());
@@ -319,19 +323,6 @@ class UnifiedList {
     modal.classList.add("active");
     document.body.classList.add("modal-open");
     this._showModalLoading(modal);
-
-    // 🚩 FIX: 팝업 열릴 때, 상세/수정 모달의 필드 강제 초기화
-    this._resetFormFields(modal);
-    
-    // 🚩 FIX: 수정 버튼의 기존 이벤트 핸들러 명시적 제거 (연속 클릭/이벤트 충돌 방지)
-    const updateBtn = modal.querySelector("#updateBtn");
-    if (updateBtn) {
-        if (updateBtn._handler) {
-            updateBtn.removeEventListener("click", updateBtn._handler);
-            delete updateBtn._handler;
-        }
-        delete updateBtn._hasHandler;
-    }
 
     try {
       const res = await fetch(`${this.config.apiUrl}/${id}`, this._opts("GET"));
@@ -352,24 +343,34 @@ class UnifiedList {
           if (tag === "input") {
             switch (type) {
               case "checkbox":
-                // 🚩 FIX: 체크박스 바인딩 로직 강화
-                if (el.name) {
-                  const val = String(v ?? "");
-                  el.checked = (Array.isArray(v) && v.includes(el.value)) || 
-                               (val.includes(el.value)); // '백업 활성화,자동 모니터링' 형태의 문자열 처리
+                if (
+                  el.name &&
+                  modal.querySelectorAll(`input[name='${el.name}']`).length > 1
+                ) {
+                  el.checked = Array.isArray(v)
+                    ? v.includes(el.value)
+                    : v === el.value;
                 } else {
-                  el.checked = v === true || v === "true" || v === "Y" || v === "1";
+                  el.checked =
+                    v === true ||
+                    v === "true" ||
+                    v === "Y" ||
+                    v === "1" ||
+                    v === el.value;
                 }
                 break;
               case "radio":
-                if (String(el.value) === String(v))
+                if (el.value == v || String(el.value) === String(v))
                   el.checked = true;
                 break;
               default:
                 el.value = v ?? "";
             }
           } else if (tag === "select") {
-            el.value = v ?? ""; 
+            if (Array.isArray(v)) {
+              for (const opt of el.options)
+                opt.selected = v.includes(opt.value);
+            } else el.value = v ?? "";
           } else if (tag === "textarea") {
             el.value = v ?? "";
           } else if (tag === "button") {
@@ -381,11 +382,9 @@ class UnifiedList {
         });
       });
 
-      // 수정 버튼 이벤트 재등록
-      if (updateBtn) {
-        const handler = () => this.updateData(id);
-        updateBtn.addEventListener("click", handler);
-        updateBtn._handler = handler; // 핸들러 함수를 저장
+      const updateBtn = modal.querySelector("#updateBtn");
+      if (updateBtn && !updateBtn._hasHandler) {
+        updateBtn.addEventListener("click", () => this.updateData(id));
         updateBtn._hasHandler = true;
       }
     } catch (e) {
@@ -400,31 +399,9 @@ class UnifiedList {
     document.querySelectorAll(".modal").forEach((m) => {
       m.classList.remove("active");
       m.style.display = "none";
-      
-      // 🚩 FIX 핵심: 모달 닫을 때 내부 필드와 에러 클래스 초기화
-      this._resetFormFields(m);
-      
-      // 🚩 FIX: 팝업 닫을 때 이벤트 핸들러 제거 (수정 버튼 및 등록 버튼 플래그)
-      const updateBtn = m.querySelector("#updateBtn");
-      if (updateBtn && updateBtn._handler) {
-          updateBtn.removeEventListener("click", updateBtn._handler);
-          delete updateBtn._handler;
-          delete updateBtn._hasHandler;
-      }
-      const saveBtn = m.querySelector("#saveBtn");
-      if (saveBtn && saveBtn._hasHandler) {
-          delete saveBtn._hasHandler; 
-      }
-      
     });
-    
-    // 🚩 FIX: Body 잠금 해제와 Global 오버레이 제거는 finally 블록으로 위임합니다.
-    // if (!keepOne) document.body.classList.remove("modal-open");
-    // this._hideGlobalOverlay();
-    
-    // 🚩 최종 FIX: 팝업 닫은 후 본문에 포커스를 줘서 다음 터치 지연 방지 및 스크롤 위치 초기화
-    document.body.focus(); 
-    window.scrollTo(0, 0); 
+    if (!keepOne) document.body.classList.remove("modal-open");
+    this._hideGlobalOverlay();
   }
 
   closeModal(sel) {
@@ -432,103 +409,27 @@ class UnifiedList {
     if (el) {
       el.classList.remove("active");
       el.style.display = "none";
-      
-      // 🚩 FIX 핵심: 모달 닫을 때 내부 필드와 에러 클래스 초기화
-      this._resetFormFields(el);
-      
-      // 🚩 FIX: 팝업 닫을 때 이벤트 핸들러 제거 (수정 버튼 및 등록 버튼 플래그)
-      const updateBtn = el.querySelector("#updateBtn");
-      if (updateBtn && updateBtn._handler) {
-          updateBtn.removeEventListener("click", updateBtn._handler);
-          delete updateBtn._handler;
-          delete updateBtn._hasHandler;
-      }
-      const saveBtn = el.querySelector("#saveBtn");
-      if (saveBtn && saveBtn._hasHandler) {
-          delete saveBtn._hasHandler;
-      }
     }
-    
-    // 🚩 FIX: Body 잠금 해제와 Global 오버레이 제거는 finally 블록으로 위임합니다.
     document.body.classList.remove("modal-open");
     this._hideGlobalOverlay();
-    document.body.focus();
-    window.scrollTo(0, 0);
   }
 
-  // 🚩 FIX: 폼 필드 초기화 전용 함수 (중복 호출 방지 및 정리)
-  _resetFormFields(modalEl) {
-    modalEl.querySelectorAll('input,textarea,select').forEach(el => {
-        const tag = el.tagName.toLowerCase();
-        const type = el.type ? el.type.toLowerCase() : "";
-        
-        if (tag === 'input') {
-            if (type === 'checkbox' || type === 'radio') {
-                el.checked = false; // 🚩 FIX: 체크/라디오 상태 초기화
-            } else if (type !== 'submit' && type !== 'button') {
-                el.value = '';
-            }
-        } else if (tag === 'textarea') {
-            el.value = '';
-        } else if (tag === 'select') {
-            el.selectedIndex = 0; // 🚩 FIX: 셀렉트 박스 첫 번째 옵션 선택
-        }
-        
-        // 에러 표시 제거
-        el.classList.remove("input-error");
-    });
-  }
-  
-  // 🚩 FIX: 폼 데이터 직렬화 로직 통합 및 개선 (updateData/saveData에서 사용)
-  _serializeForm(modal) {
-    const data = {};
-    const checkboxValues = {};
-
-    modal.querySelectorAll("input,textarea,select").forEach((el) => {
-        const raw = el.dataset.field || el.name || el.id || "";
-        if (!raw) return;
-        
-        let key = raw.replace(/^detail/, "");
-        key = key.charAt(0).toLowerCase() + key.slice(1);
-        key = key.replace(/Input$/, "");
-        
-        const type = el.type ? el.type.toLowerCase() : "";
-        
-        if (type === 'checkbox') {
-            if (el.checked) {
-                if (!checkboxValues[key]) checkboxValues[key] = [];
-                checkboxValues[key].push(el.value);
-            }
-        } else if (type === 'radio') {
-            if (el.checked) {
-                data[key] = el.value;
-            }
-        } else {
-            data[key] = el.value;
-        }
-    });
-
-    // 체크박스 값 배열을 쉼표로 구분된 문자열로 변환 (서버 전송 형식 맞춤)
-    Object.keys(checkboxValues).forEach(key => {
-        data[key] = checkboxValues[key].join(', '); 
-    });
-    
-    return data;
-  }
-  
   async saveData() {
     if (!this._validateRequired(this.config.modalId)) return;
     const modal = document.querySelector(this.config.modalId);
-    const data = this._serializeForm(modal); 
-    
+    const data = {};
+    modal.querySelectorAll("input,textarea,select").forEach((el) => {
+      const key = el.dataset.field || el.name || el.id || "";
+      if (key)
+        data[key.replace(/^detail/, "").replace(/Input$/, "")] = el.value;
+    });
+
     CommonLoading?.show?.();
     try {
       const res = await fetch(this.config.apiUrl, this._opts("POST", data));
       if (!res.ok) throw new Error("등록 실패");
       Toast?.show?.("등록 완료", "success");
-      
-      this.closeAllModals(); // 팝업만 숨김 (Body 잠금 해제는 finally에서 처리)
-      
+      this.closeAllModals();
       this._clientData = null;
       await this.loadList(this.currentPage, "web", this.lastSearch);
     } catch (e) {
@@ -536,18 +437,25 @@ class UnifiedList {
       Toast?.show?.("등록 실패", "error");
     } finally {
       CommonLoading?.hide?.();
-      
-      // 🚩 최종 FIX: 통신 완료 후 Body 잠금과 오버레이를 확실히 제거합니다.
-      document.body.classList.remove("modal-open");
       this._hideGlobalOverlay();
+      this._bindGlobalEvents();
+      document.body.classList.remove("modal-open");
     }
   }
 
   async updateData(id) {
     if (!this._validateRequired(this.config.detailModalId)) return;
     const modal = document.querySelector(this.config.detailModalId);
-    const data = this._serializeForm(modal);
-    
+    const data = {};
+    modal.querySelectorAll("input,textarea,select").forEach((el) => {
+      const raw = el.dataset.field || el.name || el.id || "";
+      if (!raw) return;
+      let key = raw.replace(/^detail/, "");
+      key = key.charAt(0).toLowerCase() + key.slice(1);
+      key = key.replace(/Input$/, "");
+      data[key] = el.value;
+    });
+
     CommonLoading?.show?.();
     try {
       const res = await fetch(
@@ -556,9 +464,7 @@ class UnifiedList {
       );
       if (!res.ok) throw new Error("수정 실패");
       Toast?.show?.("수정 완료", "success");
-      
-      this.closeAllModals(); // 팝업만 숨김 (Body 잠금 해제는 finally에서 처리)
-      
+      this.closeAllModals();
       this._clientData = null;
       await this.loadList(this.currentPage, "web", this.lastSearch);
     } catch (e) {
@@ -566,10 +472,9 @@ class UnifiedList {
       Toast?.show?.("수정 실패", "error");
     } finally {
       CommonLoading?.hide?.();
-      
-      // 🚩 최종 FIX: 통신 완료 후 Body 잠금과 오버레이를 확실히 제거합니다.
-      document.body.classList.remove("modal-open");
       this._hideGlobalOverlay();
+      this._bindGlobalEvents();
+      document.body.classList.remove("modal-open");
     }
   }
 
@@ -595,10 +500,9 @@ class UnifiedList {
       Toast?.show?.("삭제 실패", "error");
     } finally {
       CommonLoading?.hide?.();
-      
-      // 🚩 최종 FIX: Body 잠금 클래스 및 오버레이 제거 (삭제는 모달을 열지 않지만 안전을 위해 호출)
-      document.body.classList.remove("modal-open");
       this._hideGlobalOverlay();
+      this._bindGlobalEvents();
+      document.body.classList.remove("modal-open");
     }
   }
 
@@ -654,8 +558,9 @@ class UnifiedList {
       console.error(err);
       alert("엑셀 다운로드 오류");
     } finally {
-      // 🚩 최종 FIX: 오버레이를 확실히 제거합니다.
       this._hideGlobalOverlay();
+      this._bindGlobalEvents();
+      document.body.classList.remove("modal-open");
     }
   }
 

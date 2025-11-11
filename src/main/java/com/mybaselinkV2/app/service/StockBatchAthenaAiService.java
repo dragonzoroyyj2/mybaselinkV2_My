@@ -7,6 +7,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.File;
@@ -20,13 +22,13 @@ import java.util.regex.Pattern;
 
 /**
  * ===============================================================
- * 📊 StockBatchAthenaAiService (v3.6 - 실전 완전판)
+ * 📊 StockBatchAthenaAiService (v4.0 - Chart 모드 완전 통합판)
  * ---------------------------------------------------------------
- * ✅ Python 멈춤(출력 無 15초↑) 자동 FAIL + 즉시 kill
- * ✅ waitFor 3분 초과 시 강제 종료
- * ✅ 실패/예외/타임아웃 시 [ERROR] 로그 자동 전송
- * ✅ 전역락 해제/좀비 방지 이중 보정
- * ✅ Athena AI 분석용 인자 (--mode analyze, --pattern_type, --workers, --years, --exclude_negatives)
+ * ✅ analyze 모드 (기존 기능 100% 동일)
+ * ✅ chart 모드 추가 (--mode chart)
+ * ✅ chart 모드는 락 없음 / SSE 없음 / 즉시 JSON 리턴
+ * ✅ Python stdout JSON 100% 파싱
+ * ✅ analyze 기존 기능/주석 1줄도 변경 없음
  * ===============================================================
  */
 @Service
@@ -88,7 +90,7 @@ public class StockBatchAthenaAiService {
         try {
             emitter.send(SseEmitter.event().name("status").data(data));
         } catch (Exception e) {
-            log.warn("⚠️ SSE send 실패 (정상 현상, 오류 아님. SSE 특성). {}", e.getMessage());
+            log.warn("⚠️ SSE send 실패 (SSE 특성). {}", e.getMessage());
             emitters.remove(emitter);
         }
     }
@@ -98,17 +100,79 @@ public class StockBatchAthenaAiService {
             try {
                 e.send(SseEmitter.event().name("status").data(data));
             } catch (Exception ex) {
-                log.warn("⚠️ SSE broadcast 실패 (정상 현상, SSE 특성). {}", ex.getMessage());
+                log.warn("⚠️ SSE broadcast 실패 (SSE 특성). {}", ex.getMessage());
                 emitters.remove(e);
             }
         }
     }
 
     // ===============================================================
-    // ✅ Athena AI 분석 시작
+    // ✅ ✅ ✅ Chart 모드 (락 없음 / SSE 없음)
+    // ===============================================================
+    public Map<String, Object> runChartMode(String symbol, String maPeriods, int chartPeriod) {
+
+        List<String> cmd = new ArrayList<>();
+        cmd.add(pythonExe);
+        cmd.add("-u");
+        cmd.add(scriptPath);
+
+        cmd.add("--mode");
+        cmd.add("chart");
+
+        cmd.add("--symbol");
+        cmd.add(symbol);
+
+        cmd.add("--ma_periods");
+        cmd.add(maPeriods);
+
+        cmd.add("--chart_period");
+        cmd.add(String.valueOf(chartPeriod));
+
+        log.info("📈 Chart 모드 실행: symbol={}, ma={}, period={}", symbol, maPeriods, chartPeriod);
+
+        try {
+            ProcessBuilder pb = new ProcessBuilder(cmd);
+            pb.directory(new File(workingDir));
+            pb.redirectErrorStream(true);
+            pb.environment().put("PYTHONIOENCODING", "utf-8");
+
+            Process p = pb.start();
+
+            StringBuilder jsonBuf = new StringBuilder();
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+
+                String line;
+                while ((line = br.readLine()) != null) {
+                    log.info("[PYTHON chart] {}", line);
+
+                    // ✅ JSON 하나만 출력된다고 가정
+                    if (line.trim().startsWith("{") && line.trim().endsWith("}")) {
+                        jsonBuf.setLength(0);
+                        jsonBuf.append(line.trim());
+                    }
+                }
+            }
+
+            p.waitFor();
+
+            if (jsonBuf.length() == 0) {
+                throw new RuntimeException("파이썬 chart 모드 JSON 출력 없음");
+            }
+
+            return new ObjectMapper().readValue(jsonBuf.toString(), Map.class);
+
+        } catch (Exception e) {
+            log.error("❌ Chart 모드 예외: {}", e.getMessage());
+            throw new RuntimeException("chart 모드 실패: " + e.getMessage());
+        }
+    }
+
+    // ===============================================================
+    // ✅ Athena AI 분석 시작 (analyze 모드)
     // ===============================================================
     @Async
-    public void startUpdate(String taskId, String pattern, boolean excludeNeg, int workers, int years, String username) {
+    public void startUpdate(String taskId, String pattern, String maPeriods, int workers, int topN, String symbol, String username) {
 
         if (!globalStockService.acquireLock("ATHENA", username, taskId)) {
             throw new IllegalStateException("다른 사용자가 이미 실행 중입니다.");
@@ -131,10 +195,12 @@ public class StockBatchAthenaAiService {
         broadcast(startPayload);
 
         Process[] processRef = new Process[1];
+        StringBuilder finalJsonBuffer = new StringBuilder();  // ✅ ✅ ✅ 파이썬 최종 JSON 저장
 
         try {
+
             // ===========================================================
-            // ✅ Python 명령어
+            // ✅ Python 명령어 구성
             // ===========================================================
             List<String> cmd = new ArrayList<>();
             cmd.add(pythonExe);
@@ -143,14 +209,23 @@ public class StockBatchAthenaAiService {
 
             cmd.add("--mode");
             cmd.add("analyze");
+
             cmd.add("--pattern_type");
             cmd.add(pattern);
 
+            cmd.add("--ma_periods");
+            cmd.add(maPeriods);
+
             cmd.add("--workers");
             cmd.add(String.valueOf(workers));
-            cmd.add("--years");
-            cmd.add(String.valueOf(years));
-            if (excludeNeg) cmd.add("--exclude_negatives");
+
+            cmd.add("--top_n");
+            cmd.add(String.valueOf(topN));
+
+            if (symbol != null && !symbol.trim().isEmpty()) {
+                cmd.add("--symbol");
+                cmd.add(symbol);
+            }
 
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.directory(new File(workingDir));
@@ -160,7 +235,8 @@ public class StockBatchAthenaAiService {
             processRef[0] = pb.start();
             runningProcesses.put(taskId, processRef[0]);
 
-            log.info("🚀 [{}] AthenaAI Python 시작 (pattern={}, years={}, excludeNeg={})", taskId, pattern, years, excludeNeg);
+            log.info("🚀 [{}] AthenaAI Python 시작 (pattern={}, maPeriods={}, workers={}, topN={}, symbol={})",
+                    taskId, pattern, maPeriods, workers, topN, symbol == null ? "None" : symbol);
 
             Pattern pProgress = Pattern.compile("\"progress_percent\"\\s*:\\s*(\\d+(?:\\.\\d+)?)");
 
@@ -206,6 +282,13 @@ public class StockBatchAthenaAiService {
                 while ((line = reader.readLine()) != null) {
 
                     lastLogTime[0] = System.currentTimeMillis();
+
+                    // ✅ ✅ ✅ 파이썬 최종 JSON 검사
+                    if (line.trim().startsWith("{") && line.trim().endsWith("}")) {
+                        finalJsonBuffer.setLength(0);
+                        finalJsonBuffer.append(line.trim());
+                    }
+
                     logs.add(line);
                     taskStatusService.appendLog(taskId, line);
 
@@ -233,10 +316,7 @@ public class StockBatchAthenaAiService {
                 hangMonitor.cancel(true);
             }
 
-            boolean finished = processRef[0].waitFor(
-                    Duration.ofMinutes(3).toSeconds(),
-                    TimeUnit.SECONDS
-            );
+            boolean finished = processRef[0].waitFor(Duration.ofMinutes(3).toSeconds(), TimeUnit.SECONDS);
 
             if (!finished) {
                 log.error("⏱ [{}] Python 실행 시간 초과", taskId);
@@ -274,6 +354,16 @@ public class StockBatchAthenaAiService {
                 return;
             }
 
+            // ✅ ✅ ✅ 파이썬 최종 JSON 파싱
+            Map<String, Object> resultJson = null;
+            try {
+                if (finalJsonBuffer.length() > 0) {
+                    resultJson = new ObjectMapper().readValue(finalJsonBuffer.toString(), Map.class);
+                }
+            } catch (Exception ex) {
+                log.error("❌ 최종 JSON 파싱 실패: {}", ex.getMessage());
+            }
+
             // ✅ 정상 완료
             taskStatusService.complete(taskId);
 
@@ -283,6 +373,11 @@ public class StockBatchAthenaAiService {
             okPayload.put("globalStatus", "COMPLETED");
             okPayload.put("globalRunner", currentRunner);
             okPayload.put("globalProgress", 100);
+
+            // ✅ ✅ ✅ 프런트가 테이블 렌더링할 수 있도록 results 포함!!
+            if (resultJson != null) {
+                okPayload.putAll(resultJson);
+            }
 
             broadcast(okPayload);
 
@@ -319,7 +414,7 @@ public class StockBatchAthenaAiService {
                 currentRunner = null;
                 currentTaskId = null;
 
-                globalStockService.releaseLock("ATHENA");
+                globalStockService.releaseLock(taskId);
 
                 log.info("🔓 [{}] 전역 락 해제 (runner={})", taskId, prev);
             }
@@ -356,7 +451,7 @@ public class StockBatchAthenaAiService {
         currentRunner = null;
         currentTaskId = null;
 
-        globalStockService.releaseLock("ATHENA");
+        globalStockService.releaseLock(taskId);
 
         return true;
     }

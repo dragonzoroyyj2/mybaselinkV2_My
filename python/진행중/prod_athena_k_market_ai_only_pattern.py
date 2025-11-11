@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-📘 athena_k_market_ai.py (v1.0)
+📘 teset_athena_k_market_ai_only_pattern_delete.py (v1.3 - DART API Key만 제거 버전)
 --------------------------------------------
 ✅ 한국 주식 시장 데이터 분석 및 기술적 패턴 감지 스크립트
     - 기능: 종목 분석 필터링 (analyze 모드), 차트 시각화 데이터 생성 (chart 모드)
+    - 특징: DART API 키 인자 및 관련 로직을 제거하고, 순수 기술적 분석 기능만 수행합니다.
     - 수정: --symbol 인자를 통한 단일 종목 분석 기능 추가
 """
 
@@ -83,8 +84,7 @@ class CustomJsonEncoder(json.JSONEncoder):
 # ==============================
 # 2. 경로 및 상수 설정
 # ==============================
-# → 상위 2단계로 올라가면 /MyBaseLinkV2/python
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parent
 LOG_DIR = BASE_DIR / "log"
 DATA_DIR = BASE_DIR / "data" / "stock_data" 
 LISTING_FILE = BASE_DIR / "data" / "stock_list" / "stock_listing.json" 
@@ -716,7 +716,7 @@ def generate_chart(symbol, ma_periods_str, chart_period):
 # main 함수 수정 (argparse 인자 목록 반영)
 def main():
     """스크립트의 메인 실행 함수입니다. 인수를 파싱하고 모드별 함수를 호출합니다."""
-    parser = argparse.ArgumentParser(description="주식 데이터 분석 및 차트 데이터 생성 스크립트")
+    parser = argparse.ArgumentParser(description="주식 데이터 분석 및 차트 데이터 생성 스크립트 (DART API Key 제거)")
     
     # 요청하신 인자 목록 반영
     parser.add_argument("--mode", type=str, required=True, choices=['analyze', 'chart'], help="실행 모드 선택: 'analyze' 또는 'chart'")
@@ -734,6 +734,7 @@ def main():
     parser.add_argument("--debug", action="store_true", help="디버그 모드 활성화 (로깅 레벨 DEBUG)")
     parser.add_argument("--top_n", type=int, default=10, help="분석 결과 중 상위 N개 종목만 반환 (0 이하: 전체 반환)")
     
+    # parser.add_argument("--dart_api_key", type=str, default="", help="DART API 서비스 키 (분석 모드에서 공시 정보 통합 시 사용)") <--- 이 부분이 제거되었습니다.
 
     args = parser.parse_args()
     

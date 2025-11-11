@@ -1,7 +1,8 @@
 /* ===============================================
-   ✅ commonPagination.css (v1.0 - 2025.11 안정판)
+   ✅ commonPagination.css (v1.1 - A11y & UX FIX)
    ------------------------------------------------
-   - 페이징 버튼 정렬, 크기, 반응형
+   - FIX: 버튼 최소 높이 및 터치 영역 확보 (32px)
+   - FIX: 모바일 스크롤 시 좌우 여백 추가
 =============================================== */
 
 /* ===============================================================
@@ -14,6 +15,7 @@
   --page-active-bg: #2563eb;
   --page-active-text: #ffffff;
   --page-hover-bg: #f3f4f6;
+  --page-disabled-text: #9ca3af;
 }
 body.dark-mode {
   --page-bg: #1f2937;
@@ -22,8 +24,8 @@ body.dark-mode {
   --page-active-bg: #3b82f6;
   --page-active-text: #f9fafb;
   --page-hover-bg: #374151;
-  background: #111827;
-  color: var(--page-text);
+  --page-disabled-text: #6b7280;
+  /* 🚩 FIX: 불필요한 전역 배경색/텍스트 설정 제거 */
 }
 
 .pagination {
@@ -34,6 +36,9 @@ body.dark-mode {
   gap: 4px;
   flex-wrap: nowrap;
   overflow-x: auto;
+  
+  /* 🚩 NEW FIX: 모바일 스크롤 시 좌우 여백 확보 */
+  padding: 4px 10px; 
 }
 
 .pagination button {
@@ -41,28 +46,51 @@ body.dark-mode {
   background: var(--page-bg);
   color: var(--page-text);
   border-radius: 6px;
-  padding: 5px 9px;
+  padding: 0 9px; /* 🚩 FIX: 상하 패딩을 0으로 하고 height로 높이 고정 */
+  height: 32px;  /* 🚩 NEW FIX: 버튼 최소 높이 확보 (터치 영역) */
+  min-width: 32px; /* 🚩 NEW FIX: 버튼 최소 너비 확보 (아이콘/숫자) */
   font-size: 0.8rem;
   cursor: pointer;
   transition: 0.15s;
+  display: inline-flex; /* 🚩 NEW: 아이콘/텍스트 중앙 정렬 */
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .pagination button.active {
   background: var(--page-active-bg);
   color: var(--page-active-text);
   border-color: var(--page-active-bg);
+  font-weight: 600; /* 🚩 NEW: 활성 페이지 강조 */
 }
 
 .pagination button:hover:not(.active) {
   background: var(--page-hover-bg);
 }
 
+.pagination button:disabled {
+  cursor: not-allowed;
+  color: var(--page-disabled-text);
+  background: var(--page-bg);
+  border-color: var(--page-border);
+}
+
+.pagination button i {
+  font-size: 1.0rem; /* 아이콘 크기 통일 */
+}
+
 /* 반응형 */
 @media (max-width: 480px) {
-  .pagination { margin-top: 0.6rem; gap: 2px; }
+  .pagination { 
+    margin-top: 0.6rem; 
+    gap: 3px; /* 간격 미세 조정 */
+    padding: 4px 8px; /* 좌우 여백 미세 조정 */
+  }
   .pagination button {
-    font-size: 0.7rem;
-    padding: 6px 10px;
-    min-width: 26px;
+    font-size: 0.75rem; /* 폰트 크기 미세 조정 */
+    height: 28px; /* 모바일에서 높이 약간 감소 */
+    min-width: 28px;
+    padding: 0 8px;
   }
 }

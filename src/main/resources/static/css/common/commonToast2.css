@@ -1,9 +1,9 @@
 /* ===============================================================
-   ✅ commonToast.css (v1.3 - 위치 Top 중앙 FIX)
+   ✅ commonToast.css (v1.0 - 2025.11 안정판)
    ---------------------------------------------------------------
    - 성공 / 실패 / 경고 / 정보 토스트 메시지
    - fade-in / fade-out 애니메이션 포함
-   - 화면 우측 상단 -> **상단 중앙**으로 위치 변경 FIX
+   - 화면 우측 하단에 자동 정렬
 ================================================================ */
 
 /* ===============================================================
@@ -37,22 +37,33 @@ body.dark-mode {
   --toast-info-bg: #1e3a8a;
   --toast-info-border: #3b82f6;
   --toast-close: #d1d5db;
-  /* 🚩 FIX: body.dark-mode에 직접적인 background/color 설정 제거 (토스트 외 영향 방지) */
+  background: #111827;
+  color: var(--toast-text);
 }
 
-/* ===============================================================
-   ✅ 토스트 컨테이너 (상단 중앙 통일)
-================================================================ */
-.toast-container { 
+/* 컨테이너 (여러 토스트 누적용) */
+.toast-container2 { 
   position: fixed;
-  top: 65px;     /* 상단 바(50px) 아래 + 여백 15px */
-  left: 50%;     
-  transform: translateX(-50%); /* 가로 중앙 정렬 */
+   top: 70px;        /* ✅ 상단바 아래 */ /* bottom: 20px;  ✅ 하단 */
+  right: 20px;   /* ✅ 오른쪽 */
   display: flex;
   flex-direction: column;
-  align-items: center; /* 내부 토스트들을 중앙에 정렬 */
+  align-items: flex-end;
   gap: 10px;
   z-index: 9999;
+}
+
+/* 상단 중앙  현재 적용중 변경시 : toast-container 이름 바꾸면서 사용 */
+.toast-container {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 6000;
 }
 
 /* 기본 토스트 */
@@ -70,8 +81,8 @@ body.dark-mode {
   align-items: center;
   gap: 8px;
   opacity: 0;
-  transform: translateY(-20px);
-  animation: fadeInDown 0.3s ease forwards;
+  transform: translateY(20px);
+  animation: fadeInUp 0.3s ease forwards;
 }
 
 /* 상태별 색상 */
@@ -111,41 +122,30 @@ body.dark-mode {
 
 /* 사라질 때 */
 .toast.hide {
-  animation: fadeOutUp 0.35s ease forwards;
+  animation: fadeOutDown 0.35s ease forwards;
 }
 
 /* 애니메이션 */
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes fadeOutUp {
+@keyframes fadeOutDown {
   from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 0; transform: translateY(20px); }
 }
 
-/* ===============================================================
-   ✅ 반응형 (모바일)
-   ---------------------------------------------------------------
-   - 모바일에서도 Top 중앙 배치를 유지합니다.
-================================================================ */
+/* 반응형 */
 @media (max-width: 480px) {
   .toast-container {
-    /* Top 중앙 정렬 유지 */
-    top: 60px; /* 모바일에서 간격을 5px 정도 줄여 60px로 설정 */
-    bottom: auto; 
-    left: 50%;
-    right: auto;
+    bottom: 14px;
+    right: 10px;
     width: calc(100% - 20px);
-    transform: translateX(-50%); 
     align-items: center;
-    gap: 8px;
   }
   .toast {
     min-width: unset;
     width: 100%;
     max-width: 90%;
   }
-  
-  /* 애니메이션은 PC와 동일하게 유지 */
 }
