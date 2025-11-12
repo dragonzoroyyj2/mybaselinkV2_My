@@ -38,16 +38,14 @@ python:
   find_last_close_downward:
     path: "${python.root.path}/python/stock/py/find_last_close_downward.py"
 
-  athena_k_market_ai:
-    path: "${python.root.path}/python/stock/py/athena_k_market_ai.py"
+  athena_k_market_ai_prod:
+    path: "${python.root.path}/python/stock/py/athena_k_market_ai_prod.py"
 
   stock:
     stock_listing:
-      # ⭐⭐⭐ 경로 수정 완료 (python/ 추가) ⭐⭐⭐
       path: "${python.root.path}/python/data/stock_list/stock_listing.json"
 
     stock_listing_prod:
-      # ⭐⭐⭐ 경로 수정 완료 (python/ 추가) ⭐⭐⭐
       path: "${python.root.path}/python/data/stock_list/stock_listing_prod.json"
 
 ###########################################################################

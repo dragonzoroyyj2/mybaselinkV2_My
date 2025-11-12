@@ -20,12 +20,13 @@ import java.util.regex.Pattern;
 
 /**
  * ===============================================================
- * 📊 StockBatchGProdService (v3.4 - 주가 시세 다운로드 전용)
+ * 📊 StockBatchGProdService (v3.6 - 전역/세부 동기화 완전판)
  * ---------------------------------------------------------------
  * ✅ Python 멈춤(출력 無 15초↑) 자동 FAIL + 즉시 kill
  * ✅ waitFor 3분 초과 시 강제 종료
  * ✅ 실패/예외/타임아웃 시 [ERROR] 로그 자동 전송 (화면 표시)
- * ✅ 전역락 해제/좀비 방지 이중 보정
+ * ✅ 전역락 즉시 해제/취소 후 즉시 재시작 가능
+ * ✅ 전역 + KRX + 개별 데이터 + 로그 완전 동기화 초기화
  * ===============================================================
  */
 @Service
@@ -68,27 +69,51 @@ public class StockBatchGProdService {
         emitter.onTimeout(() -> emitters.remove(emitter));
         emitter.onError(e -> emitters.remove(emitter));
 
-        Map<String, Object> payload = new LinkedHashMap<>();
         boolean running = activeLock.get();
-        payload.put("status", running ? "RUNNING" : "IDLE");
-        payload.put("runner", currentRunner);
-        payload.put("progress", 0);
-        payload.put("globalStatus", running ? "RUNNING" : "IDLE");
-        payload.put("globalRunner", currentRunner);
-        payload.put("globalProgress", 0);
 
-        sendTo(emitter, payload);
+        // ✅ 1. 즉시 초기화 패킷 전송 (UI 완전 리셋)
+        Map<String, Object> initPayload = new LinkedHashMap<>();
+        initPayload.put("status", "INIT");          // 초기화 신호
+        initPayload.put("runner", "-");
+        initPayload.put("progress", 0);
+        initPayload.put("globalStatus", "IDLE");
+        initPayload.put("globalRunner", "-");
+        initPayload.put("globalProgress", 0);
+        initPayload.put("krxTotal", 0);
+        initPayload.put("krxSaved", 0);
+        initPayload.put("dataTotal", 0);
+        initPayload.put("dataSaved", 0);
+        initPayload.put("logs", new ArrayList<>());
+        initPayload.put("errorLogs", new ArrayList<>());
+        initPayload.put("taskId", currentTaskId);   // 새로고침 후 취소 가능하게
+        sendTo(emitter, initPayload);
+
+        // ✅ 2. 0.2초 후 실제 상태 전송 (전역 박자 맞추기)
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Map<String, Object> statePayload = new LinkedHashMap<>();
+                boolean stillRunning = activeLock.get();
+                statePayload.put("status", stillRunning ? "RUNNING" : "IDLE");
+                statePayload.put("runner", currentRunner);
+                statePayload.put("progress", 0);
+                statePayload.put("globalStatus", stillRunning ? "RUNNING" : "IDLE");
+                statePayload.put("globalRunner", currentRunner);
+                statePayload.put("globalProgress", 0);
+                statePayload.put("taskId", currentTaskId); // 동일 task 유지
+                broadcast(statePayload);
+            }
+        }, 200);
+
         return emitter;
     }
+
 
     private void sendTo(SseEmitter emitter, Map<String, Object> data) {
         try {
             emitter.send(SseEmitter.event().name("status").data(data));
         } catch (Exception e) {
-        	log.warn("⚠️ SSE send 실패 (오류 아님, 정상 출력입니다. SSE 특성). {}", e.getMessage());
-            // ✅ 브라우저가 SSE 연결 끊으면 여기로 들어옴 (정상 동작)
-            // ✅ IOException: 현재 연결은 사용자의 호스트 시스템의 소프트웨어에 의해 중단되었습니다
-            // ✅ SSE 특성상 발생하는 자연스러운 예외 — 오류 아님
+            log.warn("⚠️ SSE send 실패 (정상적인 끊김): {}", e.getMessage());
             emitters.remove(emitter);
         }
     }
@@ -98,7 +123,7 @@ public class StockBatchGProdService {
             try {
                 e.send(SseEmitter.event().name("status").data(data));
             } catch (Exception ex) {
-                log.warn("⚠️ SSE broadcast 실패 (오류 아님, SSE 특성으로 정상 출력됨): {}", ex.getMessage());
+                log.warn("⚠️ SSE broadcast 실패 (정상 끊김): {}", ex.getMessage());
                 emitters.remove(e);
             }
         }
@@ -119,14 +144,37 @@ public class StockBatchGProdService {
         currentTaskId = taskId;
         taskStatusService.reset(taskId);
 
-        Map<String, Object> startPayload = new LinkedHashMap<>();
-        startPayload.put("status", "START");
-        startPayload.put("runner", username);
-        startPayload.put("progress", 0);
-        startPayload.put("globalStatus", "RUNNING");
-        startPayload.put("globalRunner", username);
-        startPayload.put("globalProgress", 0);
-        broadcast(startPayload);
+     // ✅ 완전 초기화 패킷 먼저 전송 (전역+세부+로그+에러 완전 리셋)
+        Map<String, Object> initPayload = new LinkedHashMap<>();
+        initPayload.put("status", "INIT");
+        initPayload.put("runner", username);
+        initPayload.put("progress", 0);
+        initPayload.put("globalStatus", "RUNNING");
+        initPayload.put("globalRunner", username);
+        initPayload.put("globalProgress", 0);
+        initPayload.put("krxTotal", 0);
+        initPayload.put("krxSaved", 0);
+        initPayload.put("dataTotal", 0);
+        initPayload.put("dataSaved", 0);
+        initPayload.put("logs", List.of("[LOG] 수집 초기화 중...")); // ✅ 첫 로그로 초기화 메시지
+        initPayload.put("errorLogs", new ArrayList<>());             // ✅ 에러리스트도 완전 리셋
+        broadcast(initPayload);
+
+
+        // ✅ 0.2초 후 자연스러운 START 상태 전송
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Map<String, Object> startPayload = new LinkedHashMap<>();
+                startPayload.put("status", "START");
+                startPayload.put("runner", username);
+                startPayload.put("progress", 0);
+                startPayload.put("globalStatus", "RUNNING");
+                startPayload.put("globalRunner", username);
+                startPayload.put("globalProgress", 0);
+                broadcast(startPayload);
+            }
+        }, 200);
 
         Process[] processRef = new Process[1];
 
@@ -160,9 +208,6 @@ public class StockBatchGProdService {
             List<String> logs = new ArrayList<>();
             long[] lastLogTime = {System.currentTimeMillis()};
 
-            // ===========================================================
-            // 🕒 hang 감시 스레드
-            // ===========================================================
             Future<?> hangMonitor = hangWatcher.scheduleAtFixedRate(() -> {
                 long gap = System.currentTimeMillis() - lastLogTime[0];
                 if (gap > 15000 && processRef[0] != null && processRef[0].isAlive()) {
@@ -186,9 +231,6 @@ public class StockBatchGProdService {
                 }
             }, 5, 5, TimeUnit.SECONDS);
 
-            // ===========================================================
-            // 🔍 로그 읽기 루프
-            // ===========================================================
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(processRef[0].getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
@@ -236,7 +278,6 @@ public class StockBatchGProdService {
             boolean finished = processRef[0].waitFor(Duration.ofMinutes(3).toSeconds(), TimeUnit.SECONDS);
             if (!finished) {
                 log.error("⏱ [{}] Python 실행 시간 초과 - 프로세스 강제 종료", taskId);
-
                 taskStatusService.fail(taskId, "Python 실행 시간 초과");
 
                 Map<String, Object> failPayload = new LinkedHashMap<>();
@@ -255,9 +296,7 @@ public class StockBatchGProdService {
             int exit = processRef[0].exitValue();
             if (exit != 0) {
                 log.error("❌ [{}] Python 비정상 종료(exitCode={})", taskId, exit);
-
                 taskStatusService.fail(taskId, "Python 비정상 종료(exit=" + exit + ")");
-
                 Map<String, Object> failPayload = new LinkedHashMap<>();
                 failPayload.put("status", "FAILED");
                 failPayload.put("progress", progress[0]);
@@ -266,10 +305,10 @@ public class StockBatchGProdService {
                 failPayload.put("globalRunner", currentRunner);
                 failPayload.put("globalProgress", (int)Math.floor(progress[0]));
                 broadcast(failPayload);
-
                 return;
             }
 
+            // ✅ 정상 완료
             taskStatusService.complete(taskId);
 
             Map<String, Object> completePayload = new LinkedHashMap<>();
@@ -281,10 +320,10 @@ public class StockBatchGProdService {
             broadcast(completePayload);
 
             log.info("✅ [{}] Python 정상 종료 및 완료", taskId);
+            globalStockService.unlockForce();
 
         } catch (Exception e) {
             log.error("💥 [{}] 실행 중 예외 발생", taskId, e);
-
             taskStatusService.fail(taskId, e.getMessage());
 
             Map<String, Object> failPayload = new LinkedHashMap<>();
@@ -310,7 +349,7 @@ public class StockBatchGProdService {
                 String prevRunner = currentRunner;
                 currentRunner = null;
                 currentTaskId = null;
-                globalStockService.releaseLock("GPROD");
+                globalStockService.releaseLock(taskId);
                 log.info("🔓 [{}] 전역 락 해제 완료 (prevRunner={})", taskId, prevRunner);
             }
         }
@@ -342,22 +381,22 @@ public class StockBatchGProdService {
         activeLock.set(false);
         currentRunner = null;
         currentTaskId = null;
-        globalStockService.releaseLock("GPROD");
+        globalStockService.unlockForce();
 
         return true;
     }
 
-    private int safeInt(String s){
+    private int safeInt(String s) {
         try { return Integer.parseInt(s.trim()); }
-        catch(Exception e){ return 0; }
+        catch (Exception e) { return 0; }
     }
 
-    private double safeDouble(String s){
+    private double safeDouble(String s) {
         try { return Double.parseDouble(s.trim()); }
-        catch(Exception e){ return 0.0; }
+        catch (Exception e) { return 0.0; }
     }
 
-    public boolean isLocked(){return activeLock.get();}
-    public String getCurrentTaskId(){return currentTaskId;}
-    public String getCurrentRunner(){return currentRunner;}
+    public boolean isLocked() { return activeLock.get(); }
+    public String getCurrentTaskId() { return currentTaskId; }
+    public String getCurrentRunner() { return currentRunner; }
 }

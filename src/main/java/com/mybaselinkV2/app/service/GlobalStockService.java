@@ -10,12 +10,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * ===============================================================
- * 🧭 GlobalStockService (v2.0 - 전역 락/상태 관리 완전판)
+ * 🧭 GlobalStockService (v2.2 - 즉시 강제 해제 + 자동정리 안정판)
  * ---------------------------------------------------------------
- * ✅ 단일 선점 락(기본 1명) - 공통 전역 관리
+ * ✅ 단일 선점 락(1명) - 전역 관리
  * ✅ 각 메뉴별 Python 작업 상태 저장
- * ✅ GlobalDashboardService와 완벽 연동
  * ✅ 관리자 강제 종료/락 해제/상태조회 지원
+ * ✅ cancel 직후 재시작 시 409 방지 (락 잔류 자동정리)
  * ===============================================================
  */
 @Service
@@ -142,6 +142,37 @@ public class GlobalStockService {
             log.info("✅ 작업 완료 처리됨: {}", taskId);
             releaseLock(taskId);
         }
+    }
+
+    // ===============================================================
+    // ✅ 잔류 락 자동 정리 (프로세스가 실제 없음)
+    // ===============================================================
+    public synchronized void forceUnlockIfNoProcess() {
+        if (!isLocked()) return;
+
+        // running=false 또는 activeTasks 비었는데 count 남아있는 경우
+        boolean hasRunning = activeTasks.values().stream().anyMatch(t -> t.running);
+        if (!hasRunning) {
+            log.warn("🧹 잔류 락 자동 해제 (프로세스 없음, owner={})", currentOwner);
+            activeTasks.clear();
+            activeCount.set(0);
+            currentMenu = null;
+            currentOwner = null;
+            currentTaskId = null;
+        }
+    }
+
+    // ===============================================================
+    // ✅ 즉시 강제 해제 (취소 직후 사용)
+    // ===============================================================
+    public synchronized void unlockForce() {
+        if (!isLocked()) return;
+        log.warn("🟥 즉시 강제 락 해제 실행 (owner={})", currentOwner);
+        activeTasks.clear();
+        activeCount.set(0);
+        currentMenu = null;
+        currentOwner = null;
+        currentTaskId = null;
     }
 
     // ===============================================================

@@ -10,51 +10,89 @@
 <title>📊 Stock Batch GProd</title>
 
 <style>
-  :root{
-    --main-bg:#f3f4f6;--card-bg:#ffffff;--text-color-primary:#111827;--text-color-secondary:#6b7280;
-    --border-color-default:#d1d5db;--input-bg:#ffffff;--progress-bar-bg:#e5e7eb;
-    --log-box-bg:#111;--log-text-default:#e0e0e0;--log-text-info:#9ca3af;--log-text-progress:#60a5fa;
-    --log-text-warning:#f59e0b;--log-text-error:#ef4444;--log-text-complete:#22c55e;
-  }
-  h2{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;color:var(--text-color-primary);}
-  .card-box,.dashboard-cards,.log-wrapper{background:var(--card-bg);border-radius:12px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,.15);margin-top:14px;}
-  .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-size:.9rem;font-weight:600;color:#fff;min-width:110px;text-align:center;}
-  .btn-start{background:#2563eb;}
-  .btn-cancel{background:#dc2626;}
-  .btn:disabled{opacity:.5;cursor:not-allowed;}
-  .controls{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;}
-  input[type=number],select{width:90px;padding:.45rem .6rem;border:1px solid var(--border-color-default);border-radius:6px;color:var(--text-color-primary);background-color:var(--input-bg);}
-  .dashboard-cards{display:flex;flex-wrap:wrap;gap:14px;}
-  .card{flex:1 1 300px;background:var(--card-bg);border-radius:12px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,.05);display:flex;flex-direction:column;}
-  .card-header{display:flex;align-items:center;gap:6px;font-size:.95rem;font-weight:600;margin-bottom:6px;}
-  .card-header i{color:#2563eb;}
-  .card-header .right{margin-left:auto;font-weight:600;font-size:.9rem;}
-  .progress-bar{width:100%;background:var(--progress-bar-bg);height:14px;border-radius:7px;margin-top:10px;overflow:hidden;}
-  .progress-bar div{height:100%;width:0%;transition:width .25s;}
-  .bar-total div{background:#2563eb;}
-  .bar-krx div{background:#10b981;}
-  .bar-data div{background:#f59e0b;}
-  .log-wrapper h3{display:flex;align-items:center;justify-content:space-between;margin:0;font-size:1rem;padding-bottom:4px;border-bottom:1px solid var(--border-color-default);}
-  .copy-btn{display:flex;align-items:center;gap:4px;font-size:.9rem;cursor:pointer;user-select:none;margin-left:10px;color:#3b82f6;opacity:.9;padding:4px 8px;border-radius:6px;}
-  .log-box{background:var(--log-box-bg);color:var(--log-text-default);font-family:Consolas,mono;font-size:13px;padding:12px;border-radius:10px;height:240px;overflow:auto;margin-top:6px;line-height:1.4;}
-  .log-box p{margin:0;padding:0;white-space:nowrap;}
-  .status-pill{margin-left:8px;padding:2px 8px;border-radius:999px;font-size:12px;color:#fff;}
-  @media(max-width:640px){.controls{flex-direction:column;align-items:stretch}.btn{width:100%;margin-top:4px}.dashboard-cards .card{flex:1 1 100%}.log-box{height:200px}}
-  /* 전역 카드 */
-  .global-status-card{background:#fff;border:1px solid #d1d5db;border-radius:12px;padding:14px 18px;margin-bottom:12px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);}
-  .global-status-header{font-weight:600;color:#111827;display:flex;justify-content:space-between;align-items:center;font-size:1rem;}
-  .global-status-body{font-size:.9rem;color:#6b7280;display:flex;justify-content:space-between;margin-top:4px;}
-  .global-status-progress{width:100%;height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden;margin-top:8px;}
-  .global-status-progress div{height:100%;width:0%;background:#2563eb;transition:width .25s;}
-  /* 전역 상태 색상 */
-  .status-idle{color:#6b7280;}
-  .status-running{color:#2563eb;}
-  .status-completed{color:#22c55e;}
-  .status-failed,.status-timeout{color:#ef4444;}
-  .status-cancelled{color:#f59e0b;}
-  /* 🔵 RUNNING 텍스트 깜빡임 */
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
-  .blinking{ animation: blink 1.2s infinite; }
+:root {
+  --main-bg: #f3f4f6;
+  --card-bg: #ffffff;
+  --text-color-primary: #111827;
+  --text-color-secondary: #6b7280;
+  --border-color-default: #d1d5db;
+  --input-bg: #ffffff;
+  --progress-bar-bg: #e5e7eb;
+  --log-box-bg: #111;
+  --log-text-default: #e0e0e0;
+  --log-text-info: #9ca3af;
+  --log-text-progress: #60a5fa;
+  --log-text-warning: #f59e0b;
+  --log-text-error: #ef4444;
+  --log-text-complete: #22c55e;
+  --card-border: #d1d5db;
+  --error-card-bg: #fff;
+  --error-card-border: #e5e7eb;
+  --error-card-text: #374151;
+  --error-card-hover: #fee2e2;
+  --error-card-header: #b91c1c;
+}
+body.dark-mode {
+  --main-bg: #1f2937;
+  --card-bg: #374151;
+  --text-color-primary: #f9fafb;
+  --text-color-secondary: #9ca3af;
+  --border-color-default: #4b5563;
+  --input-bg: #4b5563;
+  --progress-bar-bg: #4b5563;
+  --card-border: #4b5563;
+  --error-card-bg: #374151;
+  --error-card-border: #4b5563;
+  --error-card-text: #d1d5db;
+  --error-card-hover: #7f1d1d;
+  --error-card-header: #f87171;
+}
+
+h2{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;color:var(--text-color-primary);}
+.card-box,.dashboard-cards,.log-wrapper{background:var(--card-bg);border-radius:12px;padding:18px;box-shadow:0 2px 6px rgba(0,0,0,.15);margin-top:14px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-size:.9rem;font-weight:600;color:#fff;min-width:110px;text-align:center;}
+.btn-start{background:#2563eb;}
+.btn-cancel{background:#dc2626;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.controls{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;}
+input[type=number],select{width:90px;padding:.45rem .6rem;border:1px solid var(--border-color-default);border-radius:6px;color:var(--text-color-primary);background-color:var(--input-bg);}
+.dashboard-cards{display:flex;flex-wrap:wrap;gap:14px;}
+.card{flex:1 1 300px;background:var(--card-bg);border-radius:12px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+.card-header{display:flex;align-items:center;gap:6px;font-size:.95rem;font-weight:600;margin-bottom:6px;}
+.card-header i{color:#2563eb;}
+.card-header .right{margin-left:auto;font-weight:600;font-size:.9rem;}
+.progress-bar{width:100%;background:var(--progress-bar-bg);height:14px;border-radius:7px;margin-top:10px;overflow:hidden;}
+.progress-bar div{height:100%;width:0%;transition:width .25s;}
+.bar-total div{background:#2563eb;}
+.bar-krx div{background:#10b981;}
+.bar-data div{background:#f59e0b;}
+.log-wrapper h3{display:flex;align-items:center;justify-content:space-between;margin:0;font-size:1rem;padding-bottom:4px;border-bottom:1px solid var(--border-color-default);}
+.copy-btn{display:flex;align-items:center;gap:4px;font-size:.9rem;cursor:pointer;user-select:none;margin-left:10px;color:#3b82f6;opacity:.9;padding:4px 8px;border-radius:6px;}
+.log-box{background:var(--log-box-bg);color:var(--log-text-default);font-family:Consolas,mono;font-size:13px;padding:12px;border-radius:10px;height:240px;overflow:auto;margin-top:6px;line-height:1.4;}
+.log-box p{margin:0;padding:0;white-space:nowrap;}
+@media(max-width:640px){.controls{flex-direction:column;align-items:stretch}.btn{width:100%;margin-top:4px}.dashboard-cards .card{flex:1 1 100%}.log-box{height:200px}}
+
+/* 🌐 전역 상태 카드 */
+.global-status-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:14px 18px;margin-bottom:12px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);}
+.global-status-header{font-weight:600;color:var(--text-color-primary);display:flex;justify-content:space-between;align-items:center;font-size:1rem;}
+.global-status-body{font-size:.9rem;color:var(--text-color-secondary);display:flex;justify-content:space-between;margin-top:4px;}
+.global-status-progress{width:100%;height:10px;background:var(--progress-bar-bg);border-radius:6px;overflow:hidden;margin-top:8px;}
+.global-status-progress div{height:100%;width:0%;background:#2563eb;transition:width .25s;}
+.status-idle{color:#6b7280;}
+.status-running{color:#2563eb;}
+.status-completed{color:#22c55e;}
+.status-failed,.status-timeout{color:#ef4444;}
+.status-cancelled{color:#f59e0b;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.blinking{animation:blink 1.2s infinite;}
+
+/* ⚠️ 에러로그 카드 */
+.error-log-card{background:var(--error-card-bg);border:1px solid var(--error-card-border);border-radius:12px;padding:16px;margin-top:14px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.error-log-header{display:flex;align-items:center;justify-content:space-between;font-weight:600;color:var(--error-card-header);}
+.error-log-header button{background:#b91c1c;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:.8rem;cursor:pointer;min-width:70px;flex-shrink:0;margin-left:auto;}
+.error-log-list{display:none;margin-top:10px;max-height:200px;overflow:auto;border-top:1px solid var(--error-card-border);padding-top:8px;font-size:.9rem;color:var(--error-card-text);}
+.error-log-item{padding:4px 0;border-bottom:1px dashed var(--error-card-border);cursor:pointer;}
+.error-log-item:hover{background:var(--error-card-hover);}
 </style>
 </head>
 
@@ -128,6 +166,12 @@
       </div>
     </div>
 
+    <!-- ⚠️ 에러로그 카드 -->
+     <div class="error-log-card">
+      <div class="error-log-header">❌ 수집 실패 로그 목록<button id="errorToggleBtn">▼ 펼치기</button></div>
+      <div id="errorListBox" class="error-log-list"></div>
+    </div>
+
     <div class="log-wrapper">
       <h3>실시간 로그
         <span class="copy-btn" id="copyLogBtn"><i class="fas fa-copy"></i> 로그 복사</span>
@@ -144,30 +188,61 @@
         $globalRunner = document.getElementById("globalRunner"),
         $globalProgressLabel = document.getElementById("globalProgressLabel"),
         $globalProgressBar = document.getElementById("globalProgressBar"),
-
         $btnStart = document.getElementById("btnStart"),
         $btnCancel = document.getElementById("btnCancel"),
-
         $barTotal = document.getElementById("barTotal"),
         $pctTotal = document.getElementById("pctTotal"),
         $badgeTotal = document.getElementById("badgeTotal"),
-
         $barKrx = document.getElementById("barKrx"),
         $pctKrx = document.getElementById("pctKrx"),
         $badgeKrx = document.getElementById("badgeKrx"),
-
         $barData = document.getElementById("barData"),
         $pctData = document.getElementById("pctData"),
         $badgeData = document.getElementById("badgeData"),
-
         $log = document.getElementById("logBox"),
         $workers = document.getElementById("workers"),
         $force = document.getElementById("force"),
         $historyYears = document.getElementById("historyYears"),
-        $hintTimer = document.getElementById("hintTimer");
+        $hintTimer = document.getElementById("hintTimer"),
+        $errorBox = document.getElementById("errorListBox"),
+        $errorBtn = document.getElementById("errorToggleBtn");
 
-  let currentTaskId = null, es = null, startTime = null, timerInterval = null;
-  let currentUser = "-"; // 👤 현재 로그인 사용자
+  let currentTaskId = null;
+  let es = null;
+  let startTime = null;
+  let timerInterval = null;
+  let currentUser = "-";
+  const errorLogs = [];
+
+  // ✅ 에러 로그 토글
+  $errorBtn.onclick = () => {
+    const open = $errorBox.style.display === "block";
+    $errorBox.style.display = open ? "none" : "block";
+    $errorBtn.textContent = open ? "▼ 펼치기" : "▲ 접기";
+  };
+
+  // ✅ 에러 로그 추가
+  function addErrorLog(line) {
+    if (!/ERROR|실패|TIMEOUT|오류/.test(line)) return;
+    if (errorLogs.includes(line)) return;
+    errorLogs.push(line);
+    const div = document.createElement("div");
+    div.className = "error-log-item";
+    div.textContent = line;
+    div.onclick = () => highlightInMainLog(line);
+    $errorBox.appendChild(div);
+  }
+
+  // ✅ 메인 로그에서 해당 라인 강조
+  function highlightInMainLog(lineText) {
+    const lines = Array.from($log.querySelectorAll("p"));
+    const target = lines.find(p => p.textContent.includes(lineText));
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.style.background = "#ffff66"; // 노란색 강조로 가독성 유지
+      setTimeout(() => target.style.background = "", 2000);
+    }
+  }
 
   // ✅ 현재 로그인 사용자 확인
   async function initCurrentUser() {
@@ -181,11 +256,11 @@
     }
   }
 
-  // ✅ 진행률 표시 함수
+  // ✅ 진행률 표시
   function setBar(bar, pctEl, pctVal, status) {
     let v = Math.max(0, Math.min(100, Math.floor(pctVal || 0)));
-    if (v >= 100 && ["FAILED","CANCELLED","TIMEOUT"].includes((status || "").toUpperCase())) {
-      v = Math.max(0, v - 1); // 실패 시 99%로 보정
+    if (v >= 100 && ["FAILED", "CANCELLED", "TIMEOUT"].includes((status || "").toUpperCase())) {
+      v = Math.max(0, v - 1);
     }
     bar.style.width = v + "%";
     pctEl.textContent = v + "%";
@@ -198,9 +273,10 @@
     p.textContent = msg;
     $log.appendChild(p);
     $log.scrollTop = $log.scrollHeight;
+    addErrorLog(msg);
   }
 
-  // ✅ 타이머
+  // ✅ 타이머 시작/정지
   function startTimer() {
     startTime = Date.now();
     if (timerInterval) clearInterval(timerInterval);
@@ -210,6 +286,7 @@
       $hintTimer.textContent = `⏱ ${m > 0 ? m + "분 " : ""}${s}초 경과`;
     }, 1000);
   }
+
   function stopTimer() {
     if (timerInterval) {
       clearInterval(timerInterval);
@@ -217,46 +294,50 @@
     }
   }
 
-  // ✅ 전역 상태 텍스트 / 색상 / 깜빡임
+  // ✅ UI 전체 초기화 (업데이트 시작 시만 호출)
+  function resetUI() {
+    // 퍼센트 및 배지 초기화
+    [$barKrx, $barData, $barTotal].forEach(bar => bar.style.width = "0%");
+    [$pctKrx, $pctData, $pctTotal].forEach(p => p.textContent = "0%");
+    [$badgeKrx, $badgeData, $badgeTotal].forEach(b => b.textContent = "-");
+    // 로그 박스 초기화
+    $log.innerHTML = '<p class="log-info">로그 대기중...</p>';
+    // 에러 박스 초기화
+    $errorBox.innerHTML = "";
+  }
+
+  // ✅ 전역 상태 업데이트
   function updateGlobalStatus(status, runner, progress) {
     const s = (status || "IDLE").toUpperCase();
     $globalStatusText.textContent = s;
     $globalStatusText.className = "";
-    if (s === "RUNNING") {
-      $globalStatusText.classList.add("status-running", "blinking");
-    } else if (s === "COMPLETED") {
-      $globalStatusText.classList.add("status-completed");
-    } else if (s === "FAILED") {
-      $globalStatusText.classList.add("status-failed");
-    } else if (s === "CANCELLED") {
-      $globalStatusText.classList.add("status-cancelled");
-    } else if (s === "TIMEOUT") {
-      $globalStatusText.classList.add("status-timeout");
-    } else {
-      $globalStatusText.classList.add("status-idle");
-    }
-
+    if (s === "RUNNING") $globalStatusText.classList.add("status-running", "blinking");
+    else if (s === "COMPLETED") $globalStatusText.classList.add("status-completed");
+    else if (s === "FAILED") $globalStatusText.classList.add("status-failed");
+    else if (s === "CANCELLED") $globalStatusText.classList.add("status-cancelled");
+    else if (s === "TIMEOUT") $globalStatusText.classList.add("status-timeout");
+    else $globalStatusText.classList.add("status-idle");
     $globalRunner.textContent = runner || "-";
     const v = Math.min(100, Math.max(0, Math.floor(progress || 0)));
     $globalProgressLabel.textContent = v + "%";
     $globalProgressBar.style.width = v + "%";
   }
 
-  // ✅ 초기 상태 버튼 제어
+  // ✅ 초기 전역 상태 로딩
   async function initGlobalStatus() {
     try {
       const res = await fetch("/api/global/status", { credentials: "include" });
       if (res.ok) {
         const d = await res.json();
         updateGlobalStatus(d.status, d.runner, d.progress);
-        const isRunning = (d.status || "").toUpperCase() === "RUNNING";
-        if (isRunning) {
+        const isRun = (d.status || "").toUpperCase() === "RUNNING";
+        if (isRun) {
           if (d.runner && d.runner === currentUser) {
             $btnStart.disabled = true;
-            $btnCancel.disabled = false; // 실행자 → 취소 가능
+            $btnCancel.disabled = false;
           } else {
             $btnStart.disabled = true;
-            $btnCancel.disabled = true;  // 대기자 → 둘 다 비활성
+            $btnCancel.disabled = true;
           }
         } else {
           $btnStart.disabled = false;
@@ -266,7 +347,7 @@
     } catch {}
   }
 
-  // ✅ 새로고침 후 taskId 복원
+  // ✅ active 복원
   async function initActiveTask() {
     try {
       const res = await fetch("/api/stock/batch/gprod/active", { credentials: "include" });
@@ -284,14 +365,26 @@
 
   // ✅ SSE 연결
   function connect() {
-    if (es) { try { es.close(); } catch {} }
+    if (es) {
+      try { es.close(); } catch {}
+    }
     es = new EventSource("/api/stock/batch/gprod/sse", { withCredentials: true });
-
     es.addEventListener("status", e => {
       const d = JSON.parse(e.data || "{}");
 
-      if (d.globalStatus) updateGlobalStatus(d.globalStatus, d.globalRunner, d.globalProgress);
+      // 전역 상태 갱신
+      if (d.globalStatus) {
+        updateGlobalStatus(d.globalStatus, d.globalRunner, d.globalProgress);
+        const gs = d.globalStatus.toUpperCase();
+        if (["IDLE", "COMPLETED", "FAILED", "CANCELLED", "TIMEOUT"].includes(gs)) {
+          $btnStart.disabled = false;
+          $btnCancel.disabled = true;
+          stopTimer();
+          currentTaskId = null;
+        }
+      }
 
+      // 진행률 표시
       if (typeof d.krxTotal === "number" && typeof d.krxSaved === "number" && d.krxTotal > 0) {
         setBar($barKrx, $pctKrx, (d.krxSaved * 100 / d.krxTotal), d.status);
         $badgeKrx.textContent = `${d.krxSaved}/${d.krxTotal}`;
@@ -300,42 +393,32 @@
         setBar($barData, $pctData, (d.dataSaved * 100 / d.dataTotal), d.status);
         $badgeData.textContent = `${d.dataSaved}/${d.dataTotal}`;
       }
-
       if (typeof d.progress === "number") {
         setBar($barTotal, $pctTotal, d.progress, d.status);
       }
 
+      // 로그 표시
       if (Array.isArray(d.logs)) d.logs.forEach(appendLog);
 
       const isOwner = (typeof d.owner === "boolean") ? d.owner : (d.runner && d.runner === currentUser);
-
       if (d.status === "START") {
         startTimer();
         $btnStart.disabled = true;
-        $btnCancel.disabled = isOwner ? false : true;
+        $btnCancel.disabled = !isOwner ? true : false;
       }
-
-      if (["IN_PROGRESS","RUNNING"].includes(d.status)) {
+      if (["IN_PROGRESS", "RUNNING"].includes(d.status)) {
         $btnStart.disabled = true;
-        $btnCancel.disabled = isOwner ? false : true;
+        $btnCancel.disabled = !isOwner ? true : false;
       }
-
       if (d.status === "COMPLETED") {
         stopTimer();
         $badgeTotal.textContent = "✅ 완료";
-        $btnStart.disabled = false;
-        $btnCancel.disabled = true;
       }
-
-      if (["FAILED","CANCELLED","TIMEOUT"].includes(d.status)) {
+      if (["FAILED", "CANCELLED", "TIMEOUT"].includes(d.status)) {
         stopTimer();
-        $btnStart.disabled = false;
-        $btnCancel.disabled = true;
       }
-
       if (!currentTaskId && d.taskId) currentTaskId = d.taskId;
     });
-
     es.onerror = () => {
       try { es.close(); } catch {}
       es = null;
@@ -349,8 +432,9 @@
     navigator.clipboard.writeText(text).then(() => appendLog("[LOG] 📋 로그 복사 완료"));
   };
 
-  // ✅ 실행
+  // ✅ 실행 (업데이트 시작 시 UI 완전 초기화)
   $btnStart.onclick = async () => {
+    resetUI(); // 🔥 추가: 새 업데이트 시작 시 완전 초기화
     $btnStart.disabled = true;
     $btnCancel.disabled = false;
     const url = `/api/stock/batch/gprod/start?workers=${$workers.value || 16}&historyYears=${$historyYears.value || 3}&force=${$force.checked}`;
@@ -368,13 +452,14 @@
     }
   };
 
-  // ✅ 취소
+  // ✅ 취소 (화면 그대로 유지)
   $btnCancel.onclick = async () => {
     if (!currentTaskId) return;
     const res = await fetch(`/api/stock/batch/gprod/cancel/${currentTaskId}`, { method: "POST", credentials: "include" });
     if (res.ok) {
       appendLog("🟥 작업 취소됨");
       stopTimer();
+      currentTaskId = null;
       $btnStart.disabled = false;
       $btnCancel.disabled = true;
     } else {
@@ -393,3 +478,6 @@
 </script>
 </th:block>
 
+</th:block>
+</body>
+</html>

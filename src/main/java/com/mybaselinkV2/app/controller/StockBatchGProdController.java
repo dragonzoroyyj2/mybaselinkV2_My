@@ -15,12 +15,13 @@ import java.util.LinkedHashMap;
 
 /**
  * ===============================================================
- * 📊 StockBatchGProdController (v1.1 - 실전 안정판)
+ * 📊 StockBatchGProdController (v1.2 - 락 자동해제 안정판)
  * ---------------------------------------------------------------
  * ✅ /api/stock/batch/gprod/**
  * ✅ GlobalStockService 전역락 완전 연동
  * ✅ SSE 실시간 로그/진행률/상태 전송 (활성화)
  * ✅ Python 프로세스 강제 종료 + 전역 상태 자동 갱신
+ * ✅ 취소 직후 즉시 재시작 가능 (락 해제 지연 방지)
  * ===============================================================
  */
 @RestController
@@ -55,6 +56,14 @@ public class StockBatchGProdController {
 
         log.info("🟢 [{}] 분석 요청 by {} (force={}, workers={}, years={})", taskId, username, force, workers, historyYears);
 
+        // ✅ 취소 직후 남아있을 수 있는 잠금 상태 정리 (자동 클린업)
+        try {
+            globalStockService.forceUnlockIfNoProcess(); // 새로 추가 (락 잔존 방지)
+        } catch (Exception e) {
+            log.warn("⚠️ 잠금 상태 자동 정리 실패 (무시): {}", e.getMessage());
+        }
+
+        // ✅ 현재 락 확인
         if (globalStockService.isLocked()) {
             String runner = globalStockService.getCurrentTaskInfo()
                     .map(i -> i.user)
@@ -95,12 +104,13 @@ public class StockBatchGProdController {
         try {
             boolean cancelled = gProdService.cancelTask(taskId, username);
             if (!cancelled) {
-
                 Map<String, Object> body = new LinkedHashMap<>();
                 body.put("error", "취소 실패: 이미 종료된 작업 또는 권한 없음");
-
                 return ResponseEntity.status(409).body(body);
             }
+
+            // ✅ 즉시 전역 락 해제 (취소 후 잔류 락 방지)
+            globalStockService.unlockForce();
 
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("cancelled", true);

@@ -22,13 +22,12 @@ import java.util.regex.Pattern;
 
 /**
  * ===============================================================
- * 📊 StockBatchAthenaAiService (v4.0 - Chart 모드 완전 통합판)
+ * 📊 StockBatchAthenaAiService (v4.2 - Python v1.3 완전 동기화판)
  * ---------------------------------------------------------------
- * ✅ analyze 모드 (기존 기능 100% 동일)
- * ✅ chart 모드 추가 (--mode chart)
- * ✅ chart 모드는 락 없음 / SSE 없음 / 즉시 JSON 리턴
- * ✅ Python stdout JSON 100% 파싱
- * ✅ analyze 기존 기능/주석 1줄도 변경 없음
+ * ✅ analyze 모드 (v1.3 인자체계 완전 일치)
+ * ✅ chart 모드 (--mode chart)
+ * ✅ SSE INIT + 200ms 브로드캐스트 정상 동작
+ * ✅ 새로고침 / 취소 / 락 해제 완전 동기화
  * ===============================================================
  */
 @Service
@@ -42,7 +41,7 @@ public class StockBatchAthenaAiService {
     @Value("${python.executable.path:python}")
     private String pythonExe;
 
-    @Value("${python.athena_k_market_ai.path}")
+    @Value("${python.athena_k_market_ai_prod.path}")
     private String scriptPath;
 
     @Value("${python.working.dir}")
@@ -72,17 +71,40 @@ public class StockBatchAthenaAiService {
         emitter.onTimeout(() -> emitters.remove(emitter));
         emitter.onError(e -> emitters.remove(emitter));
 
-        Map<String, Object> payload = new LinkedHashMap<>();
         boolean running = activeLock.get();
 
-        payload.put("status", running ? "RUNNING" : "IDLE");
-        payload.put("runner", currentRunner);
-        payload.put("progress", 0);
-        payload.put("globalStatus", running ? "RUNNING" : "IDLE");
-        payload.put("globalRunner", currentRunner);
-        payload.put("globalProgress", 0);
+        // ✅ 1차 즉시 INIT 패킷
+        Map<String, Object> initPayload = new LinkedHashMap<>();
+        initPayload.put("status", "INIT");
+        initPayload.put("runner", "-");
+        initPayload.put("progress", 0);
+        initPayload.put("globalStatus", "IDLE");
+        initPayload.put("globalRunner", "-");
+        initPayload.put("globalProgress", 0);
+        initPayload.put("krxTotal", 0);
+        initPayload.put("krxSaved", 0);
+        initPayload.put("dataTotal", 0);
+        initPayload.put("dataSaved", 0);
+        initPayload.put("logs", new ArrayList<>());
+        initPayload.put("errorLogs", new ArrayList<>());
+        sendTo(emitter, initPayload);
 
-        sendTo(emitter, payload);
+        // ✅ 0.2초 후 실제 상태 브로드캐스트
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Map<String, Object> statePayload = new LinkedHashMap<>();
+                boolean stillRunning = activeLock.get();
+                statePayload.put("status", stillRunning ? "RUNNING" : "IDLE");
+                statePayload.put("runner", currentRunner);
+                statePayload.put("progress", 0);
+                statePayload.put("globalStatus", stillRunning ? "RUNNING" : "IDLE");
+                statePayload.put("globalRunner", currentRunner);
+                statePayload.put("globalProgress", 0);
+                broadcast(statePayload);
+            }
+        }, 200);
+
         return emitter;
     }
 
@@ -90,7 +112,7 @@ public class StockBatchAthenaAiService {
         try {
             emitter.send(SseEmitter.event().name("status").data(data));
         } catch (Exception e) {
-            log.warn("⚠️ SSE send 실패 (SSE 특성). {}", e.getMessage());
+            log.warn("⚠️ SSE send 실패: {}", e.getMessage());
             emitters.remove(emitter);
         }
     }
@@ -100,14 +122,14 @@ public class StockBatchAthenaAiService {
             try {
                 e.send(SseEmitter.event().name("status").data(data));
             } catch (Exception ex) {
-                log.warn("⚠️ SSE broadcast 실패 (SSE 특성). {}", ex.getMessage());
+                log.warn("⚠️ SSE broadcast 실패: {}", ex.getMessage());
                 emitters.remove(e);
             }
         }
     }
 
     // ===============================================================
-    // ✅ ✅ ✅ Chart 모드 (락 없음 / SSE 없음)
+    // ✅ Chart 모드 (락 없음 / SSE 없음)
     // ===============================================================
     public Map<String, Object> runChartMode(String symbol, String maPeriods, int chartPeriod) {
 
@@ -115,16 +137,12 @@ public class StockBatchAthenaAiService {
         cmd.add(pythonExe);
         cmd.add("-u");
         cmd.add(scriptPath);
-
         cmd.add("--mode");
         cmd.add("chart");
-
         cmd.add("--symbol");
         cmd.add(symbol);
-
         cmd.add("--ma_periods");
         cmd.add(maPeriods);
-
         cmd.add("--chart_period");
         cmd.add(String.valueOf(chartPeriod));
 
@@ -137,16 +155,13 @@ public class StockBatchAthenaAiService {
             pb.environment().put("PYTHONIOENCODING", "utf-8");
 
             Process p = pb.start();
-
             StringBuilder jsonBuf = new StringBuilder();
+
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
-
                 String line;
                 while ((line = br.readLine()) != null) {
                     log.info("[PYTHON chart] {}", line);
-
-                    // ✅ JSON 하나만 출력된다고 가정
                     if (line.trim().startsWith("{") && line.trim().endsWith("}")) {
                         jsonBuf.setLength(0);
                         jsonBuf.append(line.trim());
@@ -156,9 +171,8 @@ public class StockBatchAthenaAiService {
 
             p.waitFor();
 
-            if (jsonBuf.length() == 0) {
+            if (jsonBuf.length() == 0)
                 throw new RuntimeException("파이썬 chart 모드 JSON 출력 없음");
-            }
 
             return new ObjectMapper().readValue(jsonBuf.toString(), Map.class);
 
@@ -191,37 +205,27 @@ public class StockBatchAthenaAiService {
         startPayload.put("globalStatus", "RUNNING");
         startPayload.put("globalRunner", username);
         startPayload.put("globalProgress", 0);
-
         broadcast(startPayload);
 
         Process[] processRef = new Process[1];
-        StringBuilder finalJsonBuffer = new StringBuilder();  // ✅ ✅ ✅ 파이썬 최종 JSON 저장
+        StringBuilder finalJsonBuffer = new StringBuilder();
 
         try {
-
-            // ===========================================================
-            // ✅ Python 명령어 구성
-            // ===========================================================
             List<String> cmd = new ArrayList<>();
             cmd.add(pythonExe);
             cmd.add("-u");
             cmd.add(scriptPath);
-
             cmd.add("--mode");
             cmd.add("analyze");
-
             cmd.add("--pattern_type");
             cmd.add(pattern);
-
             cmd.add("--ma_periods");
             cmd.add(maPeriods);
-
             cmd.add("--workers");
             cmd.add(String.valueOf(workers));
-
             cmd.add("--top_n");
             cmd.add(String.valueOf(topN));
-
+            cmd.add("--analyze_patterns"); // ✅ Python v1.3 완전 동기화 핵심 추가
             if (symbol != null && !symbol.trim().isEmpty()) {
                 cmd.add("--symbol");
                 cmd.add(symbol);
@@ -239,23 +243,17 @@ public class StockBatchAthenaAiService {
                     taskId, pattern, maPeriods, workers, topN, symbol == null ? "None" : symbol);
 
             Pattern pProgress = Pattern.compile("\"progress_percent\"\\s*:\\s*(\\d+(?:\\.\\d+)?)");
-
             double[] progress = {0.0};
             List<String> logs = new ArrayList<>();
             long[] lastLogTime = {System.currentTimeMillis()};
 
-            // ===========================================================
-            // 🕒 Hang 감시
-            // ===========================================================
             Future<?> hangMonitor = hangWatcher.scheduleAtFixedRate(() -> {
                 long gap = System.currentTimeMillis() - lastLogTime[0];
                 if (gap > 15000 && processRef[0] != null && processRef[0].isAlive()) {
                     log.error("⚠️ [{}] 15초 이상 로그 없음 → 강제 종료", taskId);
-
                     try {
                         processRef[0].destroyForcibly();
                         taskStatusService.fail(taskId, "Python 로그 정지 감지됨 (hang)");
-
                         Map<String, Object> failPayload = new LinkedHashMap<>();
                         failPayload.put("status", "FAILED");
                         failPayload.put("progress", progress[0]);
@@ -263,37 +261,25 @@ public class StockBatchAthenaAiService {
                         failPayload.put("globalStatus", "FAILED");
                         failPayload.put("globalRunner", currentRunner);
                         failPayload.put("globalProgress", (int) Math.floor(progress[0]));
-
                         broadcast(failPayload);
-
                     } catch (Exception ex) {
                         log.error("❌ hang 처리 예외: {}", ex.getMessage());
                     }
                 }
             }, 5, 5, TimeUnit.SECONDS);
 
-            // ===========================================================
-            // ✅ 로그 읽기 루프
-            // ===========================================================
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(processRef[0].getInputStream(), StandardCharsets.UTF_8))) {
-
                 String line;
                 while ((line = reader.readLine()) != null) {
-
                     lastLogTime[0] = System.currentTimeMillis();
-
-                    // ✅ ✅ ✅ 파이썬 최종 JSON 검사
                     if (line.trim().startsWith("{") && line.trim().endsWith("}")) {
                         finalJsonBuffer.setLength(0);
                         finalJsonBuffer.append(line.trim());
                     }
-
                     logs.add(line);
                     taskStatusService.appendLog(taskId, line);
-
                     log.info("[PYTHON] {}", line);
-
                     Matcher m1 = pProgress.matcher(line);
                     if (m1.find()) progress[0] = safeDouble(m1.group(1));
 
@@ -304,12 +290,9 @@ public class StockBatchAthenaAiService {
                     payload.put("logs", new ArrayList<>(logs));
                     payload.put("globalStatus", "RUNNING");
                     payload.put("globalRunner", username);
-                    payload.put("globalProgress",
-                            Math.min(100, Math.max(0, (int) Math.floor(progress[0]))));
-
+                    payload.put("globalProgress", Math.min(100, Math.max(0, (int) Math.floor(progress[0]))));
                     broadcast(payload);
                     taskStatusService.updateProgress(taskId, progress[0], username);
-
                     logs.clear();
                 }
             } finally {
@@ -317,12 +300,9 @@ public class StockBatchAthenaAiService {
             }
 
             boolean finished = processRef[0].waitFor(Duration.ofMinutes(3).toSeconds(), TimeUnit.SECONDS);
-
             if (!finished) {
                 log.error("⏱ [{}] Python 실행 시간 초과", taskId);
-
                 taskStatusService.fail(taskId, "Python 실행 시간 초과");
-
                 Map<String, Object> failPayload = new LinkedHashMap<>();
                 failPayload.put("status", "FAILED");
                 failPayload.put("progress", progress[0]);
@@ -330,7 +310,6 @@ public class StockBatchAthenaAiService {
                 failPayload.put("globalStatus", "FAILED");
                 failPayload.put("globalRunner", currentRunner);
                 failPayload.put("globalProgress", (int) Math.floor(progress[0]));
-
                 broadcast(failPayload);
                 processRef[0].destroyForcibly();
                 return;
@@ -339,9 +318,7 @@ public class StockBatchAthenaAiService {
             int exit = processRef[0].exitValue();
             if (exit != 0) {
                 log.error("❌ [{}] Python 비정상 종료 exit={}", taskId, exit);
-
                 taskStatusService.fail(taskId, "Python 비정상 종료(exit=" + exit + ")");
-
                 Map<String, Object> failPayload = new LinkedHashMap<>();
                 failPayload.put("status", "FAILED");
                 failPayload.put("progress", progress[0]);
@@ -349,12 +326,10 @@ public class StockBatchAthenaAiService {
                 failPayload.put("globalStatus", "FAILED");
                 failPayload.put("globalRunner", currentRunner);
                 failPayload.put("globalProgress", (int) Math.floor(progress[0]));
-
                 broadcast(failPayload);
                 return;
             }
 
-            // ✅ ✅ ✅ 파이썬 최종 JSON 파싱
             Map<String, Object> resultJson = null;
             try {
                 if (finalJsonBuffer.length() > 0) {
@@ -364,30 +339,20 @@ public class StockBatchAthenaAiService {
                 log.error("❌ 최종 JSON 파싱 실패: {}", ex.getMessage());
             }
 
-            // ✅ 정상 완료
             taskStatusService.complete(taskId);
-
             Map<String, Object> okPayload = new LinkedHashMap<>();
             okPayload.put("status", "COMPLETED");
             okPayload.put("progress", 100);
             okPayload.put("globalStatus", "COMPLETED");
             okPayload.put("globalRunner", currentRunner);
             okPayload.put("globalProgress", 100);
-
-            // ✅ ✅ ✅ 프런트가 테이블 렌더링할 수 있도록 results 포함!!
-            if (resultJson != null) {
-                okPayload.putAll(resultJson);
-            }
-
+            if (resultJson != null) okPayload.putAll(resultJson);
             broadcast(okPayload);
-
             log.info("✅ [{}] Athena AI 완료", taskId);
 
         } catch (Exception e) {
             log.error("💥 [{}] 예외 발생", taskId, e);
-
             taskStatusService.fail(taskId, e.getMessage());
-
             Map<String, Object> failPayload = new LinkedHashMap<>();
             failPayload.put("status", "FAILED");
             failPayload.put("error", e.getMessage());
@@ -395,7 +360,6 @@ public class StockBatchAthenaAiService {
             failPayload.put("globalStatus", "FAILED");
             failPayload.put("globalRunner", currentRunner);
             failPayload.put("globalProgress", 0);
-
             broadcast(failPayload);
 
         } finally {
@@ -410,12 +374,9 @@ public class StockBatchAthenaAiService {
             } finally {
                 activeLock.set(false);
                 String prev = currentRunner;
-
                 currentRunner = null;
                 currentTaskId = null;
-
                 globalStockService.releaseLock(taskId);
-
                 log.info("🔓 [{}] 전역 락 해제 (runner={})", taskId, prev);
             }
         }
@@ -425,34 +386,25 @@ public class StockBatchAthenaAiService {
     // ✅ 취소
     // ===============================================================
     public boolean cancelTask(String taskId, String username) {
-
         if (!Objects.equals(taskId, currentTaskId)) return false;
         if (!Objects.equals(username, currentRunner)) return false;
-
         Process p = runningProcesses.remove(taskId);
-
         if (p != null && p.isAlive()) {
             p.destroyForcibly();
             log.warn("🟥 [{}] 강제 취소됨 by {}", taskId, username);
         }
-
         taskStatusService.cancel(taskId);
-
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("status", "CANCELLED");
         payload.put("logs", List.of("[LOG] 사용자에 의해 취소되었습니다."));
         payload.put("globalStatus", "CANCELLED");
         payload.put("globalRunner", username);
         payload.put("globalProgress", 0);
-
         broadcast(payload);
-
         activeLock.set(false);
         currentRunner = null;
         currentTaskId = null;
-
         globalStockService.releaseLock(taskId);
-
         return true;
     }
 

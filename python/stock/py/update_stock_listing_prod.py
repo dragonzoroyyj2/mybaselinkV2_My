@@ -46,7 +46,9 @@ DEFAULT_HISTORY_YEARS = 3
 # 경로 설정
 # ==============================
 # BASE_DIR: 스크립트가 실행되는 현재 작업 디렉토리
-# → 상위 2단계로 올라가면 /MyBaseLinkV2/python
+# Path(__file__).resolve().parents[2] 위치는
+#로컬 →  상위 2단계로 올라가면 /MyBaseLinkV2/python
+#운영 →  C:/SET_MyBaseLinkV2/server/python_scripts/python/stock/py
 BASE_DIR = Path(__file__).resolve().parents[2]
 LOG_DIR = BASE_DIR / "log"
 DATA_DIR = BASE_DIR / "data" / "stock_data"

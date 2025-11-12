@@ -34,8 +34,8 @@ python:
   find_last_close_downward:
     path: "${python.root.path}/python/stock/py/find_last_close_downward.py"
 
-  athena_k_market_ai:
-    path: "${python.root.path}/python/stock/py/athena_k_market_ai.py"
+  athena_k_market_ai_prod:
+    path: "${python.root.path}/python/stock/py/athena_k_market_ai_prod.py"
 
   stock:
     stock_listing:
