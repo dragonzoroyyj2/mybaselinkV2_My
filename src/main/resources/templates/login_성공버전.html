@@ -7,21 +7,9 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/favicon/android-icon-192x192.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
 <link rel="manifest" href="/favicon/manifest.json">
 <meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
 <meta name="theme-color" content="#ffffff">
 <style>
 /* 폰트 관련은 그대로 유지 */
@@ -30,12 +18,81 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: center; /* 수직 중앙 정렬 */
+  align-items: center;     /* 수평 중앙 정렬 */
   font-family: "Pretendard", "Noto Sans KR", sans-serif;
   background: linear-gradient(135deg, #e5e7eb, #9ca3af, #6b7280);
   color: #fff;
+  overflow: hidden; /* 오버플로우 방지 */
 }
+
+/* ========================================= */
+/* 전체 컨테이너: 차트와 폼을 묶어 중앙에 고정 */
+/* ========================================= */
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 340px; 
+  position: relative; /* 토스트 메시지의 기준점 */
+}
+
+
+/* ========================================= */
+/* 팝업 메시지 (토스트) 스타일 - 색상 개선 및 모던화 */
+/* ========================================= */
+#toastMessage {
+    position: absolute; 
+    top: 155px; /* 차트 높이(150px) + 약간의 여백 */
+    left: 50%;
+    transform: translate(-50%, 0) scale(0.95); 
+    z-index: 200; 
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5); /* 그림자 강조 */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease-out, visibility 0.4s ease-out, transform 0.4s ease-out;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    min-width: 180px;
+    text-align: center;
+    backdrop-filter: blur(5px); /* 유리 효과 추가 */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* 테두리 추가 */
+}
+
+#toastMessage.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -10px) scale(1.0); /* 약간 위로 올라오면서 나타남 */
+}
+
+/* 색상 조정: 회색톤에 맞춰 고급스럽게 변경 */
+#toastMessage.success {
+    /* 짙은 청록색 계열 (Dark Teal/Slate) */
+    background-color: rgba(30, 91, 80, 0.95); /* 이전 녹색보다 훨씬 어둡고 차분하게 */
+    color: #e5e7eb; /* 밝은 회색 폰트 */
+}
+#toastMessage.error {
+    /* 짙은 붉은색 계열 (Dark Maroon/Red) */
+    background-color: rgba(150, 40, 40, 0.95); /* 이전 빨강보다 훨씬 어둡고 차분하게 */
+    color: #fff;
+}
+#toastMessage.warning {
+    /* 밝지만 튀지 않는 색상 (Glassy Light Gray) */
+    background-color: rgba(255, 255, 255, 0.85); /* 투명도를 높여 뒷배경이 살짝 비치게 */
+    color: #4b5563; /* 어두운 회색 폰트 */
+}
+
+#toastMessage i {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+/* ========================================= */
+
 
 /* 추가: 로딩 오버레이 스타일 - 배경 클릭 방지 */
 #loadingOverlay {
@@ -44,11 +101,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4); /* 배경을 약간 어둡게 처리 */
-  z-index: 100; /* 모든 UI 위에 위치 */
-  display: none; /* 초기에는 숨김 */
-  cursor: wait; /* 커서를 로딩 모양으로 변경 */
-  pointer-events: auto; /* 클릭 이벤트를 막음 */
+  background: rgba(0, 0, 0, 0.4); 
+  z-index: 100; 
+  display: none; 
+  cursor: wait; 
+  pointer-events: auto; 
 }
 
 
@@ -67,7 +124,7 @@ body {
   box-sizing: border-box;
   border: 1px solid rgba(255,255,255,0.2);
   position: relative;
-  z-index: 2; /* 오버레이보다 낮게 설정하여 로그인 컨테이너는 보이게 함 */
+  z-index: 2; 
 }
 
 /* ========================================= */
@@ -154,7 +211,7 @@ button {
   pointer-events: auto;
 }
 
-button:hover:not(:disabled) { 
+button:hover:not(.loading-btn) { 
   background: linear-gradient(90deg,#4b5563,#374151);
   transform: translateY(-2px);
 }
@@ -229,34 +286,80 @@ button.loading-btn {
 
 <div id="loadingOverlay"></div>
 
-<div class="chart-container">
-  <canvas id="candleChart" height="150"></canvas>
-  <i id="toggleRepeatIcon" class="fas fa-pause-circle" title="반복 시작/정지"></i>
-</div>
+<div class="main-wrapper">
+    <div id="toastMessage"></div> 
 
-<div class="login-container">
-  <h2>🔐 MyBaseLink 로그인</h2>
+    <div class="chart-container">
+      <canvas id="candleChart" height="150"></canvas>
+      <i id="toggleRepeatIcon" class="fas fa-pause-circle" title="반복 시작/정지"></i>
+    </div>
+    
+    <div class="login-container">
+      <h2>🔐 MyBaseLink 로그인</h2>
 
-  <div class="input-group">
-    <input type="text" id="username" placeholder="아이디" />
-    <i class="fas fa-user"></i>
-  </div>
+      <div class="input-group">
+        <input type="text" id="username" placeholder="아이디" />
+        <i class="fas fa-user"></i>
+      </div>
 
-  <div class="input-group">
-    <input type="password" id="password" placeholder="비밀번호" />
-    <i class="fas fa-lock"></i>
-  </div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="비밀번호" />
+        <i class="fas fa-lock"></i>
+      </div>
 
-  <button id="loginBtn">
-    <span class="button-text">로그인</span>
-  </button>
+      <button id="loginBtn">
+        <span class="button-text">로그인</span>
+      </button>
 
-  <div class="login-footer">
-    <p>계정이 없나요? <a href="#">회원가입</a></p>
-  </div>
+      <div class="login-footer">
+        <p>계정이 없나요? <a href="#">회원가입</a></p>
+      </div>
+    </div>
 </div>
 
 <script>
+// ==================== 알림 모달 로직 (추가) ====================
+const toastMessage = document.getElementById("toastMessage");
+
+/**
+ * 사용자에게 멋진 알림 모달을 표시합니다.
+ * @param {string} message - 표시할 메시지
+ * @param {string} type - 'success', 'error', 'warning' 중 하나
+ */
+function showAlertModal(message, type) {
+    let icon;
+    // 기존 클래스 초기화
+    toastMessage.className = '';
+    
+    switch (type) {
+        case 'success':
+            icon = 'fas fa-check-circle';
+            toastMessage.classList.add('success');
+            break;
+        case 'error':
+            icon = 'fas fa-times-circle';
+            toastMessage.classList.add('error');
+            break;
+        case 'warning':
+        default:
+            icon = 'fas fa-exclamation-triangle';
+            toastMessage.classList.add('warning');
+            break;
+    }
+    
+    toastMessage.innerHTML = `<i class="${icon}"></i>${message}`;
+    
+    // 모달 표시
+    toastMessage.classList.add('show');
+
+    // 2초 후 숨기기
+    setTimeout(() => {
+        toastMessage.classList.remove('show');
+    }, 2000); 
+}
+// ==========================================================
+
+
 // ==================== 플래그 & 아이콘 (그대로 유지) ====================
 let repeatChart = true;
 let animationId = null;
@@ -288,10 +391,10 @@ icon.addEventListener("click", ()=>{
   }
 });
 
-// ==================== 로그인 (수정된 로직) ====================
+// ==================== 로그인 (토스트 메시지 적용) ====================
 const loginBtn = document.getElementById("loginBtn");
 const buttonText = loginBtn.querySelector(".button-text");
-const loadingOverlay = document.getElementById("loadingOverlay"); // 오버레이 요소
+const loadingOverlay = document.getElementById("loadingOverlay"); 
 
 /** 로딩 스피너를 표시하고 버튼을 비활성화하며, 오버레이를 고 배경 클릭을 막습니다. */
 function showLoading() {
@@ -316,13 +419,16 @@ loginBtn.addEventListener("click", async ()=>{
   const password=document.getElementById("password").value.trim();
   
   if(!username||!password){
-    alert("아이디와 비밀번호를 입력하세요."); 
+    // 기존 alert 대신 토스트 메시지 사용
+    showAlertModal("아이디와 비밀번호를 입력하세요.", 'warning'); 
     return;
   }
 
   showLoading(); // 로딩 스피너 표시 및 오버레이 활성화
 
   try{
+    // *** 서버 주소 확인: /auth/login이 제대로 작동하지 않으면 
+    // fetch("http://localhost:8080/auth/login", ...)처럼 전체 주소를 사용해야 할 수 있습니다.
     const res=await fetch("/auth/login",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
@@ -337,21 +443,26 @@ loginBtn.addEventListener("click", async ()=>{
       localStorage.setItem("sessionMillis",data.sessionMillis);
       localStorage.setItem("serverTime",data.serverTime);
       
+      // 토스트 메시지로 성공 알림
+      showAlertModal("로그인 성공! 환영합니다.", 'success');
+      
       // 로딩 버튼에 성공 UI 표시 (오버레이는 유지)
       loginBtn.classList.remove("loading-btn");
-      loginBtn.disabled = true; // 성공 메시지를 보여주는 동안 클릭 방지
+      loginBtn.disabled = true; 
       loginBtn.style.background = '#10b981'; // 초록색 배경
       buttonText.innerHTML = '<i class="fas fa-check-circle"></i> 로그인 성공!';
       
       // 1초(1000ms) 후 페이지 이동 및 오버레이 제거
       setTimeout(() => {
-        // 오버레이 제거는 페이지 이동 직전에만 필요하지만, 안전을 위해 호출합니다.
         loadingOverlay.style.display = 'none'; 
-        location.href="/pages/main/base";
-      }, 1000); // 1초 대기
+        location.href="/pages/main/base"; // 실제 페이지 이동 경로
+      }, 1000); 
 
     } else { 
       // 로그인 실패 처리
+      // 토스트 메시지로 실패 알림
+      showAlertModal("아이디 또는 비밀번호가 일치하지 않습니다.", 'error');
+
       // 실패 시 에러 메시지 표시
       loginBtn.classList.remove("loading-btn");
       loginBtn.disabled = true; 
@@ -367,6 +478,9 @@ loginBtn.addEventListener("click", async ()=>{
     // 서버 오류 처리
     console.error(err); 
     
+    // 토스트 메시지로 서버 오류 알림
+    showAlertModal("서버 연결에 실패했습니다.", 'error');
+
     loginBtn.classList.remove("loading-btn");
     loginBtn.disabled = true; 
     loginBtn.style.background = '#ef4444'; 

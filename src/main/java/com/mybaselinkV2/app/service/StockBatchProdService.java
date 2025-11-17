@@ -46,7 +46,7 @@ public class StockBatchProdService {
     @Value("${python.executable.path:python}")
     private String pythonExe;
 
-    @Value("${python.update_stock_listing_prod.path}")
+    @Value("${python.update_stock_listing.path}")
     private String scriptPath;
 
     @Value("${python.working.dir}")

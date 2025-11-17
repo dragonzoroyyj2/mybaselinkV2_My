@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 AthenaAI 배치 업데이트</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body { font-family: 'Inter', sans-serif; }
+.chart-canvas-wrap{width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;min-height:300px;}
+#chartCanvas,#macdCanvas{width:100%;height:360px;}
+@media(max-width:640px){#chartCanvas,#macdCanvas{height:260px;}}
+.accordion-section { border-bottom: 1px solid #e5e7eb; }
+.accordion-header { display:flex;justify-content:space-between;align-items:center;width:100%;padding:1rem 1.25rem;font-size:1.25rem;font-weight:700;cursor:pointer;transition:background-color 0.2s; }
+.accordion-header:hover { background-color:#eef2ff; }
+/* ✅ 아코디언 애니메이션 개선 */
+.accordion-content {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: scaleY(0.95);
+  transform-origin: top;
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+}
+
+.accordion-content.open {
+  max-height: 1000px; /* 충분히 큰 값 (내부 콘텐츠 높이보다 크면 OK) */
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* ✅ 패턴 카드 선택 상태 시각 강화 */
+.option-card-wrapper {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.option-card {
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  background-color: #fff;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+/* Hover 효과 */
+.option-card-wrapper:hover .option-card {
+  border-color: #818cf8; /* indigo-400 */
+  background-color: #eef2ff;
+}
+
+/* ✅ 선택된 상태 */
+input[type="radio"]:checked + .option-card {
+  border-color: #4f46e5; /* indigo-600 */
+  background-color: #eef2ff;
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.3);
+  transform: scale(1.03);
+}
+
+/* ✅ 비선택 상태 약간 투명 */
+input[type="radio"]:not(:checked) + .option-card {
+  opacity: 0.7;
+}
+
+
+.rotate-icon { transition:transform 0.4s ease; }
+.rotate-icon.open { transform:rotate(180deg); }
+.status-running { color: #3b82f6; font-weight: bold; }
+.status-locked { color: #f59e0b; font-weight: bold; }
+.status-completed { color: #22c55e; font-weight: bold; }
+.status-failed { color: #ef4444; font-weight: bold; }
+.status-cancelled { color: #9ca3af; font-weight: bold; }
+.status-idle { color: #6b7280; }
+.btn-disabled { opacity:0.5; cursor:not-allowed; }
+@keyframes blink { 0%,100%{opacity:1;}50%{opacity:0.5;} }
+.status-running.blinking { animation:blink 1s infinite; }
+
+
+
+/* 툴팁 컨테이너 (relative) */
+.tooltip-container {
+    position: relative;
+    display: inline-block; /* 셀 내용과 함께 표시 */
+}
+
+/* 정보 아이콘 스타일 */
+.info-icon {
+    margin-left: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #4f46e5; /* 인디고 색상 */
+    cursor: pointer;
+}
+
+/* 툴팁 박스 스타일 */
+.tooltip-box {
+    visibility: hidden; /* 기본적으로 숨김 */
+    opacity: 0;
+    transition: opacity 0.3s;
+    width: 200px; /* 툴팁 너비 설정 */
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%; /* 셀 위쪽에 위치 */
+    left: 50%;
+    margin-left: -100px; /* 가운데 정렬 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 0.85em;
+    line-height: 1.4;
+    white-space: normal; /* 툴팁 내용 줄바꿈 허용 */
+}
+
+/* 툴팁 화살표 (선택사항) */
+.tooltip-box::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+/* 툴팁 표시 클래스 */
+.tooltip-box.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* ⭐ 모바일 스크롤 잠금 (iOS/Android 대응) - 모달 열릴 때 body에 추가 */
+.modal-open-fix {
+  overflow: hidden !important; 
+  position: fixed; 
+  width: 100%;
+  height: 100vh;
+  top: 0;
+  left: 0;
+}
+
+
+/* ✅ 애니메이션 */
+@keyframes fadeInUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+/* ✅ 차트 로딩 스피너 */
+.loader { border-top-color: #4f46e5; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* ✅ 스크롤 잠금용 */
+.modal-open-fix {
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  top: 0; left: 0;
+}
+
+/* ✅ 브라우저별 중앙 정렬 및 스케일 안정화 */
+#chartModal { align-items: center; justify-content: center; }
+#chartModal .modal-card { margin: auto; transform: translateY(0); }
+</style>
+<head>
+<!-- 반드시 Chart.js보다 먼저 -->
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+
+</head>
+</head>
+
+<body>
+<div layout:fragment="content">
+<div class="content-container p-4 md:p-6 lg:p-8">
+
+<!-- 📌 헤더 -->
+	<div class="page-header">
+	  <div class="page-title">
+	    <h2 th:text="${pageTitle} ?: '📄 기본 페이지 제목'">📄 기본 페이지 제목</h2>
+	  </div>
+	  <div class="breadcrumb">
+	    <i class="fas fa-folder-open"></i>
+	    <span th:text="${breadcrumb} ?: '시스템 / 기본 경로'">시스템 / 기본 경로</span>
+	  </div>
+	</div>   
+
+<!-- 🌐 전역 상태 -->
+<div class="global-status-card bg-white border border-gray-200 rounded-xl p-4 shadow-sm mb-6">
+  <div class="flex justify-between items-center mb-2">
+    <span class="font-bold text-lg">🌐 AthenaAI 전역 배치 진행 상태</span>
+    <span id="globalStatusText" class="text-gray-500">대기중</span>
+  </div>
+  <div class="flex justify-between text-sm text-gray-600 mb-2">
+    <div>실행자: <span id="globalRunner">미연결</span></div>
+    <div>전체 진행률: <span id="globalProgressLabel">0%</span></div>
+  </div>
+  <div class="w-full h-3 bg-gray-200 rounded-lg overflow-hidden">
+    <div id="globalProgressBar" class="h-full bg-blue-600 transition-all duration-300" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- ⚙️ 아코디언 카드 -->
+<div class="card bg-white border border-gray-200 rounded-xl p-5 mb-10 shadow-sm">
+  <form id="analysisForm" class="space-y-4">
+
+    <div class="accordion-section">
+      <div class="accordion-header" onclick="toggleAccordion('analysisTypeContent', 'icon1')">
+        <span>1️⃣ 분석 유형 선택</span>
+        <i id="icon1" class="fas fa-chevron-down rotate-icon"></i>
+      </div>
+      <div id="analysisTypeContent" class="accordion-content open p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <label class="option-card-wrapper">
+          <input type="radio" name="analysisType" id="maRadio" value="long_term_down_trend" class="hidden" checked onclick="toggleMaPeriods()">
+          <div class="option-card border-2 p-4 rounded-xl">📉 MA 장기 하락 추세</div>
+        </label>
+        <label class="option-card-wrapper">
+          <input type="radio" name="analysisType" value="double_bottom" class="hidden" onclick="toggleMaPeriods()">
+          <div class="option-card border-2 p-4 rounded-xl">📈 이중바닥</div>
+        </label>
+        <label class="option-card-wrapper">
+          <input type="radio" name="analysisType" value="triple_bottom" class="hidden" onclick="toggleMaPeriods()">
+          <div class="option-card border-2 p-4 rounded-xl">📊 삼중바닥</div>
+        </label>
+        <label class="option-card-wrapper">
+          <input type="radio" name="analysisType" value="cup_and_handle" class="hidden" onclick="toggleMaPeriods()">
+          <div class="option-card border-2 p-4 rounded-xl">☕ 컵앤핸들</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- MA 옵션 -->
+	<div id="maPeriodsContainer" class="bg-indigo-50 rounded-lg p-4 mt-2">
+	  <h4 class="font-bold text-indigo-600 mb-2">MA 기간</h4>
+	  <div class="flex flex-wrap gap-4 items-center text-sm">
+	    <input type="checkbox" id="ma20" value="20" checked disabled class="mr-1">
+	    <label for="ma20" class="font-bold">20일 (필수)</label>
+	
+	    <input type="checkbox" id="ma50" name="maPeriods" value="50" checked>
+	    <label for="ma50">50일</label>
+	
+	    <input type="checkbox" id="ma200" name="maPeriods" value="200" checked>
+	    <label for="ma200">200일</label>
+	  </div>
+	</div>
+
+
+    <!-- 2️⃣ 실행 옵션 + 결과 개수 -->
+    <div class="accordion-section">
+      <div class="accordion-header" onclick="toggleAccordion('executionOptionsContent', 'icon2')">
+        <span>2️⃣ 실행 옵션</span>
+        <i id="icon2" class="fas fa-chevron-down rotate-icon"></i>
+      </div>
+      <div id="executionOptionsContent" class="accordion-content p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 bg-gray-50 border rounded-lg flex items-center gap-2">
+          <span class="text-purple-700 font-bold">🛠️ 작업자:</span>
+          <input id="workerCount" type="number" value="8" min="1" max="16" class="w-20 text-center border rounded-lg">
+        </div>
+        <div class="p-4 bg-gray-50 border rounded-lg flex items-center gap-2">
+          <span class="text-purple-700 font-bold">🔢 상위 N:</span>
+          <input id="topNCount" type="number" value="10" min="1" max="50" class="w-20 text-center border rounded-lg">
+        </div>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- 실행/취소 버튼 -->
+  <div class="flex flex-col sm:flex-row gap-4 mt-8">
+    <button id="runAnalysisBtn" onclick="runAnalysis()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl text-lg font-bold">🚀 분석 실행</button>
+    <button id="btnCancel" onclick="cancelAnalysis()" class="flex-1 bg-red-600 text-white py-3 rounded-xl text-lg font-bold" disabled>❌ 취소</button>
+  </div>
+</div>
+
+<!-- 결과/로그 카드 -->
+<div class="card bg-white border rounded-xl p-5 mb-10 shadow-sm">
+  <h3 class="text-2xl font-bold mb-4">📊 분석 결과</h3>
+  	<div class="overflow-x-auto">
+		  <table class="min-w-full text-sm" id="resultTable">
+		    <thead class="bg-gray-100">
+		      <tr>
+		        <th class="p-3">순위</th>       
+		        <th class="p-3">종목코드</th>
+		        <th class="p-3">종목명</th>
+		        <th class="p-3">신호</th>
+		        <th class="p-3">MA 배열</th>
+		        <th class="p-3">크로스 여부</th>
+		        <th class="p-3">차트</th>
+		      </tr>
+		    </thead>
+		    <tbody id="resultTableBody"></tbody>
+		  </table>
+	</div>
+  
+  
+  <div id="noResultBox" class="hidden p-6 text-center text-gray-500">결과 없음</div>
+</div>
+
+<div class="card bg-white border rounded-xl p-5 mb-10 shadow-sm">
+  <h3 class="text-2xl font-bold mb-4 flex items-center">
+    🪵 실시간 로그
+    <button id="copyLogBtn" class="ml-3 text-sm bg-indigo-600 text-white px-3 py-1 rounded-md">복사</button>
+  </h3>
+  <div id="logBox" class="h-64 bg-black text-green-300 p-3 overflow-y-auto font-mono text-xs rounded-md"><p>로그 대기중...</p></div>
+</div>
+
+<!-- 📈 차트 모달 (완전 반응형 중앙 정렬 + 스크롤 락 + 애니메이션 적용) -->
+<div id="chartModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] p-4">
+  <div class="modal-card bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-2xl md:max-w-3xl lg:max-w-5xl max-h-[90vh] overflow-y-auto p-4 relative shadow-2xl animate-[fadeInUp_0.25s_ease-out]">
+    <h2 id="modalTitle" class="text-lg sm:text-xl md:text-2xl font-bold mb-4 text-left pl-2 pr-24"></h2>
+
+    <!-- ✅ 로딩 스피너 -->
+    <div id="chartLoading" class="hidden absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-20">
+      <div class="loader border-4 border-t-4 border-gray-200 border-t-indigo-500 rounded-full w-10 h-10 animate-spin"></div>
+    </div>
+
+    <!-- ✅ 차트 캔버스 -->
+    <div class="chart-canvas-wrap mb-4">
+      <canvas id="chartCanvas"></canvas>
+    </div>
+    <div class="chart-canvas-wrap mb-2">
+      <canvas id="macdCanvas"></canvas>
+    </div>
+
+    <!-- ✅ 상단 제어 버튼 -->
+    <div class="absolute top-3 right-3 flex items-center gap-2">
+      <button id="btnResetZoom" class="hidden bg-indigo-600 text-white px-3 py-1 rounded-md text-sm hover:bg-indigo-700 transition">
+        🔄 줌 초기화
+      </button>
+      <button id="btnSaveChart" class="hidden bg-green-600 text-white px-3 py-1 rounded-md text-sm hover:bg-green-700 transition">
+        💾 이미지 저장
+      </button>
+      <button onclick="closeChartModal()" class="text-gray-500 hover:text-black text-lg font-bold">✖</button>
+    </div>
+  </div>
+</div>
+
+
+</div>
+</div>
+
+
+<th:block layout:fragment="pageScript">
+<script>
+/* ==========================================================
+ * 📜 AthenaAI (chart + analyze) 페이지 스크립트 (완성판)
+ * - Chart.js Financial + Zoom 플러그인 안전 등록
+ * - JSON 차트 렌더링 + 줌 초기화 + 이미지 저장(메인+MACD 합성)
+ * - SSE 상태 동기화, 실행/취소, 로그/결과 테이블
+ * ========================================================== */
+
+/* ✅ 아코디언 토글 */
+window.toggleAccordion = function(contentId, iconId) {
+  const content = document.getElementById(contentId);
+  const icon = document.getElementById(iconId);
+  const isOpen = content.classList.contains('open');
+
+  // 모바일에서는 하나만 열리게
+  if (window.innerWidth < 768) {
+    document.querySelectorAll('.accordion-content').forEach(c => { if (c !== content) c.classList.remove('open'); });
+    document.querySelectorAll('.rotate-icon').forEach(i => { if (i !== icon) i.classList.remove('open'); });
+  }
+
+  content.classList.toggle('open', !isOpen);
+  icon.classList.toggle('open', !isOpen);
+};
+
+(function () {
+  /* ================================
+     ✅ 요소 선택
+  ================================== */
+  const $runBtn = document.getElementById("runAnalysisBtn");
+  const $cancelBtn = document.getElementById("btnCancel");
+
+  const $analysisForm = document.getElementById("analysisForm");
+  const $log = document.getElementById("logBox");
+  const $copyLogBtn = document.getElementById("copyLogBtn");
+
+  const $resultTableBody = document.getElementById("resultTableBody");
+  const $noResultBox = document.getElementById("noResultBox");
+
+  const $chartModal = document.getElementById("chartModal");
+  const $modalTitle = document.getElementById("modalTitle");
+  const $btnResetZoom = document.getElementById('btnResetZoom');
+  const $btnSaveChart = document.getElementById('btnSaveChart');
+  const $chartLoading = document.getElementById('chartLoading');
+
+  const $globalStatusText = document.getElementById("globalStatusText");
+  const $globalRunner = document.getElementById("globalRunner");
+  const $globalProgressLabel = document.getElementById("globalProgressLabel");
+  const $globalProgressBar = document.getElementById("globalProgressBar");
+
+  const $priceCanvas = document.getElementById('chartCanvas');
+  const $macdCanvas  = document.getElementById('macdCanvas');
+
+  let priceChart = null;
+  let macdChart  = null;
+
+  let currentTaskId = null;
+  let es = null;
+  let currentUser = "미연결";
+  let $currentRow = null;
+  let globalStatus = "IDLE";
+
+  /* ================================
+     ✅ Chart.js Financial + Zoom 플러그인 등록
+     - chartjs-plugin-zoom UMD 전역: ChartZoom
+  ================================== */
+  (function ensureFinancialRegistered(){
+	  try {
+	    const hasCandle =
+	      (Chart?.registry?.controllers?.get?.('candlestick')) ||
+	      (Chart?.controllers && (Chart.controllers.candlestick || Chart.FinancialController));
+	    if (!hasCandle) {
+	      const candlestick = (Chart.FinancialController || Chart.controllers?.candlestick);
+	      const ohlc        = (Chart.OhlcController      || Chart.controllers?.ohlc);
+	      if (candlestick) Chart.register(candlestick);
+	      if (ohlc)        Chart.register(ohlc);
+	    }
+
+	    // ✅ 줌 플러그인 글로벌 탐색 & 등록 (UMD/Esm/Legacy 모두 호환)
+	    const zoomCandidate = window.ChartZoom || window.chartjsPluginZoom || window.Zoom || window['chartjs-plugin-zoom'];
+	    if (zoomCandidate && typeof zoomCandidate.id === 'string') {
+	      Chart.register(zoomCandidate);
+	      console.info('[ChartJS] Zoom plugin registered:', zoomCandidate.id);
+	    } else {
+	      console.warn('[ChartJS] Zoom plugin not found on global scope.');
+	    }
+	  } catch (e) {
+	    console.warn('Financial/Zoom register warning:', e);
+	  }
+	})();
+
+
+
+  /* ================================
+     ✅ 분석 유형 & MA
+  ================================== */
+  function getSelectedPattern() {
+    const checked = document.querySelector("input[name='analysisType']:checked");
+    return checked ? checked.value : "ma";
+  }
+
+  function getMaPeriods() {
+    const maPeriodsElements = document.querySelectorAll('input[name="maPeriods"]:checked');
+    const maPeriods = Array.from(maPeriodsElements)
+      .map(el => el.value)
+      .filter((value, index, self) => self.indexOf(value) === index)
+      .sort((a, b) => parseInt(a) - parseInt(b))
+      .join(',');
+    return maPeriods;
+  }
+
+  /* ================================
+     ✅ MA 표시/숨김
+  ================================== */
+  window.toggleMaPeriods = function () {
+    const isMA = document.getElementById("maRadio").checked;
+    const box = document.getElementById("maPeriodsContainer");
+    if (!box) return;
+    const inputs = box.querySelectorAll('input[type="checkbox"]');
+    inputs.forEach(input => {
+      if (input.id === 'ma20') return; // 20일은 필수 + disabled 유지
+      input.disabled = !isMA;
+    });
+    box.style.display = isMA ? "block" : "none";
+  };
+
+  /* ================================
+     ✅ 섹션 토글 (키프레임 애니메이션과 충돌 없게)
+  ================================== */
+  window.toggleSection = function (contentId, buttonElement, arrowId) {
+    const content = document.getElementById(contentId);
+    const arrow = document.getElementById(arrowId);
+    const isClosed = content.style.maxHeight === '0px' || content.style.maxHeight === '';
+    if (isClosed) {
+      content.style.maxHeight = content.scrollHeight + "px";
+      arrow.classList.add('rotate-180');
+      setTimeout(() => {
+        if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+          content.style.maxHeight = null;
+        }
+      }, 450);
+    } else {
+      if (content.style.maxHeight === 'none' || content.style.maxHeight === '') {
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+      arrow.classList.remove('rotate-180');
+      void content.offsetWidth;
+      requestAnimationFrame(() => {
+        content.style.maxHeight = '0px';
+      });
+    }
+  };
+
+  /* ================================
+     ✅ 드래그 앤 드롭 (원본 유지)
+  ================================== */
+  let dragSrcEl = null;
+  function handleDragStart (e) {
+    dragSrcEl = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+    this.classList.add('dragging');
+  }
+  function handleDragOver (e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+  function handleDragEnter () { this.classList.add('drag-over'); }
+  function handleDragLeave () { this.classList.remove('drag-over'); }
+  function handleDrop (e) {
+    e.stopPropagation();
+    this.classList.remove('drag-over');
+    if (dragSrcEl !== this) {
+      const container = document.getElementById("analysisTypeContent");
+      if (dragSrcEl.compareDocumentPosition(this) & Node.DOCUMENT_POSITION_FOLLOWING) {
+        container.insertBefore(dragSrcEl, this.nextSibling);
+      } else {
+        container.insertBefore(dragSrcEl, this);
+      }
+      const sourceRadio = dragSrcEl.querySelector('input[type="radio"]');
+      const targetRadio = this.querySelector('input[type="radio"]');
+      if (sourceRadio && sourceRadio.checked) sourceRadio.checked = true;
+      else if (targetRadio && targetRadio.checked) targetRadio.checked = true;
+    }
+    return false;
+  }
+  function handleDragEnd () {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.option-card-wrapper').forEach(item => { item.classList.remove('drag-over'); });
+  }
+  function attachDragListeners() {
+    document.querySelectorAll('#analysisTypeContent label.option-card-wrapper').forEach(item => {
+      item.addEventListener('dragstart', handleDragStart);
+      item.addEventListener('dragover', handleDragOver);
+      item.addEventListener('dragenter', handleDragEnter);
+      item.addEventListener('dragleave', handleDragLeave);
+      item.addEventListener('drop', handleDrop);
+      item.addEventListener('dragend', handleDragEnd);
+    });
+  }
+
+  /* ================================
+     ✅ 버튼 상태 + 시각효과
+  ================================== */
+  function setButtonVisualState() {
+    [$runBtn,$cancelBtn].forEach(btn=>{
+      if (!btn) return;
+      if (btn.disabled) btn.classList.add('btn-disabled');
+      else btn.classList.remove('btn-disabled');
+    });
+  }
+
+  function updateButtonState(status, runner) {
+    const S = (status || "IDLE").toUpperCase();
+    const isRunning = ["START", "IN_PROGRESS", "RUNNING"].includes(S);
+    const isOwner = (runner === currentUser);
+    globalStatus = S;
+
+    // 실행 버튼
+    if (!isRunning) {
+      $runBtn.disabled = false;
+    } else if (isRunning && !isOwner) {
+      $runBtn.disabled = true;
+    } else if (isRunning && isOwner) {
+      $runBtn.disabled = true;
+    }
+
+    // 입력 폼
+    const inputs = $analysisForm.querySelectorAll('input, select');
+    inputs.forEach(input => {
+      if (input.id === 'ma20' && input.getAttribute('disabled') !== null) return;
+      input.disabled = isRunning;
+    });
+    toggleMaPeriods();
+
+    // 취소 버튼
+    $cancelBtn.disabled = !(isRunning && isOwner);
+    setButtonVisualState();
+  }
+
+  function updateGlobalState(st, runner, progress) {
+    const S = (st || "IDLE").toUpperCase();
+    let displayText = S;
+    if (S === "RUNNING" && runner !== currentUser) {
+      displayText = "다른 사용자 실행 중(잠김)";
+      $globalStatusText.classList.add("status-locked");
+    } else {
+      $globalStatusText.classList.remove("status-locked");
+    }
+    $globalStatusText.textContent = displayText;
+    $globalRunner.textContent = runner || "미연결";
+
+    let pct = 0;
+    if (S === "COMPLETED") pct = 100;
+    else if (S === "RUNNING") pct = Math.min(100, Math.max(0, Math.floor(progress || 0)));
+    else pct = 0;
+
+    $globalProgressLabel.textContent = pct + "%";
+    $globalProgressBar.style.width = pct + "%";
+
+    $globalStatusText.className = "";
+    if (S === "RUNNING" && runner === currentUser) $globalStatusText.classList.add("status-running", "blinking");
+    else if (S === "RUNNING" && runner !== currentUser) $globalStatusText.classList.add("status-locked");
+    else if (S === "COMPLETED") $globalStatusText.classList.add("status-completed");
+    else if (S === "FAILED") $globalStatusText.classList.add("status-failed");
+    else if (S === "CANCELLED") $globalStatusText.classList.add("status-cancelled");
+    else $globalStatusText.classList.add("status-idle");
+  }
+
+  // ✅ 현재 로그인 사용자
+  async function initCurrentUser() {
+    try {
+      const res = await fetch("/auth/me", { credentials: "include" });
+      if (!res.ok) return "-";
+      const data = await res.json();
+      currentUser = data.username || data.fullName || "-";
+      return currentUser;
+    } catch {
+      currentUser = "-";
+      return "-";
+    }
+  }
+
+  /* ================================
+  ✅ 로그
+================================== */
+function appendLog(line) {
+ if (!line) return;
+ const p = document.createElement("p");
+ // ✅ 수정: COMPLETED 로그의 글씨 크기(text-lg)를 제거하여, 부모 요소의 text-xs를 상속받아 크기가 통일되도록 했습니다.
+ if (line.includes("[ERROR]") || line.includes("FATAL") || line.includes("실패")) {
+   p.className = 'text-red-500';
+ } else if (line.includes("WARNING")) {
+   p.className = 'text-yellow-500';
+ } else if (line.includes("COMPLETED") || line.includes("성공")) {
+   p.className = 'text-green-500 font-extrabold'; // text-lg 제거하여 크기 통일
+ } else if (line.includes("[LOG]") || line.includes("요청")) {
+   p.className = 'text-blue-400';
+ } else {
+   p.className = 'text-gray-300';
+ }
+ p.textContent = line;
+ $log.appendChild(p);
+ $log.scrollTop = $log.scrollHeight;
+}
+
+
+  /* ================================
+     ✅ 로그 복사
+  ================================== */
+  $copyLogBtn.onclick = () => {
+    const t = Array.from($log.querySelectorAll("p"))
+      .map(p => p.textContent)
+      .join("\n");
+    if (t.trim() === '로그 대기중...') {
+      appendLog("[LOG] 🚫 복사할 로그가 없습니다.");
+      return;
+    }
+    navigator.clipboard.writeText(t)
+      .then(() => appendLog("[LOG] 📋 로그 복사 완료"));
+  };
+
+  
+//💡 툴팁 토글 함수: 아이콘 클릭 시 툴팁을 보였다/숨겼다 합니다.
+  window.toggleTooltip = function(event, elementId) {
+     // 이벤트 전파 방지: 테이블 행 클릭 등 다른 이벤트가 동시에 발생하는 것을 막습니다.
+     event.stopPropagation(); 
+     
+     const tooltip = document.getElementById(elementId);
+     
+     // 현재 툴팁 상태 토글
+     tooltip.classList.toggle('visible');
+
+     // 다른 툴팁이 열려 있으면 닫기
+     document.querySelectorAll('.tooltip-box.visible').forEach(box => {
+         if (box.id !== elementId) {
+             box.classList.remove('visible');
+         }
+     });
+  }
+
+  //💡 툴팁 외부 클릭 시 닫기 이벤트 리스너 (HTML 문서 로드 후 한 번만 실행)
+  document.addEventListener('click', function(event) {
+     let isTooltipElement = false;
+     
+     // 클릭된 요소가 툴팁 박스 내부이거나 정보 아이콘인지 확인
+     if (event.target.closest('.tooltip-box') || event.target.classList.contains('info-icon')) {
+         isTooltipElement = true;
+     }
+
+     // 툴팁 요소가 아닌 곳을 클릭했다면 모든 툴팁을 닫습니다.
+     if (!isTooltipElement) {
+         document.querySelectorAll('.tooltip-box.visible').forEach(box => {
+             box.classList.remove('visible');
+         });
+     }
+  });
+
+/* ================================
+  2. 결과 테이블 렌더링 함수 (renderResults)
+  ================================ */
+function renderResults(list) {
+   const $resultTableBody = document.getElementById("resultTableBody");
+   const $noResultBox = document.getElementById("noResultBox");
+   
+   $resultTableBody.innerHTML = "";
+   if (!list || list.length === 0) {
+       $noResultBox.classList.remove("hidden");
+       return;
+   }
+   $noResultBox.classList.add("hidden");
+
+   list.forEach((item, index) => {
+       const rowId = `result-row-${item.ticker}`;
+       const tr = document.createElement("tr");
+       const initialClasses = 'hover:bg-gray-100 transition duration-100'; 
+       tr.className = initialClasses;
+
+       // 💡 크로스 여부 판별 및 뱃지 생성 로직
+       const conditions = item.technical_conditions || {};
+       let crossBadge = '<span>-</span>';
+       
+       if (conditions.goldencross_50_200_detected) {
+           crossBadge = `<span class="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded-full">⭐ 골든 크로스</span>`;
+       } else if (conditions.deadcross_50_200_detected) {
+           crossBadge = `<span class="bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded-full">💀 데드 크로스</span>`;
+       }
+
+       // 💡 MA 배열 상태 (down_trend_status) 값을 가져옵니다.
+       const maStatus = conditions.down_trend_status || "-";
+       
+       // MA 배열 상태에 따른 뱃지 시각화
+       let maStatusContent = maStatus;
+       if (maStatus === 'StrongDownTrend') {
+           maStatusContent = `<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">${maStatus}</span>`;
+       }
+
+
+       // --- 툴팁 설명 정의 ---
+       const tooltip_rank = `전체 분석 종목 중 Market Regime(시장 국면)을 기준으로 정렬된 순위입니다.`;
+       const tooltip_signal = `K-Means 클러스터링을 통해 분류된 시장 국면(Market Regime) 번호(0~3)입니다. 이 숫자가 클수록 정렬 우선순위가 높습니다.`;
+       const tooltip_ma_array = `장기 하락 추세(StrongDownTrend) 여부 및 MA 배열 상태 (MA20 < MA50 < MA200 조건 포함)입니다.`;
+       const tooltip_cross = `50일 이동평균선과 200일 이동평균선의 최근 하루 동안의 교차 발생 여부입니다.`;
+       // ------------------------
+       
+       // 💡 고유 ID 생성 (툴팁 박스를 구분하기 위함)
+       const rankId = `tt-rank-${item.ticker}`;
+       const signalId = `tt-signal-${item.ticker}`;
+       const maId = `tt-ma-${item.ticker}`;
+       const crossId = `tt-cross-${item.ticker}`;
+
+
+       tr.innerHTML = `
+           <td class="px-4 py-2 border font-bold">
+               <div class="flex items-center justify-start">
+                   ${index + 1}
+                   <div class="tooltip-container">
+                       <span class="info-icon" onclick="toggleTooltip(event, '${rankId}')">i</span>
+                       <div id="${rankId}" class="tooltip-box">${tooltip_rank}</div>
+                   </div>
+               </div>
+           </td>
+           <td class="px-4 py-2 border">${item.ticker || "-"}</td>
+           <td class="px-4 py-2 border">${item.name || "-"}</td>
+           <td class="px-4 py-2 border font-bold">
+               <div class="flex items-center justify-center">
+                   ${item.technical_conditions?.market_regime || "-"}
+                   <div class="tooltip-container">
+                       <span class="info-icon" onclick="toggleTooltip(event, '${signalId}')">i</span>
+                       <div id="${signalId}" class="tooltip-box">${tooltip_signal}</div>
+                   </div>
+               </div>
+           </td>
+           <td class="px-4 py-2 border">
+               <div class="flex items-center justify-start">
+                   ${maStatusContent}
+                   <div class="tooltip-container">
+                       <span class="info-icon" onclick="toggleTooltip(event, '${maId}')">i</span>
+                       <div id="${maId}" class="tooltip-box">${tooltip_ma_array}</div>
+                   </div>
+               </div>
+           </td>
+           <td class="px-4 py-2 border text-center">
+               <div class="flex items-center justify-center">
+                   ${crossBadge}
+                   <div class="tooltip-container">
+                       <span class="info-icon" onclick="toggleTooltip(event, '${crossId}')">i</span>
+                       <div id="${crossId}" class="tooltip-box">${tooltip_cross}</div>
+                   </div>
+               </div>
+           </td>
+           <td class="px-4 py-2 border text-center">
+               <button class="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                       onclick="showChart('${item.ticker}', '${item.name}', '${rowId}')">보기</button>
+           </td>
+       `;
+       $resultTableBody.appendChild(tr);
+   });
+
+    appendLog(`[LOG] ✅ 최종 분석 결과 ${list.length}개 항목 테이블 업데이트 완료.`);
+  }
+
+  /* ================================
+     ✅ 차트 유틸
+  ================================== */
+  function destroyCharts() {
+    try { if (priceChart) { priceChart.destroy(); priceChart = null; } } catch(e){}
+    try { if (macdChart)  { macdChart.destroy();  macdChart  = null; } } catch(e){}
+    if ($btnResetZoom) $btnResetZoom.classList.add('hidden');
+    if ($btnSaveChart) $btnSaveChart.classList.add('hidden');
+  }
+
+  function toXY(ds) {
+    if (!Array.isArray(ds)) return [];
+    return ds.map(d => {
+      const timestamp = new Date(d.x).getTime();
+      if (isNaN(timestamp) || d.y === null || d.y === undefined || isNaN(d.y)) return null;
+      return { x: timestamp, y: d.y };
+    }).filter(p => p !== null);
+  }
+
+  /* ============================================================
+   * 📈 buildPriceChart (Candlestick Chart - 안정판 v3.2)
+   * ------------------------------------------------------------
+   * ✅ Chart.js Financial + chartjs-plugin-zoom + Hammer.js 호환
+   * ✅ 줌/이동 시 데이터 사라짐 방지 (범위 고정)
+   * ✅ 좌우 이동/확대 안정화 + Y축 자동 스케일링
+   * ✅ 부드러운 드래그(팬) + 휠 줌 + 터치 줌 완벽 작동
+   * ============================================================ */
+  function buildPriceChart(ctx, payload) {
+    const ohlcData = payload.ohlcv_data
+      ? payload.ohlcv_data.map(d => {
+          const ts = new Date(d.x).getTime();
+          if (isNaN(ts) || d.o===undefined || d.h===undefined || d.l===undefined || d.c===undefined) return null;
+          return { x: ts, o: d.o, h: d.h, l: d.l, c: d.c };
+        }).filter(Boolean)
+      : [];
+
+    const ma20  = payload.ma_data?.MA20  ? toXY(payload.ma_data.MA20)  : [];
+    const ma50  = payload.ma_data?.MA50  ? toXY(payload.ma_data.MA50)  : [];
+    const ma200 = payload.ma_data?.MA200 ? toXY(payload.ma_data.MA200) : [];
+
+    const cross = Array.isArray(payload.cross_points)
+      ? payload.cross_points.map(p => {
+          const ts = new Date(p.x).getTime();
+          if (isNaN(ts)) return null;
+          return {x:ts, y:p.y, type:p.type};
+        }).filter(Boolean)
+      : [];
+
+    const pats = Array.isArray(payload.pattern_points)
+      ? payload.pattern_points.map(p => {
+          const ts = new Date(p.x).getTime();
+          if (isNaN(ts)) return null;
+          return {x:ts, y:p.y, type:p.type, status:p.status};
+        }).filter(Boolean)
+      : [];
+
+    // ✅ 전체 데이터의 x 범위 계산 (이동 한계 설정용)
+    const xMin = ohlcData.length ? ohlcData[0].x : undefined;
+    const xMax = ohlcData.length ? ohlcData[ohlcData.length - 1].x : undefined;
+
+    priceChart = new Chart(ctx, {
+      type: 'candlestick',
+      data: {
+        datasets: [
+          { label: 'OHLCV', data: ohlcData, parsing:false, borderWidth:1.3 },
+          { type:'line', label:'MA20',  data:ma20,  parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#22c55e' },
+          { type:'line', label:'MA50',  data:ma50,  parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#7c3aed' },
+          { type:'line', label:'MA200', data:ma200, parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#3b82f6' },
+          { label:'Cross', type:'scatter', data:cross, parsing:false, pointRadius:4, pointBackgroundColor:'#ef4444' },
+          { label:'Pattern', type:'scatter', data:pats, parsing:false, pointRadius:4, pointBackgroundColor:'#8b5cf6' }
+        ]
+      },
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{ mode:'nearest', intersect:false },
+        scales:{
+          x:{
+            type:'time',
+            time:{ tooltipFormat:'yyyy-MM-dd' },
+            grid:{ display:false },
+            min: xMin,
+            max: xMax
+          },
+          y:{
+            beginAtZero:false,
+            ticks:{ callback:v => v.toLocaleString() }
+          }
+        },
+        plugins:{
+          legend:{ display:true, position:'top' },
+          tooltip:{ enabled:true },
+          zoom:{
+            pan:{
+              enabled:true,
+              mode:'x',
+              // ✅ 데이터 범위 밖 이동 방지
+              onPan: ({chart}) => {
+                const xScale = chart.scales.x;
+                const {min, max} = xScale;
+                const dataMin = xMin;
+                const dataMax = xMax;
+                if (min < dataMin) xScale.options.min = dataMin;
+                if (max > dataMax) xScale.options.max = dataMax;
+              },
+            },
+            zoom:{
+              wheel:{ enabled:true },
+              pinch:{ enabled:true },
+              mode:'x',
+              // ✅ 과도한 확대 시 자동 복원
+              onZoom: ({chart}) => {
+                const xScale = chart.scales.x;
+                const range = xScale.max - xScale.min;
+                const fullRange = xMax - xMin;
+                if (range < fullRange * 0.01) chart.resetZoom();
+              },
+            },
+          }
+        }
+      }
+    });
+  }
+
+
+  function buildMacdChart(ctx, payload) {
+    const macd   = payload.macd_data?.MACD      ? toXY(payload.macd_data.MACD)      : [];
+    const signal = payload.macd_data?.Signal    ? toXY(payload.macd_data.Signal)    : [];
+    const hist   = payload.macd_data?.Histogram ? toXY(payload.macd_data.Histogram) : [];
+
+    macdChart = new Chart(ctx, {
+      data: {
+        datasets: [
+          { type:'line', label:'MACD',   data: macd,   parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#111827' },
+          { type:'line', label:'Signal', data: signal, parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#f43f5e' },
+          {
+            type:'bar',
+            label:'Hist',
+            data: hist,
+            parsing:false,
+            backgroundColor: (ctx) => {
+              const value = ctx.parsed.y;
+              return value > 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)';
+            },
+          }
+        ].filter(ds => ds.data?.length > 0 || ds.type !== 'line')
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{ mode:'nearest', intersect:false },
+        scales:{
+          x:{ type:'time', time:{ tooltipFormat:'yyyy-MM-dd' }, grid:{ display:false } },
+          y:{ beginAtZero:false }
+        },
+        plugins:{
+          legend:{ display:true, position:'top' },
+          tooltip:{ enabled:true },
+          zoom:{
+        	  pan:{ enabled:true, mode:'xy' }, // ✅ 위아래/좌우 이동
+              zoom:{ wheel:{ enabled:true }, pinch:{ enabled:true }, mode:'xy' } // ✅ 위아래/좌우 확대/축소
+          }
+        }
+      }
+    });
+  }
+
+  /* ==========================================================
+     ✅ JSON 차트 요청 (컨트롤러 시그니처와 일치)
+  ========================================================== */
+  async function tryRenderChartsByJson(ticker, name){
+    const url = `/api/stock/batch/athena/chart?symbol=${encodeURIComponent(ticker)}&ts=${Date.now()}`;
+    const res = await fetch(url, { headers: { 'Accept':'application/json' } });
+    const ct = res.headers.get('Content-Type') || '';
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!ct.includes('application/json')) throw new Error('Not JSON. Server returned: ' + ct);
+
+    const payload = await res.json();
+
+    destroyCharts();
+
+    // 방어: 캔버스가 반드시 존재해야 함
+    if (!$priceCanvas || !$macdCanvas) {
+      throw new Error('차트 캔버스가 없습니다.');
+    }
+
+    buildPriceChart($priceCanvas.getContext('2d'), payload);
+    buildMacdChart($macdCanvas.getContext('2d'), payload);
+
+    // 버튼 활성화
+    if ($btnResetZoom) $btnResetZoom.classList.remove('hidden');
+    if ($btnSaveChart) $btnSaveChart.classList.remove('hidden');
+
+    // ✅ 줌 초기화
+    if ($btnResetZoom) {
+      $btnResetZoom.onclick = () => {
+        try { priceChart?.resetZoom?.(); } catch(e){}
+        try { macdChart?.resetZoom?.(); } catch(e){}
+      };
+    }
+
+    // ✅ 이미지 저장 (메인 + MACD 합성 후 PNG 다운로드)
+    if ($btnSaveChart) {
+      $btnSaveChart.onclick = () => {
+        try {
+          // 실제 렌더링 크기 확보
+          const c1 = $priceCanvas;
+          const c2 = $macdCanvas;
+
+          // Retina 대비: 내부 픽셀 크기가 다를 수 있음 → toDataURL 전 그대로 합성
+          const merged = document.createElement('canvas');
+          merged.width  = Math.max(c1.width, c2.width);
+          merged.height = c1.height + c2.height + 20;
+
+          const ctx = merged.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, merged.width, merged.height);
+          ctx.drawImage(c1, 0, 0);
+          ctx.drawImage(c2, 0, c1.height + 10);
+
+          const link = document.createElement('a');
+          link.download = `${ticker}_${name}_chart.png`;
+          link.href = merged.toDataURL('image/png');
+          link.click();
+
+          appendLog(`[LOG] 💾 차트 이미지 저장 완료 (${ticker})`);
+        } catch (e) {
+          appendLog(`[ERROR] 이미지 저장 실패: ${e.message}`);
+        }
+      };
+    }
+
+    appendLog(`[LOG] 📈 차트 데이터(JSON) 로드 완료: ${ticker} - ${name}`);
+  }
+
+  /* ==========================================================
+     ✅ 차트 모달 (로딩 스피너 + 리사이즈 안정화)
+  ========================================================== */
+  let modalResizeObserver = null;
+
+  /* ✅ 차트 모달 열기 (body scroll lock 포함) */
+  window.showChart = async (ticker, name, rowId) => {
+    if (!$chartModal) return;
+    $modalTitle.textContent = `📈 ${ticker} - ${name}`;
+    $chartModal.classList.remove("hidden");
+    
+    // ⭐ 모바일 대응 수정: body에 scroll lock 클래스 추가
+    document.body.classList.add('modal-open-fix');
+    
+    // 🚀 스피너 바로 표시 후 차트 로드 (지연 실행)
+    $chartLoading.classList.remove('hidden');
+    await new Promise(r => setTimeout(r, 100));  // 살짝 딜레이 주면 시각적 반응 완벽함
+
+    try {
+      await tryRenderChartsByJson(ticker, name);
+    } catch (err) {
+      destroyCharts();
+      if ($btnResetZoom) $btnResetZoom.classList.add('hidden');
+      if ($btnSaveChart)  $btnSaveChart.classList.add('hidden');
+      appendLog(`[LOG] ℹ️ 차트 로드 실패: ${err.message}`);
+    } finally {
+      $chartLoading.classList.add('hidden');
+    }
+
+    if (modalResizeObserver) modalResizeObserver.disconnect();
+    const modalCard = $chartModal.querySelector('.bg-white.rounded-xl');
+    if (modalCard) {
+      modalResizeObserver = new ResizeObserver(() => {
+        try { priceChart?.resize(); macdChart?.resize(); } catch {}
+      });
+      modalResizeObserver.observe(modalCard);
+    }
+  };
+
+  // ----------------------------------------------------
+
+  /* ✅ 차트 모달 닫기 (body scroll 복원) */
+  window.closeChartModal = () => {
+    try { modalResizeObserver?.disconnect(); } catch {}
+    modalResizeObserver = null;
+    if ($chartModal) $chartModal.classList.add("hidden");
+    destroyCharts();
+    
+    // ⭐ 모바일 대응 수정: body에서 scroll lock 클래스 제거하여 스크롤 복원
+    document.body.classList.remove('modal-open-fix');
+  };
+
+  // ✅ 수동 검토 완료 (현재 테이블 행에 배지 표시)
+  window.updateResultStatus = function() {
+    if ($currentRow) {
+      const scoreCell = $currentRow.cells[2];
+      const ticker = $currentRow.cells[0].textContent;
+      const originalContent = scoreCell.textContent.replace('⭐ 수동 검토 완료', '').trim();
+      if (scoreCell.innerHTML.includes('수동 검토 완료')) {
+        appendLog(`[UPDATE] ${ticker} 종목은 이미 검토 완료되었습니다.`);
+        closeChartModal();
+        return;
+      }
+      scoreCell.innerHTML = `
+        <span class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
+          ⭐ 수동 검토 완료
+        </span>
+        ${originalContent}
+      `;
+      $currentRow.classList.add('bg-green-50');
+      $currentRow.classList.remove('hover:bg-gray-100');
+      $currentRow.classList.add('transition-colors', 'duration-500');
+      appendLog(`[UPDATE] ${ticker} 종목 수동 검토 완료.`);
+    }
+    closeChartModal();
+  };
+
+  /* ================================
+     ✅ SSE
+  ================================== */
+  function connectSSE() {
+    if (es) { try { es.close(); } catch {} }
+    appendLog(`[LOG] SSE 연결 시도. 현재 사용자 ID: ${currentUser}`);
+    es = new EventSource("/api/stock/batch/athena/sse");
+
+    es.onopen = () => { appendLog("[LOG] SSE 연결 성공."); };
+
+    es.addEventListener("status", (ev) => {
+      const d = JSON.parse(ev.data || "{}");
+      if (d.globalStatus) {
+        updateGlobalState(d.globalStatus, d.globalRunner, d.globalProgress);
+        updateButtonState(d.globalStatus, d.globalRunner);
+      }
+      if (Array.isArray(d.logs)) d.logs.forEach(line => appendLog(line));
+      if (Array.isArray(d.results)) renderResults(d.results);
+      if (d.taskId) currentTaskId = d.taskId;
+    });
+
+    es.onerror = () => {
+      appendLog("[ERROR] SSE 연결 오류. 재시도 중...");
+      try { es.close(); } catch {}
+      es = null;
+      updateButtonState("IDLE", currentUser);
+      setTimeout(connectSSE, 2000);
+    };
+  }
+
+  /* ================================
+     ✅ 분석 실행
+  ================================== */
+  window.runAnalysis = async () => {
+    if ($runBtn.disabled) {
+      if (globalStatus === 'RUNNING' && $globalRunner.textContent !== currentUser) {
+        appendLog("[ERROR] 다른 사용자가 실행 중. 잠시 후 다시 시도하세요.");
+      } else {
+        appendLog("[ERROR] 현재 실행 불가 상태.");
+      }
+      return;
+    }
+    updateButtonState("RUNNING", currentUser);
+    $log.innerHTML = `<p class="opacity-70">분석 요청 시작...</p>`;
+    $resultTableBody.innerHTML = "";
+    $noResultBox.classList.add("hidden");
+
+    const pattern = getSelectedPattern();
+    const workers = document.getElementById("workerCount").value;
+    const topN = document.getElementById("topNCount").value;
+    const maPeriods = getMaPeriods();
+
+    const url = `/api/stock/batch/athena/start`
+      + `?pattern=${encodeURIComponent(pattern)}`
+      + `&workers=${encodeURIComponent(workers)}`
+      + `&maPeriods=${encodeURIComponent(maPeriods)}`
+      + `&topN=${encodeURIComponent(topN)}`;
+
+    try {
+      const res = await fetch(url, { method: 'POST' });
+      if (!res.ok) {
+        const errorText = await res.text();
+        appendLog(`[ERROR] 분석 시작 요청 실패: ${res.status} ${errorText}`);
+        updateButtonState("IDLE", currentUser);
+      } else {
+        const data = await res.json();
+        currentTaskId = data.taskId;
+        appendLog(`[LOG] 분석 시작 요청 성공. Task ID: ${currentTaskId}`);
+      }
+    } catch (error) {
+      appendLog(`[FATAL] 분석 시작 중 네트워크 오류: ${error.message}`);
+      updateButtonState("IDLE", currentUser);
+    }
+  };
+
+  /* ================================
+     ✅ 분석 취소 (PathVar → 실패 시 QueryParam 폴백)
+  ================================== */
+  async function postCancel(taskId){
+    let r = await fetch(`/api/stock/batch/athena/cancel/${encodeURIComponent(taskId)}`, { method:'POST' });
+    if (r.ok) return r;
+    return fetch(`/api/stock/batch/athena/cancel?taskId=${encodeURIComponent(taskId)}`, { method:'POST' });
+  }
+
+  window.cancelAnalysis = async () => {
+    if (!currentTaskId || $cancelBtn.disabled) {
+      appendLog("[WARNING] 취소할 활성 작업이 없거나 권한이 없습니다.");
+      return;
+    }
+    try {
+      const res = await postCancel(currentTaskId);
+      if (res.ok) {
+        appendLog(`[LOG] Task ID ${currentTaskId} 취소 요청 성공.`);
+      } else {
+        const errorText = await res.text();
+        appendLog(`[ERROR] 분석 취소 요청 실패: ${res.status} ${errorText}`);
+      }
+    } catch (error) {
+      appendLog(`[FATAL] 분석 취소 중 네트워크 오류: ${error.message}`);
+    }
+  };
+
+  /* ================================
+     ✅ 초기화
+  ================================== */
+  document.addEventListener("DOMContentLoaded", () => {
+    attachDragListeners();
+    toggleMaPeriods();
+    initCurrentUser().then(() => { connectSSE(); setButtonVisualState(); });
+  });
+
+})();
+</script>
+</th:block>
+
+
+</body>
+</html>

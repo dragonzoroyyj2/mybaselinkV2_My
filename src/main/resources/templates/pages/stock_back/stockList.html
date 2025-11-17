@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <title>주식 종목 리스트</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+		<div class="page-header">
+		  <div class="page-title">
+		    <h2 th:text="${pageTitle} ?: '📄 기본 페이지 제목'">📄 기본 페이지 제목</h2>
+		  </div>
+		  <div class="breadcrumb">
+		    <i class="fas fa-folder-open"></i>
+		    <span th:text="${breadcrumb} ?: '시스템 / 기본 경로'">시스템 / 기본 경로</span>
+		  </div>
+		</div>    
+
+    <!-- 🔍 검색 툴바 -->
+    <div class="toolbar">
+      <div class="search-group">
+        <input type="text" id="searchInput" placeholder="검색어 입력" />
+        <button id="searchBtn" class="btn"><i class="fas fa-search"></i></button>
+        <button class="btn"><i class="fas fa-filter"></i></button>
+        <button class="btn"><i class="fas fa-sync-alt"></i></button>
+      </div>
+    </div>
+
+    <!-- 📊 리스트 정보 + 버튼 -->
+    <div class="list-info">
+      <span id="totalCount">총 0건</span>
+      <div class="action-buttons">
+        <button id="excelBtn" class="btn excel" title="엑셀 다운로드"><i class="fa-solid fa-file-excel"></i></button>
+        <button id="addBtn" class="btn" title="추가"><i class="fas fa-plus"></i></button>
+        <button id="deleteSelectedBtn" class="btn red" title="삭제"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+
+    <!-- 🧾 테이블 -->
+    <div class="table-container">
+      <table>
+        <thead>
+        <tr>
+            <th>No</th>
+            <th>종목코드</th>
+            <th>회사명</th>
+            <th>시장구분</th>
+            <th>업종</th>
+            <th>종가</th>
+            <th>시가</th>
+            <th>고가</th>
+            <th>저가</th>
+            <th>거래량</th>
+            <th>기준일</th>
+        </tr>
+        </thead>
+        <tbody id="dataTable"></tbody>
+      </table>
+    </div>
+
+    <!-- 📑 페이징 -->
+    <div id="pagination" class="pagination"></div>
+  </div>
+
+  <!-- ➕ 등록 모달 -->
+  <div id="addModal" class="modal">
+    <div class="elegant-modal">
+      <div class="elegant-header">
+        <h3>서버 등록</h3>
+        <span data-close="addModal" class="close-btn">&times;</span>
+      </div>
+      <div class="elegant-body">
+        <div class="form-group"><label>제목</label><input id="titleInput" name="title" /></div>
+        <div class="form-group"><label>담당자</label><input id="ownerInput" name="owner" /></div>
+        <div class="form-group"><label>서버 상태</label>
+          <select id="serverStatusInput" name="serverStatus">
+            <option value="정상">정상</option>
+            <option value="점검중">점검중</option>
+          </select>
+        </div>
+        <div class="form-group"><label>기능 옵션</label>
+          <div class="option-group">
+            <label><input type="checkbox" name="featureOption" value="백업 활성화"> 백업 활성화</label>
+            <label><input type="checkbox" name="featureOption" value="자동 모니터링"> 자동 모니터링</label>
+          </div>
+        </div>
+        <div class="form-group"><label>등록일</label><input type="date" id="regDateInput" name="regDate" /></div>
+        <div class="form-group"><label>비고</label><textarea id="remarkInput" name="remark" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer elegant-footer">
+        <button id="saveBtn" class="btn">저장</button>
+        <button class="btn gray" data-close="addModal">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🧩 상세 모달 -->
+  <div id="detailModal" class="modal">
+    <div class="elegant-modal">
+      <div class="elegant-header">
+        <h3>상세 정보</h3>
+        <span data-close="detailModal" class="close-btn">&times;</span>
+      </div>
+      <div class="elegant-body">
+        <div class="form-group"><label>No</label><input id="detailId" name="id" readonly /></div>
+        <div class="form-group"><label>제목</label><input id="detailTitle" name="title" /></div>
+        <div class="form-group"><label>담당자</label><input id="detailOwner" name="owner" /></div>
+        <div class="form-group"><label>등록일</label><input id="detailRegDate" name="regDate" readonly /></div>
+        <div class="form-group"><label>서버 상태</label>
+          <select id="detailServerStatus" name="serverStatus">
+            <option value="정상">정상</option>
+            <option value="점검중">점검중</option>
+          </select>
+        </div>
+        <div class="form-group"><label>기능 옵션</label>
+          <div class="option-group">
+            <label><input type="checkbox" name="featureOption" value="백업 활성화"> 백업 활성화</label>
+            <label><input type="checkbox" name="featureOption" value="자동 모니터링"> 자동 모니터링</label>
+          </div>
+        </div>
+        <div class="form-group"><label>비고</label><textarea id="detailRemark" name="remark" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer elegant-footer">
+        <button id="updateBtn" class="btn">수정</button>
+        <button class="btn gray" data-close="detailModal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ 페이지 스크립트 -->
+<th:block layout:fragment="pageScript">
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  initUnifiedList({
+    mode: "client", // server or client
+    pagination: true,
+    apiUrl: "/api/stockList/list",
+    tableBodySelector: "#dataTable",
+    paginationSelector: "#pagination",
+    searchInputSelector: "#searchInput",
+    searchBtnSelector: "#searchBtn",
+    addBtnSelector: "#addBtn",
+    modalId: "#addModal",
+    saveBtnSelector: "#saveBtn",
+    closeBtnSelector: "[data-close]",
+    checkAllSelector: "#checkAll",
+    deleteSelectedBtnSelector: "#deleteSelectedBtn",
+    detailModalId: "#detailModal",
+    updateBtnSelector: "#updateBtn",
+    excelBtnSelector: "#excelBtn",
+
+    excelFileName: "주식종목_리스트.xlsx",
+    
+    columns: [
+  	  // 체크박스 있는 테이블{ checkbox: true } 사용
+  	  // 체크박스 없는 테이블checkbox 컬럼 자체 삭제
+    	
+   	  { key: "id", label: "No" },
+      { key: "Code", label: "종목코드" },
+      { key: "Name", label: "회사명" },
+      { key: "Market", label: "시장구분" },
+      { key: "Dept", label: "업종" },
+      { key: "Close", label: "종가" },
+      { key: "Open", label: "시가" },
+      { key: "High", label: "고가" },
+      { key: "Low", label: "저가" },
+      { key: "Volume", label: "거래량" },
+      { key: "Date", label: "기준일" }
+    ],
+    pageSize: 10,
+    pageGroupSize: window.pageGroupSize, <!-- ✅ 이제 전역변수로부터 자동 주입 -->
+    enableRowClickDetail: false,
+    enableDetailView: true,
+    buttons: {
+      search: true,
+      searchInput: true,
+      add: true,
+      deleteSelected: true,
+      excel: true
+    },
+    detailViewButtons: {
+      update: true,
+      delete: false
+    },
+    onAddModalOpen: () => console.log("➕ Add Modal Open"),
+    onDetailModalOpen: (id) => console.log("🔍 Detail Modal Open:", id),
+    onDeleteSuccess: (ids) => console.log("🗑️ Deleted:", ids)
+  });
+
+  const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+  searchInput.addEventListener("keydown", e => {
+	  if (e.key === "Enter") searchBtn.click(); 
+  });
+  
+  
+  // ✅ 3. 페이지별 커스텀 기능 예시 (원하면 확장 가능)
+  const addUserBtn = document.getElementById("addUserBtn");
+  if (addUserBtn) {
+    addUserBtn.addEventListener("click", () => {
+      alert("👤 사용자 추가 모달 여는 커스텀 로직 실행");
+    });
+  }
+
+  const customFilterBtn = document.getElementById("customFilterBtn");
+  if (customFilterBtn) {
+    customFilterBtn.addEventListener("click", () => {
+      alert("🎯 커스텀 필터 실행");
+      unifiedListManager.loadList(0, "web", "filter=active");
+    });
+  }
+});
+</script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 Python 스크립트 관리</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    :root { font-family: 'Inter', sans-serif; }
+
+    .custom-scroll::-webkit-scrollbar { width: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background-color: #a0aec0; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background-color: #edf2f7; }
+
+    .file-row-new { border-left: 4px solid #3b82f6; background: #eff6ff; }
+    .file-row-new:hover { background: #dbeafe; }
+
+    .file-row-normal:hover { background: #f9fafb; }
+
+    .fade-in { animation: fadeIn 0.25s ease-in-out; }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+</style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="content-container p-4 md:p-6 lg:p-8">
+
+        <!-- 페이지 HEADER -->
+        <div class="page-header mb-8 pb-4 border-b border-gray-200">
+            <div>
+                <h2 class="text-3xl font-extrabold text-gray-800 sm:text-2xl">
+                    🐍 Python 스크립트 관리
+                </h2>
+            </div>
+            <div class="breadcrumb text-sm text-gray-500 mt-1">
+                <i class="fas fa-folder-open text-blue-500 mr-1"></i>
+                시스템 / 배치 관리 / Python
+            </div>
+        </div>
+
+
+        <!-- 3열 GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- 업로드 카드 -->
+            <div class="lg:col-span-1">
+                <div class="bg-white p-6 rounded-xl shadow-lg border h-full fade-in">
+
+                    <h3 class="text-xl font-semibold text-blue-700 mb-4 flex items-center">
+                        <i class="fas fa-upload mr-2"></i>
+                        스크립트 업로드 / 업데이트
+                    </h3>
+
+                    <p class="text-sm text-gray-600 mb-2">로컬 Python(.py) 파일을 서버 운영 경로에 업로드합니다.</p>
+
+                    <div class="text-xs text-red-500 mb-6 break-words">
+                        운영 배포 경로:
+                        <span th:text="${pythonWorkingDir}"
+                              class="font-medium text-red-700"></span>
+                    </div>
+
+                    <form id="uploadForm" enctype="multipart/form-data" class="space-y-4">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">파일 선택 (.py)</label>
+
+                            <div id="dropZone"
+                                 class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer
+                                        hover:border-blue-500 transition bg-gray-50/50">
+
+                                <p class="text-gray-500 text-sm mb-2">
+                                    <i class="fas fa-file mr-1"></i>
+                                    드래그하거나 클릭하여 선택
+                                </p>
+
+                                <input type="file" id="fileInput" name="file" multiple accept=".py" class="hidden" />
+                                <div id="fileListPreview" class="mt-3 space-y-1 text-left"></div>
+                            </div>
+                        </div>
+
+                        <button id="uploadButton" type="submit"
+                                class="w-full py-2 px-4 rounded-lg shadow-md text-sm font-medium text-white
+                                       bg-blue-600 hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center">
+                            <i class="fas fa-upload mr-2"></i>
+                            업로드
+                        </button>
+                    </form>
+
+                    <div id="statusMessage"
+                         class="mt-4 p-3 rounded-lg text-sm hidden"></div>
+
+                </div>
+            </div>
+            
+            <!-- 파일 목록 카드 -->
+            <div class="lg:col-span-2">
+                <div class="bg-white p-6 rounded-xl shadow-lg border h-full fade-in">
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                        <span>
+                            <i class="fas fa-file-code mr-2"></i> 서버 Python 스크립트 목록
+                        </span>
+
+                        <button id="refreshButton"
+                                class="p-2 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-gray-100 transition text-sm sm:text-base"
+                                title="목록 새로고침">
+                            <i class="fas fa-sync-alt mr-1"></i>
+                            <span class="hidden sm:inline">새로고침</span>
+                        </button>
+                    </h3>
+
+                    <!-- 테이블 -->
+                    <div class="overflow-x-auto custom-scroll h-96">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-3 py-3 text-center w-10">
+                                        <input type="checkbox" id="selectAllFiles"
+                                               class="h-4 w-4 text-blue-600 border-gray-300 rounded cursor-pointer">
+                                    </th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">#</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">파일명</th>
+                                    <!-- 새 항목: 크기 -->
+                                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">크기</th>
+                                    <!-- 기존 항목 -->
+                                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        업로드 날짜
+                                    </th>
+                                    <!-- 새 항목: 해시 -->
+                                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        SHA-256 해시
+                                    </th>
+                                    <!-- 기존 항목 -->
+                                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        <i class="fas fa-magic"></i> New
+                                    </th>
+                                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">관리</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="fileListBody" class="bg-white divide-y divide-gray-100">
+                                <tr>
+                                    <!-- colspan=6에서 8로 변경됨 -->
+                                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i> 로딩 중...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 다중버튼 -->
+                    <div class="mt-4 flex justify-end space-x-3 border-t pt-4">
+
+                        <button id="deploySelectedButton"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md shadow-sm
+                                       text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+                            <i class="fas fa-rocket mr-2"></i> 선택 배포
+                        </button>
+
+                        <button id="runSelectedButton"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md shadow-sm
+                                       text-white bg-green-600 hover:bg-green-700 disabled:opacity-50">
+                            <i class="fas fa-play mr-2"></i> 선택 실행
+                        </button>
+
+                        <button id="deleteSelectedButton"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md shadow-sm
+                                       text-white bg-red-600 hover:bg-red-700 disabled:opacity-50">
+                            <i class="fas fa-trash mr-2"></i> 선택 삭제
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- GRID END -->
+
+    </div>
+</div>
+
+<th:block layout:fragment="pageScript">
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const fileListBody          = document.getElementById('fileListBody');
+    const uploadForm            = document.getElementById('uploadForm');
+    const fileInput             = document.getElementById('fileInput');
+    const uploadButton          = document.getElementById('uploadButton');
+    const statusMessage         = document.getElementById('statusMessage');
+    const refreshButton         = document.getElementById('refreshButton');
+
+    const selectAllFiles        = document.getElementById('selectAllFiles');
+    const runSelectedButton     = document.getElementById('runSelectedButton');
+    const deleteSelectedButton  = document.getElementById('deleteSelectedButton');
+    const deploySelectedButton  = document.getElementById('deploySelectedButton');
+
+    const dropZone              = document.getElementById('dropZone');
+    const fileListPreview       = document.getElementById('fileListPreview');
+
+    let selectedFiles           = [];
+    let currentFiles            = [];
+    
+    /* ============================================================
+       유틸리티: 바이트 크기를 사람이 읽기 쉬운 형태로 변환
+    ============================================================ */
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    /* ============================================================
+       공통 알림 메시지 표시
+    ============================================================ */
+    function displayStatus(message, type) {
+        statusMessage.textContent = message;
+        statusMessage.className = 'mt-4 p-3 rounded-lg text-sm fade-in';
+
+        if (type === 'success') {
+            statusMessage.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-300');
+        } else if (type === 'error') {
+            statusMessage.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-300');
+        } else {
+            statusMessage.classList.add('bg-gray-100', 'text-gray-700', 'border', 'border-gray-300');
+        }
+
+        statusMessage.classList.remove('hidden');
+    }
+
+    /* ============================================================
+       파일 목록 불러오기
+    ============================================================ */
+    async function loadFileList() {
+        fileListBody.innerHTML =
+            `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                <i class="fas fa-spinner fa-spin mr-2"></i> 로딩 중...
+            </td></tr>`;
+
+        try {
+            const response = await fetch('/api/python/list', {
+                method: 'GET',
+                headers: { "Content-Type": "application/json" },
+                cache: 'no-cache'
+            });
+
+            if (!response.ok) {
+                throw new Error('서버 오류 (' + response.status + ')');
+            }
+
+            currentFiles = await response.json();
+            renderFileList(currentFiles);
+
+        } catch (err) {
+            fileListBody.innerHTML =
+                `<tr><td colspan="8" class="px-6 py-4 text-center text-red-500">
+                    오류: ${err.message}
+                </td></tr>`;
+        }
+    }
+
+    /* ============================================================
+       파일 목록 렌더링
+    ============================================================ */
+    function renderFileList(files) {
+        if (files.length === 0) {
+            fileListBody.innerHTML =
+                `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                    배포된 스크립트가 없습니다.
+                 </td></tr>`;
+            return;
+        }
+
+        fileListBody.innerHTML = files.map((file, idx) => {
+
+            const rowClass = file.new
+                ? "file-row-new"
+                : "file-row-normal";
+
+            const newBadge = file.new
+                ? `<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700">
+                        NEW
+                   </span>`
+                : `<span class="text-xs text-gray-400">-</span>`;
+            
+            // 크기 포맷팅
+            const formattedSize = formatBytes(file.size);
+            // 해시 값 축약 (보안 및 가독성)
+            const shortHash = file.localHash ? file.localHash.substring(0, 10) + '...' : 'N/A';
+
+
+            return `
+                <tr class="${rowClass}">
+                    <td class="px-3 py-3 text-center">
+                        <input type="checkbox" name="fileCheck" value="${file.filename}"
+                               class="h-4 w-4 cursor-pointer" onclick="handleFileCheck(this)">
+                    </td>
+
+                    <td class="px-3 py-3 text-xs">${idx + 1}</td>
+
+                    <td class="px-3 py-3 text-xs text-blue-700 font-medium">
+                        <i class="fas fa-file-code mr-1"></i>${file.filename}
+                    </td>
+                    
+                    <!-- NEW: 크기 -->
+                    <td class="px-3 py-3 text-center text-xs text-gray-600">
+                        ${formattedSize}
+                    </td>
+
+                    <td class="px-3 py-3 text-center text-xs">${file.uploadDate}</td>
+
+                    <!-- NEW: SHA-256 해시 -->
+                    <td class="px-3 py-3 text-center text-xs font-mono" title="${file.localHash || '해시 정보 없음'}">
+                        ${shortHash}
+                    </td>
+
+                    <td class="px-3 py-3 text-center">${newBadge}</td>
+
+                    <td class="px-3 py-3 text-center space-x-1">
+
+                        <button onclick="handleScriptAction('${file.filename}', 'run')"
+                                class="inline-flex items-center p-2 rounded-md text-green-600 border border-green-300 hover:text-white hover:bg-green-600 transition text-xs">
+                            <i class="fas fa-play"></i>
+                            <span class="ml-1 hidden sm:inline">실행</span>
+                        </button>
+
+                        <button onclick="handleScriptAction('${file.filename}', 'delete')"
+                                class="inline-flex items-center p-2 rounded-md text-red-600 border border-red-300 hover:text-white hover:bg-red-600 transition text-xs">
+                            <i class="fas fa-trash"></i>
+                            <span class="ml-1 hidden sm:inline">삭제</span>
+                        </button>
+
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        updateButtonStates();
+        selectAllFiles.checked = false;
+    }
+
+    /* ============================================================
+       체크박스
+    ============================================================ */
+    window.handleFileCheck = function () {
+        const checkboxes = document.querySelectorAll('input[name="fileCheck"]');
+        const checkedCnt = document.querySelectorAll('input[name="fileCheck"]:checked').length;
+
+        selectAllFiles.checked = (checkedCnt > 0 && checkedCnt === checkboxes.length);
+        updateButtonStates();
+    };
+
+    selectAllFiles.addEventListener('change', () => {
+        const isChecked = selectAllFiles.checked;
+        document.querySelectorAll('input[name="fileCheck"]').forEach(cb => cb.checked = isChecked);
+        updateButtonStates();
+    });
+
+    function getSelectedFilenames() {
+        const arr = [];
+        document.querySelectorAll('input[name="fileCheck"]:checked').forEach(cb => arr.push(cb.value));
+        return arr;
+    }
+
+    function updateButtonStates() {
+        const count = document.querySelectorAll('input[name="fileCheck"]:checked').length;
+        const disabled = (count === 0);
+
+        runSelectedButton.disabled = disabled;
+        deleteSelectedButton.disabled = disabled;
+        deploySelectedButton.disabled = disabled;
+    }
+
+    /* ============================================================
+       단일 실행 / 삭제
+    ============================================================ */
+    window.handleScriptAction = (filename, action) => {
+        // NOTE: alert() 대신 커스텀 모달 또는 UI 메시지를 사용해야 합니다. 
+        // 여기서는 편의상 confirm을 사용하지만 실제 운영 환경에서는 Custom UI를 권장합니다.
+        if (action === 'run') {
+            if (confirm(`[${filename}] 실행하시겠습니까?`)) {
+                executeScript(filename);
+            }
+        } else if (action === 'delete') {
+            if (confirm(`[${filename}] 삭제하시겠습니까?`)) {
+                deleteScript(filename);
+            }
+        }
+    };
+
+    async function executeScript(filename) {
+        try {
+            const response = await fetch(`/api/python/run/${encodeURIComponent(filename)}`, {
+                method: 'POST'
+            });
+
+            const txt = await response.text();
+
+            if (response.ok) displayStatus(txt, 'success');
+            else displayStatus(txt, 'error');
+
+        } catch (err) {
+            displayStatus('네트워크 오류: ' + err.message, 'error');
+        }
+    }
+
+    async function deleteScript(filename) {
+        try {
+            const response = await fetch(`/api/python/delete/${encodeURIComponent(filename)}`, {
+                method: 'DELETE'
+            });
+
+            const txt = await response.text();
+
+            if (response.ok) {
+                displayStatus(txt, 'success');
+                loadFileList();
+            } else {
+                displayStatus(txt, 'error');
+            }
+
+        } catch (err) {
+            displayStatus('삭제 오류: ' + err.message, 'error');
+        }
+    }
+
+    /* ============================================================
+       선택 실행 / 선택 삭제 / 선택 배포
+    ============================================================ */
+
+    runSelectedButton.addEventListener('click', () => {
+        const list = getSelectedFilenames();
+        if (list.length === 0) return;
+        if (!confirm(`${list.length}개 파일 실행하시겠습니까?\n[${list.join(', ')}]`)) return;
+        runBatch(list);
+    });
+
+    deleteSelectedButton.addEventListener('click', () => {
+        const list = getSelectedFilenames();
+        if (list.length === 0) return;
+        if (!confirm(`${list.length}개 파일 삭제하시겠습니까?\n[${list.join(', ')}]`)) return;
+        deleteBatch(list);
+    });
+
+    deploySelectedButton.addEventListener('click', () => {
+        const list = getSelectedFilenames();
+        if (list.length === 0) return;
+        if (!confirm(`${list.length}개 파일을 DEV 버전으로 운영에 배포하시겠습니까?\n(기존 파일은 백업됨)`)) return;
+        deployBatch(list);
+    });
+
+    async function runBatch(list) {
+        try {
+            const response = await fetch('/api/python/batch-run', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(list)
+            });
+
+            const txt = await response.text();
+
+            if (response.ok) displayStatus(txt, 'success');
+            else displayStatus(txt, 'error');
+
+        } catch (err) {
+            displayStatus('오류: ' + err.message, 'error');
+        }
+    }
+
+    async function deleteBatch(list) {
+        try {
+            const response = await fetch('/api/python/batch-delete', {
+                method: 'DELETE',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(list)
+            });
+
+            const txt = await response.text();
+
+            if (response.ok) {
+                displayStatus(txt, 'success');
+                loadFileList();
+            } else {
+                displayStatus(txt, 'error');
+            }
+
+        } catch (err) {
+            displayStatus('삭제 실패: ' + err.message, 'error');
+        }
+    }
+
+    async function deployBatch(list) {
+        try {
+            const response = await fetch('/api/python/batch-deploy', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(list)
+            });
+
+            const txt = await response.text();
+
+            if (response.ok) displayStatus(txt, 'success');
+            else if (response.status === 206) displayStatus(txt, 'warning');
+            else displayStatus(txt, 'error');
+
+            loadFileList();
+
+        } catch (err) {
+            displayStatus('배포 오류: ' + err.message, 'error');
+        }
+    }
+
+    /* ============================================================
+       업로드 관련 처리
+    ============================================================ */
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev =>
+        dropZone.addEventListener(ev, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        })
+    );
+
+    dropZone.addEventListener('dragenter', () => {
+        dropZone.classList.add('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('drop', e => {
+        dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+        setFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', e => setFiles(e.target.files));
+
+    function setFiles(files) {
+        selectedFiles = Array.from(files).filter(f => f.name.endsWith('.py'));
+
+        if (selectedFiles.length === 0) {
+            displayStatus('.py 파일만 업로드할 수 있습니다.', 'error');
+        }
+
+        updateFilePreview();
+    }
+
+    function updateFilePreview() {
+        fileListPreview.innerHTML = '';
+
+        if (selectedFiles.length === 0) {
+            uploadButton.disabled = true;
+            return;
+        }
+
+        selectedFiles.forEach(f => {
+            const sizeKB = (f.size / 1024).toFixed(1);
+
+            const div = document.createElement('div');
+            div.className = "flex justify-between items-center p-2 bg-white rounded border text-xs";
+            div.innerHTML =
+                `<span class="truncate"><i class="fas fa-file-code mr-1"></i>${f.name}</span>
+                 <span class="text-gray-500">${sizeKB}KB</span>`;
+
+            fileListPreview.appendChild(div);
+        });
+
+        uploadButton.disabled = false;
+    }
+
+    /* ============================================================
+       업로드 폼 제출
+    ============================================================ */
+    uploadForm.addEventListener('submit', async e => {
+        e.preventDefault();
+
+        if (selectedFiles.length === 0) {
+            displayStatus('업로드할 파일이 없습니다.', 'error');
+            return;
+        }
+
+        uploadButton.disabled = true;
+        uploadButton.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> 업로드 중...`;
+
+        const formData = new FormData();
+        selectedFiles.forEach(file => formData.append('files', file));
+
+        try {
+            const response = await fetch('/api/python/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const txt = await response.text();
+
+            if (response.ok) {
+                displayStatus(txt, 'success');
+                uploadForm.reset();
+                selectedFiles = [];
+                updateFilePreview();
+                loadFileList();
+            } else {
+                displayStatus(txt, 'error');
+            }
+
+        } catch (err) {
+            displayStatus('업로드 실패: ' + err.message, 'error');
+        }
+
+        uploadButton.disabled = false;
+        uploadButton.innerHTML = `<i class="fas fa-upload mr-2"></i> 업로드`;
+    });
+
+    /* ============================================================
+       초기 목록 로드
+    ============================================================ */
+    refreshButton.addEventListener('click', loadFileList);
+    loadFileList();
+});
+
+/*]]>*/
+</script>
+</th:block>
+
+</body>
+</html>

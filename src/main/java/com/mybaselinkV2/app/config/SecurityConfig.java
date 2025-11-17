@@ -132,6 +132,18 @@ public class SecurityConfig {
                         "/api/stock/batch/athena/sse",
                         "/api/stock/lastCloseDownward/sse"
                 ).permitAll();
+                
+                
+                auth.requestMatchers(
+                	    "/api/python/list",
+                	    "/api/python/upload",
+                	    "/api/python/check-existence",
+                	    "/api/python/run/**",
+                	    "/api/python/delete/**",
+                	    "/api/python/batch-run",
+                	    "/api/python/batch-delete",
+                	    "/api/python/batch-deploy"
+                	).authenticated(); 
 
                 // ✅ 그 외 모든 API와 페이지는 인증 필수
                 auth.requestMatchers("/api/**", "/pages/**").authenticated();

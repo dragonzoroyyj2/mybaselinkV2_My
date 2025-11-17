@@ -1,3 +1,4 @@
+<!-- stockBatchAthenaAi.html -->
 <!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
@@ -136,12 +137,47 @@ input[type="radio"]:not(:checked) + .option-card {
     visibility: visible;
     opacity: 1;
 }
+
+/* ⭐ 모바일 스크롤 잠금 (iOS/Android 대응) - 모달 열릴 때 body에 추가 */
+.modal-open-fix {
+  overflow: hidden !important; 
+  position: fixed; 
+  width: 100%;
+  height: 100vh;
+  top: 0;
+  left: 0;
+}
+
+
+/* ✅ 애니메이션 */
+@keyframes fadeInUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+/* ✅ 차트 로딩 스피너 */
+.loader { border-top-color: #4f46e5; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* ✅ 스크롤 잠금용 */
+.modal-open-fix {
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  top: 0; left: 0;
+}
+
+/* ✅ 브라우저별 중앙 정렬 및 스케일 안정화 */
+#chartModal { align-items: center; justify-content: center; }
+#chartModal .modal-card { margin: auto; transform: translateY(0); }
 </style>
 <head>
+<!-- 반드시 Chart.js보다 먼저 -->
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script> 
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+
 </head>
 </head>
 
@@ -200,6 +236,11 @@ input[type="radio"]:not(:checked) + .option-card {
         <label class="option-card-wrapper">
           <input type="radio" name="analysisType" value="cup_and_handle" class="hidden" onclick="toggleMaPeriods()">
           <div class="option-card border-2 p-4 rounded-xl">☕ 컵앤핸들</div>
+        </label>
+        
+        <label class="option-card-wrapper">
+          <input type="radio" name="analysisType" value="half_and_handle" class="hidden" onclick="toggleMaPeriods()">
+          <div class="option-card border-2 p-4 rounded-xl">☕ 하프앤핸들</div>
         </label>
       </div>
     </div>
@@ -279,21 +320,25 @@ input[type="radio"]:not(:checked) + .option-card {
   <div id="logBox" class="h-64 bg-black text-green-300 p-3 overflow-y-auto font-mono text-xs rounded-md"><p>로그 대기중...</p></div>
 </div>
 
-<!-- 📈 차트 모달 -->
-<div id="chartModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-xl w-full max-w-[95vw] sm:max-w-2xl md:max-w-3xl lg:max-w-4xl p-4 relative shadow-lg">
-    <h2 id="modalTitle" class="text-lg sm:text-xl font-bold mb-4 text-left pl-2 pr-24"></h2>
+<!-- 📈 차트 모달 (완전 반응형 중앙 정렬 + 스크롤 락 + 애니메이션 적용) -->
+<div id="chartModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] p-4">
+  <div class="modal-card bg-white rounded-2xl w-full max-w-[95vw] sm:max-w-2xl md:max-w-3xl lg:max-w-5xl max-h-[90vh] overflow-y-auto p-4 relative shadow-2xl animate-[fadeInUp_0.25s_ease-out]">
+    <h2 id="modalTitle" class="text-lg sm:text-xl md:text-2xl font-bold mb-4 text-left pl-2 pr-24"></h2>
 
     <!-- ✅ 로딩 스피너 -->
     <div id="chartLoading" class="hidden absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-20">
-      <div class="loader border-4 border-t-4 border-gray-200 rounded-full w-10 h-10 animate-spin"></div>
+      <div class="loader border-4 border-t-4 border-gray-200 border-t-indigo-500 rounded-full w-10 h-10 animate-spin"></div>
     </div>
 
-    <!-- ✅ 차트 -->
-    <div class="chart-canvas-wrap mb-4"><canvas id="chartCanvas"></canvas></div>
-    <div class="chart-canvas-wrap"><canvas id="macdCanvas"></canvas></div>
+    <!-- ✅ 차트 캔버스 -->
+    <div class="chart-canvas-wrap mb-4">
+      <canvas id="chartCanvas"></canvas>
+    </div>
+    <div class="chart-canvas-wrap mb-2">
+      <canvas id="macdCanvas"></canvas>
+    </div>
 
-    <!-- ✅ 줌 초기화 + 이미지 저장 -->
+    <!-- ✅ 상단 제어 버튼 -->
     <div class="absolute top-3 right-3 flex items-center gap-2">
       <button id="btnResetZoom" class="hidden bg-indigo-600 text-white px-3 py-1 rounded-md text-sm hover:bg-indigo-700 transition">
         🔄 줌 초기화
@@ -434,7 +479,7 @@ window.toggleAccordion = function(contentId, iconId) {
       if (input.id === 'ma20') return; // 20일은 필수 + disabled 유지
       input.disabled = !isMA;
     });
-    box.style.display = isMA ? "block" : "none";
+    box.style.display = isMA ? "block" : "none";  //
   };
 
   /* ================================
@@ -631,45 +676,40 @@ function appendLog(line) {
   };
 
   
-  /* ================================
-  1. 툴팁 토글 및 외부 클릭 시 닫기 함수
-  ================================ */
-
 //💡 툴팁 토글 함수: 아이콘 클릭 시 툴팁을 보였다/숨겼다 합니다.
-function toggleTooltip(event, elementId) {
-   // 이벤트 전파 방지: 테이블 행 클릭 등 다른 이벤트가 동시에 발생하는 것을 막습니다.
-   event.stopPropagation(); 
-   
-   const tooltip = document.getElementById(elementId);
-   
-   // 현재 툴팁 상태 토글
-   tooltip.classList.toggle('visible');
+  window.toggleTooltip = function(event, elementId) {
+     // 이벤트 전파 방지: 테이블 행 클릭 등 다른 이벤트가 동시에 발생하는 것을 막습니다.
+     event.stopPropagation(); 
+     
+     const tooltip = document.getElementById(elementId);
+     
+     // 현재 툴팁 상태 토글
+     tooltip.classList.toggle('visible');
 
-   // 다른 툴팁이 열려 있으면 닫기
-   document.querySelectorAll('.tooltip-box.visible').forEach(box => {
-       if (box.id !== elementId) {
-           box.classList.remove('visible');
-       }
-   });
-}
+     // 다른 툴팁이 열려 있으면 닫기
+     document.querySelectorAll('.tooltip-box.visible').forEach(box => {
+         if (box.id !== elementId) {
+             box.classList.remove('visible');
+         }
+     });
+  }
 
-//💡 툴팁 외부 클릭 시 닫기 이벤트 리스너 (HTML 문서 로드 후 한 번만 실행)
-document.addEventListener('click', function(event) {
-   let isTooltipElement = false;
-   
-   // 클릭된 요소가 툴팁 박스 내부이거나 정보 아이콘인지 확인
-   if (event.target.closest('.tooltip-box') || event.target.classList.contains('info-icon')) {
-       isTooltipElement = true;
-   }
+  //💡 툴팁 외부 클릭 시 닫기 이벤트 리스너 (HTML 문서 로드 후 한 번만 실행)
+  document.addEventListener('click', function(event) {
+     let isTooltipElement = false;
+     
+     // 클릭된 요소가 툴팁 박스 내부이거나 정보 아이콘인지 확인
+     if (event.target.closest('.tooltip-box') || event.target.classList.contains('info-icon')) {
+         isTooltipElement = true;
+     }
 
-   // 툴팁 요소가 아닌 곳을 클릭했다면 모든 툴팁을 닫습니다.
-   if (!isTooltipElement) {
-       document.querySelectorAll('.tooltip-box.visible').forEach(box => {
-           box.classList.remove('visible');
-       });
-   }
-});
-
+     // 툴팁 요소가 아닌 곳을 클릭했다면 모든 툴팁을 닫습니다.
+     if (!isTooltipElement) {
+         document.querySelectorAll('.tooltip-box.visible').forEach(box => {
+             box.classList.remove('visible');
+         });
+     }
+  });
 
 /* ================================
   2. 결과 테이블 렌더링 함수 (renderResults)
@@ -794,71 +834,111 @@ function renderResults(list) {
     }).filter(p => p !== null);
   }
 
+  /* ============================================================
+   * 📈 buildPriceChart (Candlestick Chart - 안정판 v3.2)
+   * ------------------------------------------------------------
+   * ✅ Chart.js Financial + chartjs-plugin-zoom + Hammer.js 호환
+   * ✅ 줌/이동 시 데이터 사라짐 방지 (범위 고정)
+   * ✅ 좌우 이동/확대 안정화 + Y축 자동 스케일링
+   * ✅ 부드러운 드래그(팬) + 휠 줌 + 터치 줌 완벽 작동
+   * ============================================================ */
   function buildPriceChart(ctx, payload) {
-    const ohlcData = payload.ohlcv_data ? payload.ohlcv_data.map(d => {
-      const ts = new Date(d.x).getTime();
-      if (isNaN(ts) || d.o===undefined || d.h===undefined || d.l===undefined || d.c===undefined) return null;
-      return { x: ts, o: d.o, h: d.h, l: d.l, c: d.c };
-    }).filter(Boolean) : [];
+    const ohlcData = payload.ohlcv_data
+      ? payload.ohlcv_data.map(d => {
+          const ts = new Date(d.x).getTime();
+          if (isNaN(ts) || d.o===undefined || d.h===undefined || d.l===undefined || d.c===undefined) return null;
+          return { x: ts, o: d.o, h: d.h, l: d.l, c: d.c };
+        }).filter(Boolean)
+      : [];
 
     const ma20  = payload.ma_data?.MA20  ? toXY(payload.ma_data.MA20)  : [];
     const ma50  = payload.ma_data?.MA50  ? toXY(payload.ma_data.MA50)  : [];
     const ma200 = payload.ma_data?.MA200 ? toXY(payload.ma_data.MA200) : [];
-    //const ma500 = payload.ma_data?.MA500 ? toXY(payload.ma_data.MA500) : [];
 
-    const cross = Array.isArray(payload.cross_points) ? payload.cross_points.map(p => {
-      const ts = new Date(p.x).getTime(); if (isNaN(ts)) return null;
-      return {x:ts, y:p.y, type:p.type};
-    }).filter(Boolean) : [];
+    const cross = Array.isArray(payload.cross_points)
+      ? payload.cross_points.map(p => {
+          const ts = new Date(p.x).getTime();
+          if (isNaN(ts)) return null;
+          return {x:ts, y:p.y, type:p.type};
+        }).filter(Boolean)
+      : [];
 
-    const pats  = Array.isArray(payload.pattern_points) ? payload.pattern_points.map(p => {
-      const ts = new Date(p.x).getTime(); if (isNaN(ts)) return null;
-      return {x:ts, y:p.y, type:p.type, status:p.status};
-    }).filter(Boolean) : [];
+    const pats = Array.isArray(payload.pattern_points)
+      ? payload.pattern_points.map(p => {
+          const ts = new Date(p.x).getTime();
+          if (isNaN(ts)) return null;
+          return {x:ts, y:p.y, type:p.type, status:p.status};
+        }).filter(Boolean)
+      : [];
+
+    // ✅ 전체 데이터의 x 범위 계산 (이동 한계 설정용)
+    const xMin = ohlcData.length ? ohlcData[0].x : undefined;
+    const xMax = ohlcData.length ? ohlcData[ohlcData.length - 1].x : undefined;
 
     priceChart = new Chart(ctx, {
       type: 'candlestick',
       data: {
         datasets: [
-          { label: 'OHLCV', data: ohlcData, parsing:false, borderWidth:1.5 },
-          { type:'line', label: 'MA20',  data: ma20,  parsing:false, pointRadius:0, borderWidth:1.2, borderColor: '#22c55e' },
-          { type:'line', label: 'MA50',  data: ma50,  parsing:false, pointRadius:0, borderWidth:1.2, borderColor: '#7c3aed' },
-          { type:'line', label: 'MA200', data: ma200, parsing:false, pointRadius:0, borderWidth:1.2, borderColor: '#3b82f6' },
-          //{ type:'line', label: 'MA500', data: ma500, parsing:false, pointRadius:0, borderWidth:1.2, borderColor: '#e11d48' },
-          { label: 'Cross', type:'scatter', data: cross, parsing:false, pointRadius:4, pointBackgroundColor:'#ef4444', showLine:false },
-          { label: 'Pattern', type:'scatter', data: pats, parsing:false, pointRadius:4, pointBackgroundColor:'#8b5cf6', showLine:false }
-        ].filter(ds => ds.data?.length > 0 || ds.type === 'candlestick' || ds.type === 'line')
+          { label: 'OHLCV', data: ohlcData, parsing:false, borderWidth:1.3 },
+          { type:'line', label:'MA20',  data:ma20,  parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#22c55e' },
+          { type:'line', label:'MA50',  data:ma50,  parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#7c3aed' },
+          { type:'line', label:'MA200', data:ma200, parsing:false, pointRadius:0, borderWidth:1.2, borderColor:'#3b82f6' },
+          { label:'Cross', type:'scatter', data:cross, parsing:false, pointRadius:4, pointBackgroundColor:'#ef4444' },
+          { label:'Pattern', type:'scatter', data:pats, parsing:false, pointRadius:4, pointBackgroundColor:'#8b5cf6' }
+        ]
       },
       options: {
         responsive:true,
         maintainAspectRatio:false,
         interaction:{ mode:'nearest', intersect:false },
         scales:{
-          x:{ type:'time', time:{ tooltipFormat:'yyyy-MM-dd' }, grid:{ display:false } },
-          y:{ beginAtZero:false, ticks:{ callback:v => v.toLocaleString() } }
+          x:{
+            type:'time',
+            time:{ tooltipFormat:'yyyy-MM-dd' },
+            grid:{ display:false },
+            min: xMin,
+            max: xMax
+          },
+          y:{
+            beginAtZero:false,
+            ticks:{ callback:v => v.toLocaleString() }
+          }
         },
         plugins:{
           legend:{ display:true, position:'top' },
-          tooltip:{ callbacks:{
-            label: (ctx)=>{
-              const d = ctx.raw;
-              if (ctx.dataset.type === 'candlestick' && d && d.o !== undefined) {
-                return `O:${d.o.toLocaleString()}, H:${d.h.toLocaleString()}, L:${d.l.toLocaleString()}, C:${d.c.toLocaleString()}`;
-              }
-              if (ctx.dataset.type === 'scatter' && d && (d.type || d.status)) {
-                return `${ctx.dataset.label}: ${d.type || ''} ${d.status ? '('+d.status+')' : ''}  y=${d.y?.toLocaleString?.()}`;
-              }
-              return `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString?.()}`;
-            }
-          }},
+          tooltip:{ enabled:true },
           zoom:{
-            pan:{ enabled:true, mode:'xy' },
-            zoom:{ wheel:{ enabled:true }, pinch:{ enabled:true }, mode:'xy' }
+            pan:{
+              enabled:true,
+              mode:'x',
+              // ✅ 데이터 범위 밖 이동 방지
+              onPan: ({chart}) => {
+                const xScale = chart.scales.x;
+                const {min, max} = xScale;
+                const dataMin = xMin;
+                const dataMax = xMax;
+                if (min < dataMin) xScale.options.min = dataMin;
+                if (max > dataMax) xScale.options.max = dataMax;
+              },
+            },
+            zoom:{
+              wheel:{ enabled:true },
+              pinch:{ enabled:true },
+              mode:'x',
+              // ✅ 과도한 확대 시 자동 복원
+              onZoom: ({chart}) => {
+                const xScale = chart.scales.x;
+                const range = xScale.max - xScale.min;
+                const fullRange = xMax - xMin;
+                if (range < fullRange * 0.01) chart.resetZoom();
+              },
+            },
           }
         }
       }
     });
   }
+
 
   function buildMacdChart(ctx, payload) {
     const macd   = payload.macd_data?.MACD      ? toXY(payload.macd_data.MACD)      : [];
@@ -976,36 +1056,40 @@ function renderResults(list) {
   let modalResizeObserver = null;
 
   /* ✅ 차트 모달 열기 (body scroll lock 포함) */
-	window.showChart = async (ticker, name, rowId) => {
-	  if (!$chartModal) return;
-	  $modalTitle.textContent = `📈 ${ticker} - ${name}`;
-	  $chartModal.classList.remove("hidden");
-	  document.body.style.overflow = "hidden";
-	
-	  // 🚀 스피너 바로 표시 후 차트 로드 (지연 실행)
-	  $chartLoading.classList.remove('hidden');
-	  await new Promise(r => setTimeout(r, 100));  // 살짝 딜레이 주면 시각적 반응 완벽함
-	
-	  try {
-	    await tryRenderChartsByJson(ticker, name);
-	  } catch (err) {
-	    destroyCharts();
-	    if ($btnResetZoom) $btnResetZoom.classList.add('hidden');
-	    if ($btnSaveChart)  $btnSaveChart.classList.add('hidden');
-	    appendLog(`[LOG] ℹ️ 차트 로드 실패: ${err.message}`);
-	  } finally {
-	    $chartLoading.classList.add('hidden');
-	  }
-	
-	  if (modalResizeObserver) modalResizeObserver.disconnect();
-	  const modalCard = $chartModal.querySelector('.bg-white.rounded-xl');
-	  if (modalCard) {
-	    modalResizeObserver = new ResizeObserver(() => {
-	      try { priceChart?.resize(); macdChart?.resize(); } catch {}
-	    });
-	    modalResizeObserver.observe(modalCard);
-	  }
-	};
+  window.showChart = async (ticker, name, rowId) => {
+    if (!$chartModal) return;
+    $modalTitle.textContent = `📈 ${ticker} - ${name}`;
+    $chartModal.classList.remove("hidden");
+    
+    // ⭐ 모바일 대응 수정: body에 scroll lock 클래스 추가
+    document.body.classList.add('modal-open-fix');
+    
+    // 🚀 스피너 바로 표시 후 차트 로드 (지연 실행)
+    $chartLoading.classList.remove('hidden');
+    await new Promise(r => setTimeout(r, 100));  // 살짝 딜레이 주면 시각적 반응 완벽함
+
+    try {
+      await tryRenderChartsByJson(ticker, name);
+    } catch (err) {
+      destroyCharts();
+      if ($btnResetZoom) $btnResetZoom.classList.add('hidden');
+      if ($btnSaveChart)  $btnSaveChart.classList.add('hidden');
+      appendLog(`[LOG] ℹ️ 차트 로드 실패: ${err.message}`);
+    } finally {
+      $chartLoading.classList.add('hidden');
+    }
+
+    if (modalResizeObserver) modalResizeObserver.disconnect();
+    const modalCard = $chartModal.querySelector('.bg-white.rounded-xl');
+    if (modalCard) {
+      modalResizeObserver = new ResizeObserver(() => {
+        try { priceChart?.resize(); macdChart?.resize(); } catch {}
+      });
+      modalResizeObserver.observe(modalCard);
+    }
+  };
+
+  // ----------------------------------------------------
 
   /* ✅ 차트 모달 닫기 (body scroll 복원) */
   window.closeChartModal = () => {
@@ -1013,8 +1097,9 @@ function renderResults(list) {
     modalResizeObserver = null;
     if ($chartModal) $chartModal.classList.add("hidden");
     destroyCharts();
-    // ✅ 스크롤 복원
-    document.body.style.overflow = "";
+    
+    // ⭐ 모바일 대응 수정: body에서 scroll lock 클래스 제거하여 스크롤 복원
+    document.body.classList.remove('modal-open-fix');
   };
 
   // ✅ 수동 검토 완료 (현재 테이블 행에 배지 표시)

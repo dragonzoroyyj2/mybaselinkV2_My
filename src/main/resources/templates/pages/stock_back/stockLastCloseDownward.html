@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+<meta charset="UTF-8">
+<title>📉 연속 하락 종목 분석</title>
+
+<!-- ===============================================================
+📉 MyBaseLinkV2 - stockLastCloseDownward.html (v4.2 안정판)
+---------------------------------------------------------------
+✅ 확대 차트 왼쪽 잘림 완전 수정 (정중앙 배치)
+✅ 선점 종료 / 완료 시 "분석 시작" 버튼 자동 복원
+✅ 기존 디자인/기능 완벽 유지
+=============================================================== -->
+<style>
+  h2{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;color:#111827;}
+  .card-box,.dashboard-cards,.log-wrapper,.result-box{
+    background:#fff;border-radius:12px;padding:18px;
+    box-shadow:0 2px 6px rgba(0,0,0,.05);margin-top:14px;
+  }
+  .btn{display:inline-flex;align-items:center;justify-content:center;
+       padding:9px 14px;border-radius:8px;border:none;cursor:pointer;
+       font-size:.9rem;font-weight:600;color:#fff;min-width:110px;}
+  .btn-start{background:#2563eb;}
+  .btn-cancel{background:#dc2626;}
+  .btn:hover{opacity:.9;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .controls{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;}
+  input,select{padding:.4rem .6rem;border:1px solid #bbb;border-radius:6px;font-size:.83rem;}
+  select{min-width:120px;}
+
+  /* 진행률 */
+  .dashboard-cards{display:flex;gap:14px;flex-wrap:wrap;}
+  .card{flex:1 1 300px;background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .progress-bar{width:100%;background:#e5e7eb;height:14px;border-radius:7px;margin-top:10px;overflow:hidden;}
+  .progress-bar div{height:100%;width:0%;transition:width .3s;background:#2563eb;}
+  .card-header{display:flex;align-items:center;gap:6px;font-weight:600;font-size:.95rem;}
+  .card-header .right{margin-left:auto;font-size:.9rem;}
+
+  /* 로그 */
+  .log-box{background:#111;color:#eee;font-family:Consolas,mono;font-size:12.5px;padding:8px;border-radius:10px;height:280px;overflow-y:auto;white-space:pre-wrap;}
+  .log-error{color:#ef4444;font-weight:600;}
+  .log-progress{color:#60a5fa;}
+  .log-complete{color:#22c55e;font-weight:600;}
+
+  /* 테이블 */
+  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(10px,1vw,13px);}
+  th,td{border-bottom:1px solid #e5e7eb;padding:5px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  th{background:#f3f4f6;font-weight:600;color:#374151;}
+  tr:hover{background:#f9fafb;cursor:pointer;}
+  .table-container{border-radius:8px;overflow:auto;max-height:60vh;margin-top:8px;}
+  .no-result{text-align:center;padding:14px;color:#999;}
+
+  /* 차트 모달 */
+  .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1000;}
+  .modal-content{background:#fff;border-radius:10px;padding:16px;width:90%;max-width:900px;max-height:90vh;
+    box-shadow:0 2px 10px rgba(0,0,0,0.25);display:flex;flex-direction:column;}
+  .modal-header{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;}
+  .modal-btn{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.85rem;color:#fff;}
+  .btn-close{background:#dc2626;}
+  .btn-zoom{background:#2563eb;}
+  .chart-box{position:relative;display:flex;align-items:center;justify-content:center;min-height:400px;}
+  .chart-box img{width:100%;height:auto;border-radius:8px;opacity:0;transition:opacity .4s ease;}
+  .chart-box img.loaded{opacity:1;}
+  .spinner-container{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+                     background:rgba(255,255,255,0.7);border-radius:10px;}
+  .spinner{border:4px solid #e5e7eb;border-top:4px solid #2563eb;border-radius:50%;width:44px;height:44px;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ===== 확대 모달 (v4.2 개선) ===== */
+/* ===== 확대 모달 (v4.3 최종 수정) ===== */
+.zoom-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center; justify-content: center;
+  overflow: auto;
+  z-index: 3000;
+  backdrop-filter: blur(2px);
+}
+
+/* ✅ 좌우/상하 스크롤 완전 허용 */
+.zoom-inner {
+  position: relative;
+  background: #111;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;        /* ✅ 상단 기준 */
+  justify-content: flex-start;    /* ✅ 좌측 기준 */
+  width: 90%;
+  max-width: 1600px;
+  height: 80vh;
+  overflow: auto;                 /* ✅ 완전 스크롤 */
+}
+
+/* ✅ 이미지 전체 보기: 스크롤로 상하좌우 완전 이동 가능 */
+.zoom-inner img {
+  display: block;
+  width: auto;              /* 가로 제한 제거 */
+  height: auto;             /* 세로 제한 제거 */
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border-radius: 8px;
+}
+
+/* 닫기 버튼 그대로 유지 */
+.zoom-close-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: #dc2626;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: .9rem;
+  cursor: pointer;
+  z-index: 3100;
+  transition: background .2s ease;
+}
+.zoom-close-btn:hover { background: #b91c1c; }
+
+
+  .zoom-close-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: #dc2626;
+    color: #fff;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: .9rem;
+    cursor: pointer;
+    z-index: 3100;
+    transition: background .2s ease;
+  }
+  .zoom-close-btn:hover { background: #b91c1c; }
+
+</style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+    <div class="page-header">
+      <div class="page-title"><h2>📉 연속 하락 종목 분석</h2></div>
+      <div class="breadcrumb"><i class="fas fa-chart-line"></i><span>분석 / 연속 하락</span></div>
+    </div>
+
+    <div class="card-box">
+      <div class="controls">
+        <label>기간:
+          <select id="periodSelect">
+            <option value="7">1주일</option><option value="14">2주일</option><option value="21">3주일</option>
+            <option value="28">4주일</option><option value="30">1개월</option><option value="90">3개월</option>
+            <option value="180" selected>6개월</option><option value="365">1년</option><option value="730">2년</option>
+          </select>
+        </label>
+        <label>시작일:<input type="date" id="startDate"></label>
+        <label>종료일:<input type="date" id="endDate"></label>
+        <label>Top N:<input type="number" id="topN" value="100" min="10" max="500"></label>
+        <button id="btnStart" class="btn btn-start">분석 시작</button>
+        <button id="btnCancel" class="btn btn-cancel" disabled>취소</button>
+      </div>
+    </div>
+
+    <div class="dashboard-cards">
+      <div class="card">
+        <div class="card-header"><i class="fas fa-layer-group"></i>전체 진행률<span class="right" id="badgeTotal">-</span></div>
+        <strong id="pctTotal">0%</strong>
+        <div class="progress-bar"><div id="barTotal"></div></div>
+      </div>
+    </div>
+
+    <div class="log-wrapper">
+      <h3>실시간 로그</h3>
+      <div id="logBox" class="log-box">로그 대기중...</div>
+    </div>
+
+    <div class="result-box">
+      <h3>📊 연속 하락 종목 결과 (<span id="resultCount">0</span>개)</h3>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>#</th><th>종목코드</th><th>종목명</th><th>연속하락일수</th></tr></thead>
+          <tbody id="resultTableBody"><tr><td colspan="4" class="no-result">결과 없음</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 기본 차트 -->
+    <div id="chartModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button class="modal-btn btn-close" id="btnCloseChart">닫기</button>
+          <button class="modal-btn btn-zoom" id="btnZoomChart">확대 보기 🔍</button>
+        </div>
+        <div class="chart-box">
+          <div class="spinner-container" id="chartSpinner"><div class="spinner"></div></div>
+          <img id="chartImage" src="" alt="차트 미리보기">
+        </div>
+      </div>
+    </div>
+
+    <!-- 확대 모달 -->
+    <div id="zoomModal" class="zoom-modal">
+      <div class="zoom-inner">
+        <button class="zoom-close-btn" id="zoomCloseBtn">닫기 ✖</button>
+        <img id="zoomImage" src="" alt="확대 차트">
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="pageScript">
+<script>
+(()=>{
+  const $start=document.getElementById("startDate"),$end=document.getElementById("endDate"),
+        $period=document.getElementById("periodSelect"),$btnStart=document.getElementById("btnStart"),
+        $btnCancel=document.getElementById("btnCancel"),$log=document.getElementById("logBox"),
+        $bar=document.getElementById("barTotal"),$pct=document.getElementById("pctTotal"),$badge=document.getElementById("badgeTotal"),
+        $tbody=document.getElementById("resultTableBody"),$resultCount=document.getElementById("resultCount"),
+        $chartModal=document.getElementById("chartModal"),$chartImage=document.getElementById("chartImage"),
+        $chartSpinner=document.getElementById("chartSpinner"),$btnCloseChart=document.getElementById("btnCloseChart"),
+        $btnZoomChart=document.getElementById("btnZoomChart"),$zoomModal=document.getElementById("zoomModal"),
+        $zoomImage=document.getElementById("zoomImage"),$zoomClose=document.getElementById("zoomCloseBtn");
+  let es=null;
+
+  const now=new Date(), s=new Date(); s.setMonth(now.getMonth()-6);
+  $start.value=s.toISOString().split("T")[0]; $end.value=now.toISOString().split("T")[0];
+  $period.onchange=()=>{const d=parseInt($period.value);const end=new Date(), st=new Date();st.setDate(end.getDate()-d);
+                        $start.value=st.toISOString().split("T")[0];$end.value=end.toISOString().split("T")[0];};
+
+  function appendLog(line){if(!line)return;if($log.textContent.includes("대기중"))$log.textContent="";
+    const safe=line.replace(/[<>]/g,"");if(/error/i.test(safe))$log.innerHTML+=`<br><span class='log-error'>${safe}</span>`;
+    else if(/\[PROGRESS\]/i.test(safe))$log.innerHTML+=`<br><span class='log-progress'>${safe}</span>`;
+    else if(/완료|COMPLETE/i.test(safe))$log.innerHTML+=`<br><span class='log-complete'>${safe}</span>`;
+    else $log.innerHTML+="<br>"+safe;$log.scrollTop=$log.scrollHeight;}
+  function setBar(p){$bar.style.width=p+"%";$pct.textContent=p.toFixed(1)+"%";$badge.textContent=p>=100?"✅ 완료":Math.round(p)+"%";}
+  function renderResults(list){$tbody.innerHTML="";if(!list||list.length===0){$tbody.innerHTML='<tr><td colspan="4" class="no-result">결과 없음</td></tr>';return;}
+    $resultCount.textContent=list.length;list.forEach((r,i)=>{const tr=document.createElement("tr");
+      tr.innerHTML=`<td>${i+1}</td><td>${r.ticker}</td><td>${r.name}</td><td>${r.streak}</td>`;
+      tr.onclick=()=>openChart(r.ticker);$tbody.appendChild(tr);});}
+
+  function connectSSE(){
+    if(es){try{es.close();}catch{}}
+    es=new EventSource("/api/stock/lastCloseDownward/sse",{withCredentials:true});
+    es.addEventListener("status",e=>{
+      const d=JSON.parse(e.data||"{}");
+      if(d.progress!==undefined)setBar(d.progress);
+      if(Array.isArray(d.logs))d.logs.forEach(l=>appendLog(l));
+      if(Array.isArray(d.results))renderResults(d.results);
+      // ✅ 모든 종료 상태에서 버튼 복원
+      if(["COMPLETE","COMPLETED","FAILED","CANCELLED","IDLE"].includes(d.status)){
+        $btnStart.disabled=false;
+        $btnCancel.disabled=true;
+      }
+    });
+    es.onerror=()=>setTimeout(connectSSE,2000);
+  }
+
+  $btnStart.onclick=async()=>{
+    const s=$start.value,e=$end.value;
+    $btnStart.disabled=true;$btnCancel.disabled=true;setBar(0);
+    $log.textContent="분석 시작 중...";
+    try{
+      const res=await fetch(`/api/stock/lastCloseDownward/start?startDate=${s}&endDate=${e}&workers=8`,
+                            {method:"POST",credentials:"include"});
+      if(res.ok){appendLog("[LOG] 분석 시작됨");$btnCancel.disabled=false;}
+      else{appendLog("⚠️ 다른 사용자가 선점 중입니다.");$btnStart.disabled=false;}
+    }catch(err){appendLog("[ERROR] 서버 연결 실패");$btnStart.disabled=false;}
+  };
+
+  $btnCancel.onclick=async()=>{
+    await fetch(`/api/stock/lastCloseDownward/cancel`,{method:"POST",credentials:"include"});
+    appendLog("[LOG] 분석 취소 요청됨");
+    $btnCancel.disabled=true;$btnStart.disabled=false;
+  };
+
+  function openChart(symbol){
+    const s=$start.value,e=$end.value;
+    $chartImage.classList.remove("loaded");
+    $chartSpinner.style.display="flex";$chartModal.style.display="flex";
+    fetch(`/api/stock/lastCloseDownward/chart/${symbol}?startDate=${s}&endDate=${e}`,{credentials:"include"})
+      .then(r=>r.json()).then(d=>{
+        if(d.image_data){
+          const img="data:image/png;base64,"+d.image_data;
+          $chartImage.onload=()=>{setTimeout(()=>{$chartSpinner.style.display="none";$chartImage.classList.add("loaded");},150);}
+          $chartImage.src=img;$zoomImage.src=img;
+        }else{$chartSpinner.style.display="none";appendLog("[ERROR] 차트 생성 실패");}
+      });
+  }
+
+  $btnCloseChart.onclick=()=>{$chartModal.style.display="none";};
+  $btnZoomChart.onclick=()=>{$chartModal.style.display="none";$zoomModal.style.display="flex";};
+  $zoomClose.onclick=()=>{$zoomModal.style.display="none";};
+
+  connectSSE();
+})();
+</script>
+</th:block>
+</body>
+</html>

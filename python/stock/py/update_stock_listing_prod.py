@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-📘 update_stock_listing_prod_final.py (v2.6 실전 안정판 - 최종 개선판)
+📘 update_stock_listing_prod_final.py (v1.0 실전 안정판 - 최종 개선판)
 ----------------------------------------------------------
 ✅ StockBatchGProdService(v3.3) 완전 동기화
 ✅ BASE_DIR = Path(__file__).resolve().parents[2]

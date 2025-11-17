@@ -34,6 +34,11 @@ import org.springframework.cache.annotation.EnableCaching; // 캐싱 활성화
 public class MyBaseLinkV2Application extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
+		
+		// Spring Application 실행 직전에 환경 변수 확인
+	    String pythonPath = System.getenv("PYTHON_EXECUTABLE");
+	    System.out.println(">> System Env Check: PYTHON_EXECUTABLE = " + pythonPath);
+		
 		SpringApplication.run(MyBaseLinkV2Application.class, args);
 	}
 

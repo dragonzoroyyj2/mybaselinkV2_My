@@ -46,7 +46,7 @@ public class StockLastCloseDownwardService {
     @Value("${python.executable.path:python}")
     private String pythonExe;
 
-    @Value("${python.find_last_close_downward.path}")
+    @Value("${python.find_last_close_downward.path:}")
     private String scriptPath;
 
     @Value("${python.working.dir}")

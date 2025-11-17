@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <title>주식 종목 리스트</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+    <div class="main-inner"> <!-- ✅ 모든 요소를 테이블 기준 정렬 -->
+
+      <!-- 📄 페이지 헤더 (타이틀 + 경로 표시 - 반응형 완전형) -->
+      <div class="page-header">
+        <div class="page-title">
+          <h2 th:text="${pageTitle} ?: '📊 주식 종목 리스트'">📊 주식 종목 리스트</h2>
+        </div>
+        <div class="breadcrumb">
+          <i class="fas fa-folder-open"></i>
+          <span th:text="${breadcrumb} ?: 'Stock 관리 / 종목 리스트'">Stock 관리 / 종목 리스트</span>
+        </div>
+      </div>
+
+      <!-- 🔍 검색 영역 -->
+      <div class="toolbar">
+        <div class="search-group">
+          <input type="text" id="searchInput" placeholder="검색어 입력" />
+          <button id="searchBtn" class="btn"><i class="fas fa-search"></i></button>
+          <button id="refreshBtn" class="btn gray" title="새로고침"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </div>
+
+      <!-- 📋 총 건수 + 기능 버튼 -->
+      <div class="list-info">
+        <span id="totalCount">총 0건</span>
+        <div class="action-buttons">
+          <button id="excelBtn" class="btn excel" title="엑셀 다운로드">
+            <i class="fa-solid fa-file-excel"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 🧾 데이터 테이블 -->
+      <div class="table-container">
+        <table>
+          <thead>
+          <tr>
+            <th>No</th>
+            <th>종목코드</th>
+            <th>회사명</th>
+            <th>시장구분</th>
+            <th>업종</th>
+            <th>종가</th>
+            <th>시가</th>
+            <th>고가</th>
+            <th>저가</th>
+            <th>거래량</th>
+            <th>기준일</th>
+          </tr>
+          </thead>
+          <tbody id="dataTable"></tbody>
+        </table>
+      </div>
+
+      <!-- 📑 페이징 -->
+      <div id="pagination" class="pagination"></div>
+    </div> <!-- ✅ /main-inner -->
+  </div>
+</div>
+
+<!-- ✅ 페이지 스크립트 -->
+<th:block layout:fragment="pageScript">
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  function getPageGroupSize() {
+    const width = window.innerWidth;
+    if (width < 480) return 3;
+    if (width < 768) return 5;
+    if (width < 1024) return 10;
+    return 20;
+  }
+
+  const pageGroupSize = getPageGroupSize();
+
+  const unifiedList = initUnifiedList({
+    mode: "server",
+    pagination: true,
+    apiUrl: "/api/stockList/list",
+    tableBodySelector: "#dataTable",
+    paginationSelector: "#pagination",
+    searchInputSelector: "#searchInput",
+    searchBtnSelector: "#searchBtn",
+    excelBtnSelector: "#excelBtn",
+    checkAllSelector: "#checkAll",
+  
+    pageSize: 20,
+    pageGroupSize: pageGroupSize,
+    enableRowClickDetail: false,
+    enableDetailView: false,
+
+    buttons: {
+      search: true,
+      searchInput: true,
+      add: false,
+      deleteSelected: false,
+      excel: true
+    },
+    
+    excelFileName: "주식종목_리스트.xlsx",
+
+    columns: [
+      { key: "id", label: "No" },
+      { key: "Code", label: "종목코드" },
+      { key: "Name", label: "회사명" },
+      { key: "Market", label: "시장구분" },
+      { key: "Dept", label: "업종" },
+      { key: "Close", label: "종가" },
+      { key: "Open", label: "시가" },
+      { key: "High", label: "고가" },
+      { key: "Low", label: "저가" },
+      { key: "Volume", label: "거래량" },
+      { key: "Date", label: "기준일" }
+    ],
+
+    onLoadComplete: (data) => {
+      if (data.warning) {
+        Toast.show("⚠️ " + data.warning, "warning");
+      }
+    }
+  });
+
+  document.getElementById("searchInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("searchBtn").click();
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click", () => {
+    unifiedList.loadList(0);
+  });
+});
+</script>
+</th:block>
+</body>
+</html>

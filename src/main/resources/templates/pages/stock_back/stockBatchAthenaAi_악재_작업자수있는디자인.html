@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 AthenaAI 배치 업데이트</title> 
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --main-bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color-primary: #111827;
+            --text-color-secondary: #6b7280;
+            --border-color-default: #d1d5db;
+            --input-bg: #ffffff;
+            --progress-bar-bg: #e5e7eb;
+
+            --log-box-bg: #111;
+            --log-text-default: #e0e0e0;
+            --log-text-info: #9ca3af;
+            --log-text-progress: #60a5fa;
+            --log-text-warning: #f59e0b;
+            --log-text-error: #ef4444;
+            --log-text-complete: #22c55e;
+
+            --card-border: #d1d5db;
+            --error-card-bg: #fff;
+            --error-card-border: #e5e7eb;
+            --error-card-text: #374151;
+            --error-card-hover: #fee2e2;
+            --error-card-header: #b91c1c;
+        }
+
+        /* 💡 다크모드 필요 시 스타일 추가 가능 */
+
+        .global-status-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .global-status-header {
+            font-weight: 600;
+            color: var(--text-color-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+        }
+        .global-status-body {
+            font-size: .9rem;
+            color: var(--text-color-secondary);
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+        }
+        .global-status-progress {
+            width: 100%;
+            height: 10px;
+            background: var(--progress-bar-bg);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .global-status-progress div {
+            height: 100%;
+            width: 0%;
+            background: #2563eb;
+            transition: width .25s;
+        }
+
+        .status-idle{color:#6b7280;}
+        .status-running{color:#2563eb;}
+        .status-completed{color:#22c55e;}
+        .status-failed{color:#ef4444;}
+        .status-cancelled{color:#f59e0b;}
+        @keyframes blink {0%,100%{opacity:1}50%{opacity:.35}}
+        .blinking{animation:blink 1.2s infinite;}
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+
+    <div class="page-header">
+      <div class="page-title">
+        <h2>📄 국내 주식 패턴 분석 및 시뮬레이션</h2>
+      </div>
+      <div class="breadcrumb">
+        <i class="fas fa-folder-open"></i>
+        <span>시스템 / 분석 도구 (AthenaAi)</span>
+      </div>
+    </div>
+
+    <!-- ✅ 전역(Global) 상태 카드 -->
+    <div class="global-status-card">
+        <div class="global-status-header">
+          🌐 AthenaAI 배치 진행 상태
+          <span id="globalStatusText" class="status-idle">대기중</span>
+        </div>
+
+        <div class="global-status-body">
+          <div>실행자: <span id="globalRunner">미연결</span></div>
+          <div>전체 진행률: <span id="globalProgressLabel">0%</span></div>
+        </div>
+
+        <div class="global-status-progress">
+            <div id="globalProgressBar"></div>
+        </div>
+    </div>
+    
+        <!-- ✅ 분석 옵션 섹션 -->
+    <div class="card mb-8">
+        <form id="analysisForm">
+
+            <!-- ✅ 1. 분석 유형 선택 -->
+            <button type="button"
+                    class="w-full text-left flex justify-between items-center text-2xl font-bold text-gray-700 mt-0 mb-5 border-b pb-3 hover:text-indigo-600 transition duration-150"
+                    onclick="toggleSection('analysisTypeContent', this)">
+                <span>1. 분석 유형 선택</span>
+                <span class="text-3xl transition-transform duration-300 transform">▾</span>
+            </button>
+
+            <div id="analysisTypeContent" class="pb-4 transition-all duration-300 ease-in-out">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    <!-- MA 분석 -->
+                    <label for="maRadio" class="block">
+                        <input type="radio" name="analysisType" id="maRadio" value="ma"
+                               class="hidden" checked onclick="toggleMaPeriods()">
+                        <div class="option-card">
+                            <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                <span class="mr-2 text-indigo-500">📉</span> 이동평균선(MA) 분석 (기본)
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">장기 하락 배열 종목 탐색</p>
+
+                            <!-- MA 기간 -->
+                            <div id="maPeriodsContainer"
+                                 class="ml-0 mt-3 p-3 bg-indigo-100/50 rounded-lg transition-all duration-300">
+                                <h4 class="font-semibold text-indigo-700 mb-2 text-sm">
+                                    MA 기간 선택 (하락 배열 확인):
+                                </h4>
+
+                                <div class="flex flex-wrap gap-x-4 gap-y-2">
+
+                                    <input type="checkbox" name="maPeriods" value="60" id="ma60"
+                                           checked class="rounded text-indigo-600">
+                                    <label for="ma60" class="text-sm">60일선</label>
+
+                                    <input type="checkbox" name="maPeriods" value="200" id="ma200"
+                                           checked class="rounded text-indigo-600">
+                                    <label for="ma200" class="text-sm">200일선</label>
+
+                                    <input type="checkbox" name="maPeriods" value="500" id="ma500"
+                                           checked disabled class="rounded text-indigo-600 opacity-50">
+                                    <label for="ma500" id="ma500Label" class="text-sm opacity-50">500일선</label>
+                                    <span id="ma500Hint" class="text-red-500 text-xs font-semibold">(최소 3년 필요)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Double Bottom -->
+                    <label for="doubleBottomRadio" class="block">
+                        <input type="radio" name="analysisType" id="doubleBottomRadio"
+                               value="double_bottom" class="hidden" onclick="toggleMaPeriods()">
+                        <div class="option-card">
+                            <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                <span class="mr-2 text-green-500">📈</span> 이중바닥 (W자형 패턴)
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">강력한 추세 반전 탐색</p>
+                        </div>
+                    </label>
+
+                    <!-- Triple Bottom -->
+                    <label for="tripleBottomRadio" class="block">
+                        <input type="radio" name="analysisType" id="tripleBottomRadio"
+                               value="triple_bottom" class="hidden" onclick="toggleMaPeriods()">
+                        <div class="option-card">
+                            <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                <span class="mr-2 text-green-500">📊</span> 삼중바닥 패턴
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">바닥 다지기 종목 탐색</p>
+                        </div>
+                    </label>
+
+                    <!-- Cup & Handle -->
+                    <label for="cupAndHandleRadio" class="block">
+                        <input type="radio" name="analysisType" id="cupAndHandleRadio"
+                               value="cup_and_handle" class="hidden" onclick="toggleMaPeriods()">
+                        <div class="option-card">
+                            <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                <span class="mr-2 text-amber-500">☕</span> 컵앤핸들 패턴
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">돌파 직전 종목 탐색</p>
+                        </div>
+                    </label>
+
+                    <!-- Decline 5 Days -->
+                    <label for="decline5dRadio" class="block">
+                        <input type="radio" name="analysisType" id="decline5dRadio"
+                               value="decline_5d" class="hidden" onclick="toggleMaPeriods()">
+                        <div class="option-card">
+                            <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                <span class="mr-2 text-red-600">🔻</span> 단기 급락주 (5일 연속 하락)
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">과대 낙폭주 탐색</p>
+                        </div>
+                    </label>
+
+                    <!-- Decline 20 Days -->
+                    <label for="decline20dRadio" class="block">
+                        <input type="radio" name="analysisType" id="decline20dRadio"
+                               value="decline_20d" class="hidden" onclick="toggleMaPeriods()">
+                        <div class="option-card">
+                            <p class="text-lg font-semibold text-gray-800 flex items-center">
+                                <span class="mr-2 text-red-700">⬇️</span> 중기 연속 하락 (20일)
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">한 달간 반등 없는 종목 탐색</p>
+                        </div>
+                    </label>
+
+                </div>
+            </div>
+
+            <!-- ✅ 2. 추가 필터링 옵션 -->
+            <button type="button"
+                    class="w-full text-left flex justify-between items-center text-2xl font-bold text-gray-700 mt-8 mb-5 border-b pb-3 hover:text-indigo-600 transition duration-150"
+                    onclick="toggleSection('filteringOptionsContent', this)">
+                <span>2. 추가 필터링 옵션</span>
+                <span class="text-3xl transition-transform duration-300 transform">▾</span>
+            </button>
+
+            <div id="filteringOptionsContent" class="pb-4 transition-all duration-300 ease-in-out">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                    <!-- 악재 제외 -->
+                    <div class="p-4 bg-white rounded-lg border border-red-200 shadow-sm flex items-center">
+                        <input type="checkbox" id="excludeNegatives" checked
+                               class="mr-3 h-5 w-5 rounded text-red-500 focus:ring-red-400 border-gray-300">
+                        <label for="excludeNegatives" class="text-lg text-red-700 font-bold flex-grow">
+                            🚨 악재 종목 제외
+                        </label>
+                    </div>
+
+                    <!-- 분석 기간 -->
+                    <div class="p-4 bg-white rounded-lg border border-blue-200 shadow-sm flex items-center">
+                        <span class="mr-3 text-blue-700 font-bold">📅 분석 기간:</span>
+                        <input type="number" id="dataPeriodYears" value="5" min="1" max="10"
+                               class="w-16 px-3 py-1 border border-blue-300 rounded-lg text-center font-bold text-lg focus:ring-blue-500"
+                               oninput="updateMaCheckboxes()">
+                        <span class="ml-2 text-blue-800 font-semibold">년치</span>
+                    </div>
+
+                    <!-- 워커수 -->
+                    <div class="p-4 bg-white rounded-lg border border-purple-200 shadow-sm flex items-center">
+                        <span class="mr-3 text-purple-700 font-bold">🛠️ 작업자 수:</span>
+                        <input type="number" id="workerCount" value="8" min="1" max="16"
+                               class="w-16 px-3 py-1 border border-purple-300 rounded-lg text-center font-bold text-lg focus:ring-purple-500">
+                        <span class="ml-2 text-purple-800 font-semibold">개</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ✅ 3. 결과 표시 개수 -->
+            <button type="button"
+                    class="w-full text-left flex justify-between items-center text-2xl font-bold text-gray-700 mt-8 mb-5 border-b pb-3 hover:text-indigo-600 transition duration-150"
+                    onclick="toggleSection('topNCountContent', this)">
+                <span>3. 결과 표시 개수 설정</span>
+                <span class="text-3xl transition-transform duration-300 transform">▾</span>
+            </button>
+
+            <div id="topNCountContent"
+                 class="pb-4 transition-all duration-300 ease-in-out">
+
+                <div class="flex items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <label for="topNCount"
+                           class="text-lg text-gray-700 font-medium mr-4">
+                        상위 종목 개수(N):
+                    </label>
+
+                    <input type="number" id="topNCount" value="10" min="1" max="50"
+                           class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-center font-bold text-xl">
+
+                    <span class="ml-4 text-gray-500 text-sm">1~50 사이</span>
+                </div>
+            </div>
+
+        </form>
+
+        <!-- ✅ 실행 / 취소 버튼 -->
+        <div class="run-controls-wrapper mt-8">
+
+            <button type="button" id="runAnalysisBtn"
+                    onclick="runAnalysis()"
+                    class="flex-grow px-6 py-3 bg-indigo-600 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition duration-200">
+                🚀 분석 실행 및 유망 종목 찾기
+            </button>
+
+            <button type="button" id="btnCancel"
+                    onclick="cancelAnalysis()"
+                    class="px-6 py-3 bg-red-600 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-red-700 transition duration-200"
+                    disabled>
+                ❌ 취소
+            </button>
+
+        </div>
+
+    </div>
+    
+    
+        <!-- ✅ 결과 영역 -->
+    <div class="card mb-10">
+
+        <!-- 화면 상단 제목 -->
+        <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+            📊 분석 결과
+        </h3>
+
+        <!-- ✅ 결과 테이블 -->
+        <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+            <table class="min-w-full bg-white text-gray-800" id="resultTable">
+                <thead class="bg-gray-100 border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">종목코드</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">종목명</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">신호 강도</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">MA 배열</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">차트 확인</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- ✅ 결과 없음 -->
+        <div id="noResultBox" class="hidden p-6 text-center text-gray-500 text-lg">
+            분석된 결과가 없습니다.
+        </div>
+
+    </div>
+
+    <!-- ✅ 로그 영역 -->
+    <div class="card mb-14">
+        <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+            🪵 실시간 로그
+            <button id="copyLogBtn" class="ml-4 px-3 py-1 bg-indigo-600 text-white text-sm rounded-md">
+                복사
+            </button>
+        </h3>
+
+        <div id="logBox"
+             class="h-64 bg-black text-green-300 text-sm p-3 rounded-md overflow-y-auto font-mono">
+            <p class="opacity-70">로그 대기중...</p>
+        </div>
+    </div>
+
+    <!-- ✅ 차트 모달 -->
+    <div id="chartModal"
+         class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl p-4 max-w-4xl w-full relative">
+
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-700">📈 차트</h3>
+                <button onclick="closeChartModal()"
+                        class="text-gray-600 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+
+            <!-- ✅ 차트 이미지 -->
+            <img id="chartImage" src="" class="w-full rounded-lg shadow-md">
+
+        </div>
+    </div>
+    
+<th:block layout:fragment="pageScript">
+<script>
+(function () {
+
+  /* ================================
+     ✅ 요소 선택 (HTML 실제 id 기준)
+  ================================== */
+  const $runBtn = document.getElementById("runAnalysisBtn");
+  const $cancelBtn = document.getElementById("btnCancel");
+
+  const $analysisForm = document.getElementById("analysisForm");
+  const $log = document.getElementById("logBox");
+  const $copyLogBtn = document.getElementById("copyLogBtn");
+
+  const $resultTableBody = document.getElementById("resultTableBody");
+  const $noResultBox = document.getElementById("noResultBox");
+
+  const $chartModal = document.getElementById("chartModal");
+  const $chartImage = document.getElementById("chartImage");
+  const $modalTitle = document.getElementById("modalTitle");
+
+  const $globalStatusText = document.getElementById("globalStatusText");
+  const $globalRunner = document.getElementById("globalRunner");
+  const $globalProgressLabel = document.getElementById("globalProgressLabel");
+  const $globalProgressBar = document.getElementById("globalProgressBar");
+
+  let currentTaskId = null;
+  let es = null;
+  let currentUser = "-";
+
+  /* ================================
+     ✅ 분석 유형 선택
+  ================================== */
+  function getSelectedPattern() {
+    const checked = document.querySelector("input[name='analysisType']:checked");
+    return checked ? checked.value : "ma";
+  }
+
+  /* ================================
+     ✅ MA 체크박스 자동 활성/비활성
+  ================================== */
+  window.updateMaCheckboxes = function () {
+    const years = Number(document.getElementById("dataPeriodYears").value);
+    const ma500 = document.getElementById("ma500");
+    const ma500Label = document.getElementById("ma500Label");
+    const ma500Hint = document.getElementById("ma500Hint");
+
+    if (years >= 3) {
+      ma500.disabled = false;
+      ma500.classList.remove("opacity-50");
+      ma500Label.classList.remove("opacity-50");
+      ma500Hint.classList.add("hidden");
+    } else {
+      ma500.checked = false;
+      ma500.disabled = true;
+      ma500.classList.add("opacity-50");
+      ma500Label.classList.add("opacity-50");
+      ma500Hint.classList.remove("hidden");
+    }
+  };
+
+  window.toggleMaPeriods = function () {
+    const isMA = document.getElementById("maRadio").checked;
+    const box = document.getElementById("maPeriodsContainer");
+    box.style.display = isMA ? "block" : "none";
+  };
+
+  /* ================================
+     ✅ 전역 상태 업데이트
+  ================================== */
+  function updateGlobalState(st, runner, progress) {
+    const S = (st || "IDLE").toUpperCase();
+    $globalStatusText.textContent = S;
+    $globalRunner.textContent = runner || "-";
+
+    const pct = Math.min(100, Math.max(0, Math.floor(progress || 0)));
+    $globalProgressLabel.textContent = pct + "%";
+    $globalProgressBar.style.width = pct + "%";
+
+    $globalStatusText.className = "";
+    if (S === "RUNNING") $globalStatusText.classList.add("status-running", "blinking");
+    else if (S === "COMPLETED") $globalStatusText.classList.add("status-completed");
+    else if (S === "FAILED") $globalStatusText.classList.add("status-failed");
+    else if (S === "CANCELLED") $globalStatusText.classList.add("status-cancelled");
+    else $globalStatusText.classList.add("status-idle");
+  }
+
+  /* ================================
+     ✅ 로그인 사용자
+  ================================== */
+  async function initCurrentUser() {
+    try {
+      const r = await fetch("/auth/me", { credentials: "include" });
+      if (!r.ok) return "-";
+      const d = await r.json();
+      return d.username || "-";
+    } catch {
+      return "-";
+    }
+  }
+
+  /* ================================
+     ✅ 로그
+  ================================== */
+  function appendLog(line) {
+    if (!line) return;
+    const p = document.createElement("p");
+    p.textContent = line;
+    $log.appendChild(p);
+    $log.scrollTop = $log.scrollHeight;
+  }
+
+  /* ================================
+     ✅ 로그 복사
+  ================================== */
+  $copyLogBtn.onclick = () => {
+    const t = Array.from($log.querySelectorAll("p"))
+      .map(p => p.textContent)
+      .join("\n");
+
+    navigator.clipboard.writeText(t)
+      .then(() => appendLog("[LOG] 📋 로그 복사 완료"));
+  };
+
+  /* ================================
+     ✅ 결과 테이블 렌더링
+  ================================== */
+  function renderResults(list) {
+    $resultTableBody.innerHTML = "";
+
+    if (!list || list.length === 0) {
+      $noResultBox.classList.remove("hidden");
+      return;
+    }
+    $noResultBox.classList.add("hidden");
+
+    list.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="px-4 py-2 border">${item.ticker || "-"}</td>
+        <td class="px-4 py-2 border">${item.name || "-"}</td>
+        <td class="px-4 py-2 border">${item.score || "-"}</td>
+        <td class="px-4 py-2 border">${item.ma_pattern || "-"}</td>
+        <td class="px-4 py-2 border text-center">
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md"
+                  onclick="showChart('${item.ticker}', '${item.name}')">보기</button>
+        </td>
+      `;
+      $resultTableBody.appendChild(tr);
+    });
+  }
+
+  /* ================================
+     ✅ 차트 모달
+  ================================== */
+  window.showChart = (ticker, name) => {
+    $modalTitle.textContent = `📈 ${ticker} - ${name}`;
+    $chartImage.src = `/api/stock/batch/athena/chart?ticker=${ticker}&ts=${Date.now()}`;
+    $chartModal.classList.remove("hidden");
+  };
+
+  window.closeChartModal = () => {
+    $chartModal.classList.add("hidden");
+    $chartImage.src = "";
+  };
+
+  /* ================================
+     ✅ SSE
+  ================================== */
+  function connectSSE() {
+    if (es) { try { es.close(); } catch {} }
+
+    es = new EventSource("/api/stock/batch/athena/sse");
+
+    es.addEventListener("status", (ev) => {
+      const d = JSON.parse(ev.data || "{}");
+
+      if (d.globalStatus)
+        updateGlobalState(d.globalStatus, d.globalRunner, d.globalProgress);
+
+      if (Array.isArray(d.logs))
+        d.logs.forEach(line => appendLog(line));
+
+      if (Array.isArray(d.results))
+        renderResults(d.results);
+
+      const isOwner = (d.runner === currentUser);
+
+      if (["START", "IN_PROGRESS", "RUNNING"].includes(d.status)) {
+        $runBtn.disabled = true;
+        $cancelBtn.disabled = !isOwner ? true : false;
+      }
+
+      if (["COMPLETED", "FAILED", "CANCELLED"].includes(d.status)) {
+        $runBtn.disabled = false;
+        $cancelBtn.disabled = true;
+      }
+
+      if (d.taskId) currentTaskId = d.taskId;
+    });
+
+    es.onerror = () => {
+      try { es.close(); } catch {}
+      es = null;
+      setTimeout(connectSSE, 2000);
+    };
+  }
+
+  /* ================================
+     ✅ 실행
+  ================================== */
+  window.runAnalysis = async () => {
+    $runBtn.disabled = true;
+    $cancelBtn.disabled = false;
+
+    $log.innerHTML = `<p class="opacity-70">분석 시작...</p>`;
+    $resultTableBody.innerHTML = "";
+    $noResultBox.classList.add("hidden");
+
+    const pattern = getSelectedPattern();
+    const years = document.getElementById("dataPeriodYears").value;
+    const workers = document.getElementById("workerCount").value;
+    const excludeNeg = document.getElementById("excludeNegatives").checked;
+    const topN = document.getElementById("topNCount").value;
+
+    const url = `/api/stock/batch/athena/start`
+      + `?pattern=${pattern}`
+      + `&years=${years}`
+      + `&workers=${workers}`
+      + `&excludeNeg=${excludeNeg}`
+      + `&topN=${topN}`;
+
+    const res = await fetch(url, { method: "POST" });
+
+    if (res.ok) {
+      const d = await res.json();
+      currentTaskId = d.taskId;
+      appendLog(`🟢 실행됨 (${d.runner})`);
+    } else {
+      appendLog("⚠️ 실행 실패");
+      $runBtn.disabled = false;
+      $cancelBtn.disabled = true;
+    }
+  };
+
+  /* ================================
+     ✅ 취소
+  ================================== */
+  window.cancelAnalysis = async () => {
+    if (!currentTaskId) return;
+
+    const res = await fetch(`/api/stock/batch/athena/cancel/${currentTaskId}`, { method: "POST" });
+    if (res.ok) {
+      appendLog("🟥 작업 취소됨");
+      $runBtn.disabled = false;
+      $cancelBtn.disabled = true;
+    } else {
+      appendLog("⚠️ 취소 실패");
+    }
+  };
+
+  /* ================================
+     ✅ 초기 실행
+  ================================== */
+  (async function init() {
+    currentUser = await initCurrentUser();
+    connectSSE();
+    updateMaCheckboxes();
+    toggleMaPeriods();
+  })();
+
+})();
+</script>
+</th:block>
+
+    </div>
+  </div>
+ </body>
+</html>

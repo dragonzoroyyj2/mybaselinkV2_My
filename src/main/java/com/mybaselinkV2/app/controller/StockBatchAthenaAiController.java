@@ -15,11 +15,11 @@ import java.util.UUID;
 
 /**
  * ===============================================================
- * 📊 StockBatchAthenaAiController (v4.0 - analyze + chart 완전체)
+ * 📊 StockBatchAthenaAiController (v4.1 - analyze + chart 완전체)
  * ---------------------------------------------------------------
- * ✅ analyze: 기존 락 + SSE + 비동기
- * ✅ chart: 락 없음, SSE 없음, 즉시 JSON 반환
- * ✅ Service v4.0 과 100% 동기화
+ * ✅ chart: 즉시 JSON 반환 / 락 X
+ * ✅ analyze: 전역락 사용 + SSE 동기화
+ * ✅ GProd와 동일한 잔류 락 자동정리(forceUnlockIfNoProcess) 적용
  * ===============================================================
  */
 @RestController
@@ -41,13 +41,13 @@ public class StockBatchAthenaAiController {
     }
 
     // ===============================================================
-    // ✅ chart 모드: 단일 종목 차트 JSON 즉시 반환
+    // ✅ chart 모드 (락 없음 / 즉시 JSON)
     // ===============================================================
     @GetMapping("/chart")
     public ResponseEntity<?> chart(
             @RequestParam String symbol,
             @RequestParam(defaultValue = "20,50,200") String maPeriods,
-            @RequestParam(defaultValue = "120") int chartPeriod
+            @RequestParam(defaultValue = "250") int chartPeriod
     ) {
         try {
             log.info("📈 Chart 요청: symbol={}, ma={}, period={}", symbol, maPeriods, chartPeriod);
@@ -83,6 +83,16 @@ public class StockBatchAthenaAiController {
         log.info("🟢 [{}] AthenaAI 실행 요청 by {} (pattern={}, workers={}, maPeriods={}, topN={}, symbol={})",
                 taskId, username, pattern, workers, maPeriods, topN, symbol);
 
+        // ===============================================================
+        // 💛 GProd와 동일 — 잔류 락 자동정리
+        // ===============================================================
+        try {
+            globalStockService.forceUnlockIfNoProcess();
+        } catch (Exception e) {
+            log.warn("⚠️ 잔류 락 자동정리 실패 (무시): {}", e.getMessage());
+        }
+
+        // 현재 해당 메뉴(Athena)의 내부락 체크
         if (athenaService.isLocked()) {
             String runner = athenaService.getCurrentRunner();
             LinkedHashMap<String, Object> body = new LinkedHashMap<>();
@@ -90,6 +100,7 @@ public class StockBatchAthenaAiController {
             return ResponseEntity.status(409).body(body);
         }
 
+        // 실행 시작
         try {
             athenaService.startUpdate(
                     taskId,
@@ -121,7 +132,7 @@ public class StockBatchAthenaAiController {
 
 
     // ===============================================================
-    // ✅ 취소
+    // ❌ 취소
     // ===============================================================
     @PostMapping("/cancel/{taskId}")
     public ResponseEntity<?> cancel(Authentication auth, @PathVariable String taskId) {
@@ -156,7 +167,7 @@ public class StockBatchAthenaAiController {
     }
 
     // ===============================================================
-    // ✅ active 조회
+    // 🔍 active 조회
     // ===============================================================
     @GetMapping("/active")
     public ResponseEntity<?> active() {

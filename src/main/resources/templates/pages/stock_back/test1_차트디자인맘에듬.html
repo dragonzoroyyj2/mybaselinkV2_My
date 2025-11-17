@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글로벌 주식 배치 차트 분석</title>
+    <!-- Tailwind CSS CDN 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter 폰트 사용 설정 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        /* Chart.js 컨테이너 반응형 설정 */
+        .chart-container {
+            position: relative;
+            height: 400px; /* 데스크톱 기본 높이 */
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px; /* 모바일 높이 조정 */
+            }
+        }
+    </style>
+    <!-- Chart.js CDN 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <!-- Chart.js의 데이터 스트리밍 기능을 위한 adapter 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-8">
+        <header class="mb-6 border-b pb-4">
+            <h1 class="text-3xl font-extrabold text-gray-800">📊 글로벌 배치 작업 실시간 분석</h1>
+            <p class="text-gray-500 mt-1">배치 ID를 입력하여 주식 데이터 업데이트 현황을 실시간으로 모니터링합니다.</p>
+        </header>
+
+        <!-- 제어 패널 -->
+        <div class="mb-8 p-4 bg-indigo-50 rounded-xl flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div class="flex-grow w-full md:w-auto">
+                <label for="batchIdInput" class="block text-sm font-medium text-indigo-700 mb-1">모니터링할 배치 ID 입력:</label>
+                <input type="text" id="batchIdInput" placeholder="예: 550e8400-e29b-41d4-a716-446655440000"
+                       class="w-full px-4 py-2 border border-indigo-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm"
+                       value="mock-batch-123"> <!-- 테스트를 위한 기본값 설정 -->
+            </div>
+            <button id="connectButton"
+                    class="w-full md:w-auto mt-4 md:mt-0 px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 ease-in-out">
+                📡 스트림 연결
+            </button>
+        </div>
+
+        <!-- 실시간 상태 및 메트릭 패널 -->
+        <div id="statusPanel" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 상태 카드 1: 현재 진행률 -->
+            <div class="bg-blue-50 border border-blue-200 p-5 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-blue-700">진행률</p>
+                <div class="text-3xl font-bold text-blue-900 mt-1" id="progressDisplay">0%</div>
+                <div class="text-xs text-blue-500 mt-1" id="messageDisplay">연결 대기 중...</div>
+            </div>
+            <!-- 상태 카드 2: 최근 업데이트 가격 -->
+            <div class="bg-green-50 border border-green-200 p-5 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-green-700">최근 업데이트 가격 (USD)</p>
+                <div class="text-3xl font-bold text-green-900 mt-1" id="priceDisplay">--</div>
+                <div class="text-xs text-green-500 mt-1" id="timeDisplay">시간: --</div>
+            </div>
+            <!-- 상태 카드 3: 총 업데이트 볼륨 -->
+            <div class="bg-yellow-50 border border-yellow-200 p-5 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-yellow-700">업데이트된 총 볼륨</p>
+                <div class="text-3xl font-bold text-yellow-900 mt-1" id="volumeDisplay">0</div>
+                <div class="text-xs text-yellow-500 mt-1">단위: 주</div>
+            </div>
+        </div>
+        
+        <!-- 차트 영역 -->
+        <div class="chart-container bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-inner">
+            <canvas id="stockPriceChart"></canvas>
+        </div>
+        
+        <!-- 로그/디버그 출력 영역 -->
+        <div class="mt-8">
+            <h3 class="text-xl font-semibold text-gray-700 mb-3">스트림 로그</h3>
+            <div id="logArea" class="h-40 overflow-y-auto p-3 text-xs bg-gray-800 text-gray-200 rounded-lg">
+                여기에 실시간 스트림 메시지가 표시됩니다.
+            </div>
+        </div>
+
+        <div id="messageBox" class="fixed top-5 right-5 p-3 rounded-lg shadow-xl text-white hidden transition-opacity duration-300"></div>
+
+    </div>
+
+    <script>
+        // DOM 요소
+        const batchIdInput = document.getElementById('batchIdInput');
+        const connectButton = document.getElementById('connectButton');
+        const progressDisplay = document.getElementById('progressDisplay');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const priceDisplay = document.getElementById('priceDisplay');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const volumeDisplay = document.getElementById('volumeDisplay');
+        const logArea = document.getElementById('logArea');
+        const messageBox = document.getElementById('messageBox');
+        const chartCanvas = document.getElementById('stockPriceChart');
+
+        // 상태 변수
+        let eventSource = null;
+        let stockChart = null;
+        let totalVolume = 0;
+
+        // API 설정
+        const BATCH_STATUS_URL = '/api/global/batch/status';
+
+        /**
+         * Chart.js 초기화 함수
+         */
+        function initializeChart() {
+            if (stockChart) {
+                stockChart.destroy();
+            }
+            
+            totalVolume = 0;
+            volumeDisplay.textContent = '0';
+
+            const config = {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: '주식 가격 (USD)',
+                            data: [], // [{x: timestamp, y: price}] 형태로 저장
+                            borderColor: 'rgb(79, 70, 229)', // indigo-600
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            tension: 0.1,
+                            pointRadius: 2,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'second',
+                                displayFormats: {
+                                    second: 'HH:mm:ss'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: '시간'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '가격 (USD)'
+                            },
+                            beginAtZero: false
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            };
+
+            stockChart = new Chart(chartCanvas, config);
+            logMessage('Chart.js가 성공적으로 초기화되었습니다.', 'info');
+        }
+
+        /**
+         * SSE 연결을 설정하고 이벤트를 처리합니다.
+         */
+        function connectSseStream(batchId) {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            const url = `${BATCH_STATUS_URL}?batchId=${batchId}`;
+            eventSource = new EventSource(url);
+            
+            connectButton.textContent = '🛑 연결 끊기';
+            connectButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+            connectButton.classList.add('bg-red-600', 'hover:bg-red-700');
+            logMessage(`SSE 스트림에 연결 중: ${url}`, 'info');
+
+
+            // 1. 'init' 이벤트 처리 (연결 성공 시)
+            eventSource.addEventListener('init', (event) => {
+                logMessage('SSE 연결 성공! 데이터 스트림 대기 중.', 'success');
+                showMessageBox('연결 성공: 실시간 데이터 수신 시작', 'success');
+            });
+
+            // 2. 'update' 이벤트 처리 (주요 데이터 업데이트)
+            eventSource.addEventListener('update', (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    // 상태 패널 업데이트
+                    progressDisplay.textContent = `${data.progress || 0}%`;
+                    messageDisplay.textContent = data.message || '업데이트 진행 중...';
+
+                    if (data.stockData) {
+                        const now = new Date();
+                        const price = data.stockData.price || 0;
+                        const volume = data.stockData.volume || 0;
+
+                        // 메트릭 업데이트
+                        priceDisplay.textContent = `$${price.toFixed(2)}`;
+                        timeDisplay.textContent = `시간: ${now.toLocaleTimeString()}`;
+                        totalVolume += volume;
+                        volumeDisplay.textContent = totalVolume.toLocaleString();
+                        
+                        // 차트 데이터 추가
+                        stockChart.data.datasets[0].data.push({
+                            x: now.getTime(),
+                            y: price
+                        });
+                        
+                        // 차트 갱신 (최대 50개 데이터 포인트 유지)
+                        if (stockChart.data.datasets[0].data.length > 50) {
+                            stockChart.data.datasets[0].data.shift();
+                        }
+                        stockChart.update('none'); // 애니메이션 없이 업데이트
+                    }
+                    
+                    logMessage(`[Update] Progress: ${data.progress}%, Price: ${data.stockData?.price || 'N/A'}`);
+
+                } catch (e) {
+                    logMessage(`[Error] 데이터 파싱 오류: ${e.message}`, 'error');
+                }
+            });
+
+            // 3. 'complete' 이벤트 처리 (배치 작업 완료 시)
+            eventSource.addEventListener('complete', (event) => {
+                logMessage('배치 작업이 완료되었습니다. 스트림을 닫습니다.', 'info');
+                showMessageBox('배치 완료', 'success');
+                disconnectSseStream();
+            });
+
+            // 4. 'error' 이벤트 처리
+            eventSource.onerror = (error) => {
+                logMessage(`[Error] SSE 연결 오류 발생`, 'error');
+                console.error("SSE Error:", error);
+                showMessageBox('연결 오류 발생', 'error');
+                disconnectSseStream();
+            };
+        }
+
+        /**
+         * SSE 연결을 끊고 버튼 상태를 복원합니다.
+         */
+        function disconnectSseStream() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            connectButton.textContent = '📡 스트림 연결';
+            connectButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+            connectButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            logMessage('SSE 스트림 연결이 종료되었습니다.', 'info');
+        }
+
+        /**
+         * 로그 영역에 메시지를 추가합니다.
+         */
+        function logMessage(message, type = 'default') {
+            const now = new Date().toLocaleTimeString();
+            let color = 'text-gray-400';
+            if (type === 'error') color = 'text-red-400';
+            else if (type === 'success') color = 'text-green-400';
+            else if (type === 'info') color = 'text-blue-400';
+
+            const logEntry = `<div class="${color}">[${now}] ${message}</div>`;
+            logArea.innerHTML += logEntry;
+            logArea.scrollTop = logArea.scrollHeight; // 스크롤을 맨 아래로 이동
+        }
+
+        /**
+         * 사용자에게 알림 메시지를 표시합니다.
+         */
+        function showMessageBox(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'bg-blue-500');
+            messageBox.classList.add('opacity-100');
+
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-500');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-500');
+            } else {
+                messageBox.classList.add('bg-blue-500');
+            }
+
+            setTimeout(() => {
+                messageBox.classList.remove('opacity-100');
+                messageBox.classList.add('opacity-0');
+                setTimeout(() => messageBox.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        // --- 이벤트 리스너 ---
+        connectButton.addEventListener('click', () => {
+            const batchId = batchIdInput.value.trim();
+            if (eventSource) {
+                // 이미 연결되어 있으면 연결 끊기
+                disconnectSseStream();
+            } else {
+                if (batchId) {
+                    initializeChart();
+                    connectSseStream(batchId);
+                } else {
+                    showMessageBox('배치 ID를 입력해야 합니다.', 'error');
+                }
+            }
+        });
+
+        // 페이지 로드 시 차트 초기화
+        window.onload = initializeChart;
+    </script>
+</body>
+</html>

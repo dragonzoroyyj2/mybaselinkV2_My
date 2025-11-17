@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+<meta charset="UTF-8">
+<title>🧭 Global Stock Dashboard</title>
+<style>
+  :root {
+    --bg:#f9fafb;--card:#fff;--border:#d1d5db;
+    --text:#111827;--muted:#6b7280;
+  }
+  body{background:var(--bg);}
+  .card{background:var(--card);border-radius:12px;padding:18px;margin-top:12px;
+        box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+  table{width:100%;border-collapse:collapse;margin-top:10px;}
+  th,td{border-bottom:1px solid var(--border);padding:8px;text-align:center;}
+  th{background:#f3f4f6;font-weight:600;}
+  .btn-kill{background:#dc2626;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;}
+  .alive{color:#22c55e;font-weight:600;}
+  .dead{color:#ef4444;font-weight:600;}
+</style>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="content-container">
+    <h2>🧭 Global Stock Dashboard</h2>
+    <div class="card">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>메뉴</th><th>사용자</th><th>진행률</th><th>상태</th>
+            <th>실행중</th><th>시작시간</th><th>강제종료</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="pageScript">
+<script>
+(async()=>{
+  const $tbl=document.querySelector("#tbl tbody");
+  async function load(){
+    const r=await fetch("/api/global/stock/dashboard/status",{credentials:"include"});
+    if(!r.ok)return;
+    const d=await r.json();
+    $tbl.innerHTML="";
+    d.forEach(x=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${x.menu}</td>
+        <td>${x.user}</td>
+        <td>${x.progress?.toFixed(1)||0}%</td>
+        <td>${x.status}</td>
+        <td class="${x.alive?"alive":"dead"}">${x.alive?"실행중":"종료됨"}</td>
+        <td>${new Date(x.startTime).toLocaleTimeString()}</td>
+        <td>${x.alive?`<button class="btn-kill" data-id="${x.taskId}">강제종료</button>`:"-"}</td>`;
+      $tbl.appendChild(tr);
+    });
+  }
+  $tbl.addEventListener("click",async e=>{
+    const b=e.target.closest(".btn-kill");
+    if(!b)return;
+    if(!confirm("이 프로세스를 강제 종료하시겠습니까?"))return;
+    const id=b.dataset.id;
+    await fetch("/api/global/stock/dashboard/kill/"+id,{method:"POST",credentials:"include"});
+    await load();
+  });
+  await load();
+  setInterval(load,5000);
+})();
+</script>
+</th:block>
+</body>
+</html>
