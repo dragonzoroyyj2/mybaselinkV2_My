@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=3.0">
+  <title th:text="${title} ?: 'MyBaseLink'">MyBaseLink</title>
+
+  <th:block th:if="${_csrf} != null">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+  </th:block>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="stylesheet" href="/css/common/commonLayout.css">
+  <link rel="stylesheet" href="/css/common/commonTable.css">
+  <link rel="stylesheet" href="/css/common/commonSearch.css">
+  <link rel="stylesheet" href="/css/common/commonPagination.css">
+  <link rel="stylesheet" href="/css/common/commonModal.css">
+  <link rel="stylesheet" href="/css/common/commonToast.css">
+  <link rel="stylesheet" href="/css/common/commonTop.css">
+  <link rel="stylesheet" href="/css/common/commonLeft.css">
+</head>
+
+<body>
+
+  <th:block th:replace="~{fragments/top :: topFragment}"></th:block>
+
+  <div id="sidebarOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9998; display: none; pointer-events: auto;"></div>
+
+  <div th:replace="~{fragments/left :: leftFragment}"></div>
+
+  <main id="mainContentArea">
+    <div class="content" layout:fragment="content"></div>
+  </main>
+
+  <footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
+
+  <script>
+
+  /*
+  | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적               		|
+	| ----------- 	| ------------------- | ------------------------- | -------------------- 				|
+	| **초소형폰** | `max-width: 360px`  | iPhone SE, Galaxy A10e    | 최소 대응 (기본 텍스트/버튼 축소) |
+	| **소형폰** | `max-width: 480px`  | Galaxy S8, iPhone 12 mini | 모바일 세로 모드 기준         	|
+	| **중형폰** | `max-width: 768px`  | 대부분 스마트폰, 세로     | 레이아웃 여백, 폰트 자동조정     |
+	| **태블릿** | `max-width: 1024px` | iPad, Galaxy Tab 세로     | 리스트/폼 폭 조절           		|
+	| **데스크탑 기본** | `> 1024px`      | 노트북/PC             	 | 기본 레이아웃 유지           		|
+  */
+  document.addEventListener("DOMContentLoaded", () => {
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.getElementById("sidebarOverlay");
+    const allSubmenuContainers = document.querySelectorAll(".sidebar li.has-submenu");
+
+    // 초기 스크롤 위치 저장용
+    let lastScrollTop = 0;
+    let lastScrollLeft = 0;
+
+    function closeAllSubmenus(exceptActive = false) {
+        allSubmenuContainers.forEach(container => {
+            if (exceptActive && container.querySelector("a.active")) return;
+            container.classList.remove("open");
+            const sub = container.querySelector(".submenu");
+            if (sub) sub.style.display = "none";
+        });
+    }
+
+    // 사이드바 강제 닫기
+    function forceCloseSidebar() {
+      if (sidebar && sidebar.classList.contains("open")) {
+        sidebar.classList.remove("open");
+        if (overlay) {
+          overlay.style.setProperty("display", "none", "important");
+          overlay.classList.remove("active");
+        }
+        closeAllSubmenus(true);
+      }
+    }
+
+    // 전역 토글 함수
+    window.toggleSidebar = () => {
+      if (!sidebar) return;
+      const isOpen = sidebar.classList.contains("open");
+      
+      if (isOpen) {
+          forceCloseSidebar();
+      } else {
+          // 열릴 때 현재 스크롤 위치 박제 (변화 감지용)
+          lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          lastScrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+          
+          sidebar.classList.add("open");
+          if (overlay) {
+              overlay.style.setProperty("display", "block", "important");
+              overlay.classList.add("active");
+          }
+      }
+    };
+
+    // 🚨 [초정밀 스크롤 감시] 
+    // 1. 일반 scroll 이벤트 (true 캡처링 사용)
+    window.addEventListener("scroll", (e) => {
+        if (e.target.closest && e.target.closest('.sidebar')) return;
+        if (sidebar.classList.contains("open")) forceCloseSidebar();
+    }, true);
+
+    // 2. ✅ 메인 영역 내부 스크롤 강제 감시 (상하좌우 1px이라도 움직이면 아웃)
+    document.addEventListener("scroll", (e) => {
+        if (sidebar.classList.contains("open")) {
+            if (e.target.closest && e.target.closest('.sidebar')) return;
+            forceCloseSidebar();
+        }
+    }, true);
+
+    // 3. 모바일 터치 이동(스크롤 발생 전 단계) 감시
+    window.addEventListener("touchmove", () => {
+        if (sidebar.classList.contains("open")) {
+            // 터치 이동 시 실제 스크롤 발생 여부 체크
+            const currentTop = window.pageYOffset || document.documentElement.scrollTop;
+            const currentLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            if (Math.abs(lastScrollTop - currentTop) > 5 || Math.abs(lastScrollLeft - currentLeft) > 5) {
+                forceCloseSidebar();
+            }
+        }
+    }, {passive: true});
+
+    overlay?.addEventListener("click", forceCloseSidebar);
+  });
+  </script>
+
+  <script src="/js/common/common_loadseq_1_Loading_op.js"></script>
+  <script src="/js/common/common_loadseq_2_Notify_op.js"></script>
+  <script src="/js/common/common_loadseq_3_Pagination_op.js"></script>
+  <script src="/js/common/common_loadseq_4_Modal_op.js"></script>
+  <script src="/js/common/common_loadseq_5_UnifiedList_op.js"></script>
+  <script src="/js/common/common_loadseq_6_Left_op.js"></script>
+  
+  <th:block layout:fragment="pageScript"></th:block>
+
+  <script>
+    function setVhUnit() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    setVhUnit(); 
+    window.addEventListener("resize", setVhUnit); 
+    window.addEventListener("orientationchange", setVhUnit);
+  </script>
+
+</body>
+</html>
+  
