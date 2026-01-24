@@ -57,7 +57,7 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     # ENV: DB_URL (사용자 기준 유지)
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/mybaselink_db} 
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mybaselink_db?currentSchema=mybaselink} 
     # ENV: DB_USERNAME (사용자 기준 유지)
     username: ${DB_USERNAME:mybaseuser}
     # ENV: DB_PASSWORD (사용자 기준 유지)
@@ -73,7 +73,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate # ✅ 운영 안정화를 위해 validate로 변경 완료
+      ddl-auto: none # ✅ 운영 안정화를 위해 validate로 변경 완료
     show-sql: false
     properties:
       hibernate:

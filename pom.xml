@@ -16,7 +16,6 @@
     <artifactId>MyBaseLinkV2</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <!-- ✅ 기본은 JAR (STS 로컬 실행용) -->
     <packaging>jar</packaging>
 
     <name>MyBaseLinkV2</name>
@@ -28,26 +27,22 @@
     </properties>
 
     <dependencies>
-        <!-- ✅ Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- ✅ 외부 Tomcat (prod에서만 war 사용) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
         </dependency>
 
-        <!-- ✅ Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- ✅ JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -66,7 +61,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ✅ Thymeleaf -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -76,7 +70,6 @@
             <artifactId>thymeleaf-layout-dialect</artifactId>
         </dependency>
 
-        <!-- ✅ JPA + PostgreSQL -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -87,27 +80,23 @@
             <version>42.7.3</version>
         </dependency>
 
-        <!-- ✅ Validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- ✅ Apache POI -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.3.0</version>
         </dependency>
 
-        <!-- ✅ JSON -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20231013</version>
         </dependency>
 
-        <!-- ✅ Cache + Caffeine -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
@@ -117,7 +106,6 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
-        <!-- ✅ Parquet + Hadoop -->
         <dependency>
             <groupId>org.apache.parquet</groupId>
             <artifactId>parquet-avro</artifactId>
@@ -170,14 +158,12 @@
             </exclusions>
         </dependency>
 
-        <!-- ✅ DevTools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- ✅ Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -186,71 +172,51 @@
 
     </dependencies>
 
-    <!-- ========================================================= -->
-    <!-- ⭐ BUILD SECTION START (메인 빌드 설정) ⭐ -->
-    <!-- 이 섹션은 JAR/WAR 패키징 시 필요한 모든 설정이 포함됩니다. -->
-	<build>
+    <build>
         
-        <!-- 🐍 Python 리소스 포함 섹션 시작 🐍 -->
-        <!-- 목적: 로컬 개발 폴더의 .py 파일을 WAR 파일 내부 Classpath에 복사하기 위함 -->
         <resources>
-            <!-- 1. 기본 Java/Spring 리소스 (src/main/resources) 설정 유지 -->
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
             
-            <!-- 2. 외부 Python 스크립트를 WAR에 포함시키는 설정 (고객님 개발 폴더 유지) -->
             <resource>
-                <!-- 🎯 고객님의 Python 개발 원본 폴더 경로 (로컬 개발 환경 유지) -->
                 <directory>D:/project/dev_boot_project/workspace/MyBaseLinkV2/python/stock/py</directory> 
                 
-                <!-- WAR 파일 내부의 최종 복사 위치: /WEB-INF/classes/python_scripts/ 
-                     Java 코드(`ClassPathResource`)가 이 내부 경로를 참조하여 운영 환경의 외부 경로로 파일을 추출합니다. -->
                 <targetPath>python_scripts</targetPath> 
                 
                 <includes>
-                    <include>**/*.py</include> <!-- 해당 폴더의 모든 .py 파일만 포함하도록 지정 -->
-                </includes>
+                    <include>**/*.py</include> </includes>
                 <filtering>false</filtering>
             </resource>
         </resources>
-        <!-- 🐍 Python 리소스 포함 섹션 끝 🐍 -->
-
         <plugins>
-            <!-- Spring Boot 실행/패키징 기본 플러그인 (WAR/JAR 생성의 핵심) -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
-    <!-- ⭐ BUILD SECTION END ⭐ -->
-    <!-- ========================================================= -->
-
-
-    <!-- ✅ 운영 전용 prod 프로필: 오직 ROOT.war만 생성 -->
     <profiles>
         <profile>
             <id>prod</id>
             <build>
                 <plugins>
 
-                    <!-- ✅ WAR 생성 플러그인 (prod 프로필 전용) -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
                         <version>3.4.0</version>
+                        <configuration>
+                            <warName>ROOT</warName>
+                            <failOnMissingWebXml>false</failOnMissingWebXml>
+                        </configuration>
                         <executions>
                             <execution>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>war</goal>
                                 </goals>
-                                <configuration>
-                                    <warName>ROOT</warName>
-                                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

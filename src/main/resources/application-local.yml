@@ -64,7 +64,7 @@ python:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/mybaselink_db
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mybaselink_db?currentSchema=mybaselink} 
     # 환경 변수 DB_USERNAME을 우선 사용하고, 없으면 로컬 기본값 사용
     username: ${DB_USERNAME:mybaseuser}
     # 환경 변수 DB_PASSWORD를 우선 사용하고, 없으면 로컬 기본값 사용

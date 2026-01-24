@@ -7,15 +7,26 @@
         <a href="/pages/main/base"><i class="fas fa-home"></i><span>홈</span></a>
       </li>
       
+     <!-- 관리 -->
+	 <li class="has-submenu">
+      <a href="#" class="submenu-toggle">
+        <i class="fas fa-tasks"></i><span>종목</span>
+        <i class="fas fa-chevron-right toggle-icon"></i>
+      </a>
+      <ul class="submenu">
+        <li><a href="/pages/stock/stockList">K-Stock List</a></li>
+      </ul>
+    </li>
+      
+      
       <!-- Stock -->
       <li class="has-submenu">
         <a href="#" class="submenu-toggle">
-          <i class="fas fa-chart-line"></i><span>K-Stock</span>
+          <i class="fas fa-chart-line"></i><span>K-Stock Ai</span>
           <i class="fas fa-chevron-right toggle-icon"></i>
         </a>
         <ul class="submenu">
-          <li><a href="/pages/stock/stockList">K-Stock List</a></li>
-          <li><a href="/pages/stock/stockBatchAthenaAi">Athena AI</a></li>
+          <li><a href="/pages/stock/stockBatchAthenaAi">Athena Ai</a></li>
         </ul>
       </li>
       
@@ -28,7 +39,7 @@
         <ul class="submenu">
           <li><a href="/pages/news/newsDartTypeAList">DART 공시</a></li>
           <li><a href="/pages/news/newsNaverTypeAList">네이버 API</a></li>
-          <li><a href="/pages/news/newsRSSTypeAList">뉴스 RSS</a></li>
+          <li><a href="/pages/news/newsRssTypeAList">뉴스 RSS</a></li>
         </ul>
       </li>
       
@@ -40,6 +51,7 @@
 		  </a>
 		  <ul class="submenu">
 		    <li><a href="/pages/stock/stockBatchGProd">K-Stock Global Batch</a></li>
+		    <li><a href="/pages/sy/syfile/syFileStockPythonProd">Prod 파이썬 업로드</a></li>
 		  </ul>
 		</li>
 
@@ -53,20 +65,7 @@
         <li><a href="/pages/p01/p01a05/p01a05List">기본테이블</a></li>
       </ul>
     </li>
-
-      <!-- 관리 -->
-	<li class="has-submenu">
-      <a href="#" class="submenu-toggle">
-        <i class="fas fa-tasks"></i><span>관리</span>
-        <i class="fas fa-chevron-right toggle-icon"></i>
-      </a>
-      <ul class="submenu">
-        <li><a href="/pages/sy/syfile/syFileStockPythonProd">Prod 파이썬 업로드</a></li>
-        <li><a href="#">메뉴없음1</a></li>
-        <li><a href="#">메뉴없음2</a></li>
-      </ul>
-    </li>
-
+ 
       <!-- 설정 -->
       <li class="has-submenu">
         <a href="#" class="submenu-toggle">
@@ -74,8 +73,11 @@
           <i class="fas fa-chevron-right toggle-icon"></i>
         </a>
         <ul class="submenu">
-          <li><a href="/pages/sy/syusr/syusr01List">사용자 관리</a></li>
-          <li><a href="#">권한 설정</a></li>
+        	<li><a href="#">프로그램 관리</a></li>
+        	<li><a href="#">메뉴 관리</a></li>
+        	<li><a href="#">그룹 관리</a></li>
+        	<li><a href="#">권한 관리</a></li>
+            <li><a href="/pages/sy/syusr/syusr01List">사용자 관리</a></li>
         </ul>
       </li>
     </ul>
