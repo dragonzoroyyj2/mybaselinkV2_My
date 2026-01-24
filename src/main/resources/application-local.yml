@@ -50,6 +50,13 @@ python:
     stock_listing_prod:
       path: "${python.root.path}/python/data/stock_list/stock_listing_prod.json"
 
+  news:
+    news_search_dart_list:
+      path: "${python.root.path}/python/stock/py/news_search_dart_list.py"
+
+    news_search_naver_list:
+      path: "${python.root.path}/python/stock/py/news_search_naver_list.py"
+
 ###########################################################################
 # ? DataSource (PostgreSQL 접속)
 # ?? 일관성 확보: 운영 환경과 동일하게 환경 변수 참조 문법 적용
@@ -73,7 +80,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:

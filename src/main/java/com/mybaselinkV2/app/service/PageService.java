@@ -24,10 +24,18 @@ public class PageService {
     	
     		put("pages/p01/p01a05/p01a05List", new String[]{"🖥️ 기본테이블", 			"리포트 관리 / 기본테이블"});    
     		
+    		
+    		
     		put("pages/stock/stockBatchGProd", new String[]{"📋 K-Stock", 				"Batch / Global Batch"});
+    		
+    		
     		
     		put("pages/stock/stockList", new String[]{"📊 주식 종목 리스트", 			"K-Stock / K-Stock List"});
     		put("pages/stock/stockBatchAthenaAi", new String[]{"📊 Athena AI", 			"K-Stock / Athena AI"});
+    		
+    		
+    		put("pages/news/newsDartTypeAList", new String[]{"📋 공시", 				"Stock 뉴스/공시 / 공시"});
+    		put("pages/news/newsNaverTypeAList", new String[]{"📋 네이버", 				"Stock 뉴스/공시 / 네이버"});
         
     		put("pages/sy/syusr/syusr01List", new String[]{"⚙️ 설정", 					"사용자 관리 / 사용자 리스트"});
     		

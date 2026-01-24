@@ -109,8 +109,7 @@ public class AuthController {
 
         long remaining = jwtTokenProvider.getRemainingMillis(oldToken);
         if (remaining > 5 * 60 * 1000L) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", "세션이 충분히 남아있음"));
+          //  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "세션이 충분히 남아있음"));
         }
 
         String username = jwtTokenProvider.getUsername(oldToken);

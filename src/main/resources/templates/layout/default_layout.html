@@ -1,4 +1,3 @@
-<!--  default_layout.html -->
 <!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
@@ -6,22 +5,16 @@
 
 <head>
   <meta charset="UTF-8">
-  <!-- ✅ 뷰포트 설정: 축소 방지 및 확대(300%까지) 허용 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=3.0">
   <title th:text="${title} ?: 'MyBaseLink'">MyBaseLink</title>
 
-  <!-- 🚨🚨🚨 이전의 인라인 스타일 블록은 commonLayout.css로 이동되었습니다. 🚨🚨🚨 -->
-
-  <!-- ✅ CSRF Token -->
   <th:block th:if="${_csrf} != null">
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
   </th:block>
 
-  <!-- ✅ 폰트 및 아이콘 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- ✅ 파비콘 (모든 플랫폼 대응) -->
   <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
   <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
   <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
@@ -40,38 +33,34 @@
   <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
   <meta name="theme-color" content="#ffffff">
 
-  <!-- ✅ 공통 CSS 로드 순서 (v12.6 기준) -->
-  <link rel="stylesheet" href="/css/common/commonLayout.css">      <!-- ① 전체 레이아웃 / 버튼 / 모달 -->
-  <link rel="stylesheet" href="/css/common/commonTable.css">       <!-- ② 테이블 / 로딩오버레이 / 체크박스 -->
-  <link rel="stylesheet" href="/css/common/commonSearch.css">      <!-- ③ 검색창 / 필터 전용 -->
-  <link rel="stylesheet" href="/css/common/commonPagination.css">  <!-- ④ 페이징 버튼 전용 -->
-  <link rel="stylesheet" href="/css/common/commonModal.css">	   <!--  모달 전용 -->
-  <link rel="stylesheet" href="/css/common/commonToast.css">       <!-- 메세지 전용 -->
-  <link rel="stylesheet" href="/css/common/commonTop.css">        <!-- ⑤ 상단 바/프로필 전용 (새로 추가) -->
-  <link rel="stylesheet" href="/css/common/commonLeft.css">        <!-- 좌측 메뉴(사이드바) 전용 -->
-
+  <link rel="stylesheet" href="/css/common/commonLayout.css">
+  <link rel="stylesheet" href="/css/common/commonTable.css">
+  <link rel="stylesheet" href="/css/common/commonSearch.css">
+  <link rel="stylesheet" href="/css/common/commonPagination.css">
+  <link rel="stylesheet" href="/css/common/commonModal.css">
+  <link rel="stylesheet" href="/css/common/commonToast.css">
+  <link rel="stylesheet" href="/css/common/commonTop.css">
+  <link rel="stylesheet" href="/css/common/commonLeft.css">
 </head>
 
-<body>
+<body style="position: relative; margin: 0; padding: 0;">
 
-  <!-- ✅ 상단 -->
-  <th:block th:replace="~{fragments/top :: topFragment}"></th:block>
+  <div style="position: sticky; top: 0; z-index: 5000;">
+    <th:block th:replace="~{fragments/top :: topFragment}"></th:block>
+  </div>
 
-  <!-- ✅ 오버레이 -->
-  <div id="sidebarOverlay"></div>
+  <div id="sidebarOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.4); z-index: 2999; display: none; pointer-events: auto;"></div>
 
-  <!-- ✅ 왼쪽 메뉴 -->
-  <div th:replace="~{fragments/left :: leftFragment}"></div>
+  <div id="layoutWrapper" style="position: relative; width: 100%; display: flex; align-items: stretch; min-height: calc(100vh - 50px);">
+    <div th:replace="~{fragments/left :: leftFragment}"></div>
 
-  <!-- ✅ 메인 콘텐츠 -->
-  <main>
-    <div class="content" layout:fragment="content"></div>
-  </main>
+    <main id="mainContentArea" style="flex: 1; min-width: 0;">
+      <div class="content" layout:fragment="content"></div>
+    </main>
+  </div>
 
-  <!-- ✅ 하단 -->
   <footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
 
-  <!-- ✅ 전역 사이드바 토글 -->
   <script>
   /*
   | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적               		|
@@ -82,87 +71,62 @@
 	| **태블릿** | `max-width: 1024px` | iPad, Galaxy Tab 세로     | 리스트/폼 폭 조절           		|
 	| **데스크탑 기본** | `> 1024px`      | 노트북/PC             	 | 기본 레이아웃 유지           		|
   */
-
   document.addEventListener("DOMContentLoaded", () => {
-    // 🚨 주의: DOMContentLoaded 시점에서 left.html의 요소가 존재해야 합니다.
     const sidebar = document.querySelector(".sidebar");
     const overlay = document.getElementById("sidebarOverlay");
-    const allSubmenuContainers = document.querySelectorAll(".sidebar li.has-submenu");
-    const SIDEBAR_STATE_KEY = "sidebar_open_state";
 
-    // ✅ 모든 서브메뉴 닫기 함수 (left.html과 충돌 방지 위해 여기에 통합)
-    function closeAllSubmenus(exceptActive = false) {
-        allSubmenuContainers.forEach(container => {
-            if (exceptActive && container.querySelector("a.active")) return;
-            container.classList.remove("open");
-        });
+    // ✅ 공통 사이드바 닫기 함수
+    function forceCloseSidebar() {
+      if (sidebar && sidebar.classList.contains("open")) {
+        sidebar.classList.remove("open");
+        if (overlay) overlay.style.display = "none";
+      }
     }
 
-    // ✅ active 메뉴 상위 열기 함수
-    function openParentMenusOfActive() {
-        const activeLink = sidebar?.querySelector("a.active");
-        if (!activeLink) return;
-        let parent = activeLink.parentElement;
-        while (parent && !parent.classList.contains("sidebar")) {
-            if (parent.classList.contains("has-submenu")) {
-                parent.classList.add("open");
-            }
-            parent = parent.parentElement;
-        }
-    }
-
-    // ✅ 사이드바 전체 토글 (top.html에서 호출됨)
+    // ✅ 전역 토글 함수
     window.toggleSidebar = () => {
-      if (!sidebar || !overlay) return;
+      if (!sidebar) return;
       const isOpen = sidebar.classList.contains("open");
-      
-      sidebar.classList.toggle("open", !isOpen);
-      overlay.classList.toggle("active", !isOpen);
-      overlay.style.display = !isOpen ? "block" : "none";
-
       if (isOpen) {
-          // 사이드바 닫을 때 서브메뉴도 모두 닫기 (단, active 유지)
-          closeAllSubmenus(true);
+        forceCloseSidebar();
       } else {
-          // ⚡ 열릴 때는 0.25초 후 active 메뉴 복원 (애니메이션 딜레이 대응)
-          setTimeout(() => {
-              openParentMenusOfActive();
-          }, 250);
+        sidebar.classList.add("open");
+        if (overlay) overlay.style.display = "block";
       }
     };
 
-    // 🚨 오버레이 클릭 시
-    overlay?.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("active");
-      overlay.style.display = "none";
-      closeAllSubmenus(true); // 서브메뉴 닫기 호출 (active 유지)
-    });
+    // 🚨 [필살기] 스크롤바 유무와 상관없이 '동작' 감지 시 닫기
+    const handleCloseAction = (e) => {
+      if (!sidebar || !sidebar.classList.contains("open")) return;
+      
+      // 🚩 e.target.closest 에러 방지용 체크
+      if (!e.target || typeof e.target.closest !== 'function') return;
 
-    // 🚨 핵심: 문서 전체 클릭 리스너 (외부 클릭 시 서브메뉴 닫기)
-    document.addEventListener("click", (e) => {
-        const isClickInsideMenu = sidebar.contains(e.target);
-        const isMenuToggleButton = e.target.closest("#menuToggle");
+      // 1. 사이드바 내부에서 발생하는 동작은 무시
+      if (e.target.closest('.sidebar')) return;
+      // 2. 메뉴 버튼 클릭은 toggleSidebar가 처리하도록 무시
+      if (e.target.closest('#menuToggle')) return;
 
-        if (!isClickInsideMenu && !isMenuToggleButton) {
-            // 서브메뉴만 닫기
-            closeAllSubmenus(true); 
-            
-            // (선택 사항) 메뉴 외부 클릭 시 사이드바 전체도 닫기
-            if (sidebar.classList.contains("open")) {
-                window.toggleSidebar(); 
-            }
-        }
-    });
+      // 3. 그 외 모든 휠 동작, 터치 이동, 스크롤 발생 시 사이드바 닫기
+      forceCloseSidebar();
+    };
+
+    // [마우스 휠] 스크롤바 없어도 휠 굴리면 감지
+    window.addEventListener("wheel", handleCloseAction, {passive: true, capture: true});
     
-    // ✅ 최초 로드시 active 메뉴 자동 복원
-    openParentMenusOfActive();
+    // [터치 이동] 모바일에서 스와이프 시 감지
+    window.addEventListener("touchmove", handleCloseAction, {passive: true, capture: true});
+    
+    // [기존 클릭] 빈 공간 클릭 시 닫기
+    window.addEventListener("mousedown", handleCloseAction, true);
+    
+    // [기존 스크롤] 혹시 모를 실제 스크롤 발생 시 대응
+    window.addEventListener("scroll", handleCloseAction, true);
 
-    overlay.style.display = "none";
+    overlay?.addEventListener("click", forceCloseSidebar);
   });
   </script>
 
-  <!-- ✅ 공용 스크립트 -->
   <script src="/js/common/common_loadseq_1_Loading_op.js"></script>
   <script src="/js/common/common_loadseq_2_Notify_op.js"></script>
   <script src="/js/common/common_loadseq_3_Pagination_op.js"></script>
@@ -170,33 +134,15 @@
   <script src="/js/common/common_loadseq_5_UnifiedList_op.js"></script>
   <script src="/js/common/common_loadseq_6_Left_op.js"></script>
   
-  
-
-  <!-- ✅ 페이지별 스크립트 주입 -->
   <th:block layout:fragment="pageScript"></th:block>
 
-  <!-- ✅ 자동 헤더 높이 반영 스크립트 -->
   <script>
-    // 🚩 모바일 뷰포트(vh) 안정화 로직 추가 (URL 창 변화로 인한 레이아웃 '울컥' 방지)
     function setVhUnit() {
-      // 화면 높이를 100으로 나눈 값을 계산
       const vh = window.innerHeight * 0.01;
-      // CSS 변수 --vh에 설정: 이제 CSS에서 height: calc(var(--vh) * 100) 처럼 고정 높이를 사용할 수 있습니다.
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     }
-
-    // 🚩🚩🚩 최종 FIX 재적용: DOMContentLoaded 전에 즉시 setVhUnit()을 호출하여 최우선 적용 🚩🚩🚩
     setVhUnit(); 
-    
-    // resize 이벤트와 orientationchange 이벤트 시에도 vh를 재계산합니다. (즉시 적용)
     window.addEventListener("resize", setVhUnit); 
-    window.addEventListener("orientationchange", setVhUnit); // 방향 전환 시에도 높이 재계산
-
-    document.addEventListener("DOMContentLoaded", () => {
-      // DOMContentLoaded 내부에는 setVhUnit() 호출 불필요.
-      // 필요한 다른 DOM 조작 로직만 여기에 남깁니다.
-    });
   </script>
-
 </body>
 </html>

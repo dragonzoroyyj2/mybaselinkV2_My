@@ -6,30 +6,7 @@
       <li>
         <a href="/pages/main/base"><i class="fas fa-home"></i><span>홈</span></a>
       </li>
-
-      <!-- 리포트 관리 -->
-      <li class="has-submenu">
-        <a href="#" class="submenu-toggle">
-          <i class="fas fa-file-alt"></i><span>리포트 관리</span>
-          <i class="fas fa-chevron-right toggle-icon"></i>
-        </a>
-        <ul class="submenu">
-          <li><a href="/pages/p01/p01a05/p01a05List">기본테이블</a></li>
-        </ul>
-      </li>
-
-      <!-- Job -->
-      <li class="has-submenu">
-        <a href="#" class="submenu-toggle">
-          <i class="fas fa-chart-line"></i><span>Batch</span>
-          <i class="fas fa-chevron-right toggle-icon"></i>
-        </a>
-        <ul class="submenu">
-          <li><a href="/pages/stock/stockBatchGProd">K-Stock Global Batch</a></li>
-          <li><a href="/pages/stock/globalStockDashboard">globalStockDashboard</a></li>
-        </ul>
-      </li>
-
+      
       <!-- Stock -->
       <li class="has-submenu">
         <a href="#" class="submenu-toggle">
@@ -41,20 +18,54 @@
           <li><a href="/pages/stock/stockBatchAthenaAi">Athena AI</a></li>
         </ul>
       </li>
-
-
-      <!-- 관리 -->
+      
+      <!-- Stock 뉴스/공시 -->
       <li class="has-submenu">
         <a href="#" class="submenu-toggle">
-          <i class="fas fa-server"></i><span>관리</span>
-          <i class="fas fa-server-right toggle-icon"></i>
+          <i class="fas fa-file-alt"></i><span>Stock 뉴스/공시</span>
+          <i class="fas fa-chevron-right toggle-icon"></i>
         </a>
         <ul class="submenu">
-          <li><a href="/pages/sy/syfile/syFileStockPythonProd">Prod 파이썬 업로드</a></li>
-          <li><a href="#">메뉴없음1</a></li>
-          <li><a href="#">메뉴없음2</a></li>
+          <li><a href="/pages/news/newsDartTypeAList">DART 공시</a></li>
+          <li><a href="/pages/news/newsNaverTypeAList">네이버 API</a></li>
+          <li><a href="/pages/news/newsRSSTypeAList">뉴스 RSS</a></li>
         </ul>
       </li>
+      
+      <!-- Job -->
+		<li class="has-submenu">
+		  <a href="#" class="submenu-toggle">
+		    <i class="fas fa-history"></i><span>Batch</span>
+		    <i class="fas fa-chevron-right toggle-icon"></i>
+		  </a>
+		  <ul class="submenu">
+		    <li><a href="/pages/stock/stockBatchGProd">K-Stock Global Batch</a></li>
+		  </ul>
+		</li>
+
+      <!-- 리포트 관리 -->
+	<li class="has-submenu">
+      <a href="#" class="submenu-toggle">
+        <i class="fas fa-chart-pie"></i><span>리포트 관리</span>
+        <i class="fas fa-chevron-right toggle-icon"></i>
+      </a>
+      <ul class="submenu">
+        <li><a href="/pages/p01/p01a05/p01a05List">기본테이블</a></li>
+      </ul>
+    </li>
+
+      <!-- 관리 -->
+	<li class="has-submenu">
+      <a href="#" class="submenu-toggle">
+        <i class="fas fa-tasks"></i><span>관리</span>
+        <i class="fas fa-chevron-right toggle-icon"></i>
+      </a>
+      <ul class="submenu">
+        <li><a href="/pages/sy/syfile/syFileStockPythonProd">Prod 파이썬 업로드</a></li>
+        <li><a href="#">메뉴없음1</a></li>
+        <li><a href="#">메뉴없음2</a></li>
+      </ul>
+    </li>
 
       <!-- 설정 -->
       <li class="has-submenu">
@@ -67,81 +78,68 @@
           <li><a href="#">권한 설정</a></li>
         </ul>
       </li>
-      
-      
     </ul>
   </nav>
 
   <script>
   /* ===============================================================
-     ✅ Sidebar Menu Control (v1.2 안정판)
-     ---------------------------------------------------------------
-     - 하위 메뉴 드롭아이콘 표시
-     - 클릭 시 열기/닫기 토글
-     - 현재 페이지(active) 자동 감지 후 부모 메뉴 자동 열기
-     - 중복 초기화 방지 (fragment 로드 시 안전)
+  ✅ Sidebar Menu Control (v1.5 - 직계 submenu 정확 제어)
+  ---------------------------------------------------------------
+  ✔ 오픈 / 닫기 정상
+  ✔ CSS selector와 100% 일치
+  ✔ fragment 중복 로드 방지
   =============================================================== */
   (function initLeftMenu() {
-    const sidebar = document.querySelector(".sidebar");
-    if (!sidebar || sidebar._menuInit) return; // ✅ 중복방지
-    sidebar._menuInit = true;
+	  const sidebar = document.querySelector(".sidebar");
+	  if (!sidebar) return;
 
-    const currentUrl = location.pathname;
+	  // 1. 초기 셋팅: URL 기준 active 처리 (최초 1회)
+	  const currentUrl = window.location.pathname;
+	  const allLinks = sidebar.querySelectorAll("a");
+	  
+	  allLinks.forEach(link => {
+	    const href = link.getAttribute("href");
+	    if (href && href !== "#" && currentUrl === href) {
+	      link.classList.add("active");
+	      let parent = link.closest(".has-submenu");
+	      while (parent) {
+	        parent.classList.add("open");
+	        const sub = parent.querySelector(".submenu");
+	        if(sub) sub.style.display = "block";
+	        parent = parent.parentElement.closest(".has-submenu");
+	      }
+	    }
+	  });
 
-    // ✅ 모든 서브메뉴 닫기 (기본 상태)
-    sidebar.querySelectorAll(".submenu").forEach(ul => ul.style.display = "none");
+	  // 2. ✅ 클릭 이벤트 (충돌 방지를 위해 모든 기존 이벤트 무시 처리)
+	  sidebar.querySelectorAll(".submenu-toggle").forEach(toggle => {
+	    // 이전 이벤트를 싹 지우기 위해 복제 후 교체하는 초강수
+	    const newToggle = toggle.cloneNode(true);
+	    toggle.parentNode.replaceChild(newToggle, toggle);
 
-    // ✅ 서브메뉴 토글 기능
-    sidebar.querySelectorAll(".submenu-toggle").forEach(toggle => {
-      toggle.addEventListener("click", (e) => {
-        e.preventDefault();
-        const li = toggle.closest(".has-submenu");
-        const submenu = li.querySelector(".submenu");
-        const icon = toggle.querySelector(".toggle-icon");
+	    newToggle.onclick = function(e) {
+	      e.preventDefault();
+	      e.stopPropagation();
 
-        const isOpen = li.classList.contains("open");
-        sidebar.querySelectorAll(".has-submenu").forEach(item => {
-          item.classList.remove("open");
-          const sub = item.querySelector(".submenu");
-          const ico = item.querySelector(".toggle-icon");
-          if (sub) sub.style.display = "none";
-          if (ico) {
-            ico.classList.remove("fa-chevron-down");
-            ico.classList.add("fa-chevron-right");
-          }
-        });
+	      const parentLi = this.closest(".has-submenu");
+	      const submenu = parentLi.querySelector(".submenu");
 
-        if (!isOpen) {
-          li.classList.add("open");
-          submenu.style.display = "block";
-          if (icon) {
-            icon.classList.remove("fa-chevron-right");
-            icon.classList.add("fa-chevron-down");
-          }
-        }
-      });
-    });
+	      if (!submenu) return;
 
-    // ✅ 현재 URL 기준으로 active 메뉴 자동 설정
-    sidebar.querySelectorAll(".submenu a, .sidebar > ul > li > a").forEach(link => {
-      const href = link.getAttribute("href");
-      if (href && currentUrl.startsWith(href)) {
-        link.classList.add("active");
+	      // ✅ [핵심] 현재 눈에 보이는지 여부로만 판단한다 (클래스에 의존 X)
+	      const isVisible = submenu.style.display === "block";
 
-        // 부모 메뉴 열기
-        const parent = link.closest(".has-submenu");
-        if (parent) {
-          parent.classList.add("open");
-          const submenu = parent.querySelector(".submenu");
-          const icon = parent.querySelector(".toggle-icon");
-          if (submenu) submenu.style.display = "block";
-          if (icon) {
-            icon.classList.remove("fa-chevron-right");
-            icon.classList.add("fa-chevron-down");
-          }
-        }
-      }
-    });
-  })();
+	      if (isVisible) {
+	        // 현재 열려있으면 -> 무조건 닫는다
+	        parentLi.classList.remove("open");
+	        submenu.style.setProperty("display", "none", "important");
+	      } else {
+	        // 현재 닫혀있으면 -> 무조건 연다
+	        parentLi.classList.add("open");
+	        submenu.style.setProperty("display", "block", "important");
+	      }
+	    };
+	  });
+	})();
   </script>
 </div>

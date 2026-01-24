@@ -1,11 +1,12 @@
 /* ===============================================================
-   ✅ commonTop.css (Top Bar & Profile Layer Styles) (v1.1 FIX)
+   ✅ commonTop.css (Top Bar & Profile Layer Styles) (v1.2 FIX)
    ---------------------------------------------------------------
    - FIX: 다크모드 프로필 레이어 인풋 필드 색상 불일치 해결
    - FIX: Sticky 헤더 시각적 분리감 강화
+   - FIX: 프로필 레이어 크기 최적화 (모바일/웹 부피 감소) 🚩 NEW
 ================================================================ */
 
-/* --- Top Bar Local Variables --- */
+/* --- Top Bar Local Variables (원본 유지) --- */
 :root {
   --top-primary-bg: #f3f4f6;
   --top-border-color: #d1d5db;
@@ -22,12 +23,11 @@
   --top-glass-border: rgba(255,255,255,0.4);
   --top-glass-shadow: rgba(31, 41, 55, 0.2);
   --top-transition-speed: 0.25s;
-  /* 🚩 NEW: 프로필 레이어 인풋 색상 변수 추가 */
   --top-profile-input-bg: rgba(255,255,255,0.9);
   --top-profile-input-text: #111827;
 }
 
-/* 🌙 다크모드 변수 오버라이드 */
+/* 🌙 다크모드 변수 오버라이드 (원본 유지) */
 body.dark-mode {
   --top-primary-bg: #1f2937;
   --top-border-color: #374151;
@@ -41,13 +41,12 @@ body.dark-mode {
   --top-alert-info-text: #93c5fd;
   --top-alert-warning-text: #fbbf24;
   --top-alert-danger-text: #f87171;
-  /* 🚩 FIX: 다크모드 프로필 레이어 인풋 색상 조정 (배경보다 살짝 밝게) */
   --top-profile-input-bg: #111827; 
   --top-profile-input-text: #f3f4f6;
 }
 
 /* ===============================================================
-   ✅ 상단 바
+   ✅ 상단 바 (원본 유지)
 =============================================================== */
 .top-bar {
   position: sticky; 
@@ -62,8 +61,6 @@ body.dark-mode {
   box-sizing: border-box;
   padding: 0 1rem;
   transition: background var(--top-transition-speed), color var(--top-transition-speed);
-  
-  /* 🚩 NEW FIX: Sticky 헤더 시각적 분리 강화 */
   box-shadow: 0 1px 3px var(--top-shadow-color);
 }
 
@@ -122,13 +119,13 @@ body.dark-mode {
   font-size: 13px; font-weight: 600;
 }
 
-/* ✅ 프로필 레이어 */
+/* ✅ 프로필 레이어 (크기 최적화 🚩) */
 .profile-layer {
   position: absolute; 
-  top: 50px; 
-  right: 1rem;
-  width: 260px;
-  padding: 16px 18px;
+  top: 52px; 
+  right: 0.8rem;
+  width: 220px; /* 🚩 260px -> 220px 슬림화 */
+  padding: 12px 14px; /* 🚩 여백 축소 */
   border-radius: 12px;
   border: 1px solid var(--top-glass-border);
   background: var(--top-profile-bg);
@@ -140,12 +137,11 @@ body.dark-mode {
   animation: fadeIn 0.25s ease;
 }
 
-.profile-layer h3 { margin: 0 0 12px; font-size: 15px; font-weight: 700; }
-.profile-layer label { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; font-size: 13px; font-weight: 500; }
+.profile-layer h3 { margin: 0 0 10px; font-size: 14px; font-weight: 700; }
+.profile-layer label { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; font-size: 12px; font-weight: 500; }
 .profile-layer input {
-  border: 1px solid var(--top-border-color); border-radius: 6px; padding: 6px 8px;
-  font-size: 13px; 
-  /* 🚩 FIX: 인풋 색상 변수 사용 */
+  border: 1px solid var(--top-border-color); border-radius: 6px; padding: 5px 8px;
+  font-size: 12px; 
   background: var(--top-profile-input-bg); 
   color: var(--top-profile-input-text);
 }
@@ -153,25 +149,24 @@ body.dark-mode {
 /* 🌙 다크모드 토글 */
 .darkmode-toggle {
   display: flex; justify-content: space-between; align-items: center;
-  margin: 10px 0 14px 0; font-size: 13px; font-weight: 500;
+  margin: 8px 0 12px 0; font-size: 12px; font-weight: 500;
 }
-.switch { position: relative; width: 42px; height: 22px; }
+.switch { position: relative; width: 38px; height: 20px; } /* 🚩 크기 살짝 축소 */
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider {
   position: absolute; inset: 0; cursor: pointer;
   background-color: #cbd5e1; border-radius: 34px; transition: 0.3s;
 }
 .slider::before {
-  content: ""; position: absolute; height: 16px; width: 16px;
+  content: ""; position: absolute; height: 14px; width: 14px;
   left: 3px; bottom: 3px; background: #fff; border-radius: 50%;
   transition: 0.3s;
 }
-input:checked + .slider { background-color: #2563eb; }
-input:checked + .slider::before { transform: translateX(20px); }
+input:checked + .slider::before { transform: translateX(18px); }
 
-.profile-layer-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.profile-layer-btns { display: flex; justify-content: flex-end; gap: 6px; margin-top: 5px; }
 .profile-layer-btns button {
-  padding: 5px 10px; border-radius: 6px; border: none; font-size: 13px;
+  padding: 4px 10px; border-radius: 6px; border: none; font-size: 12px;
   background: #2563eb; color: #fff; cursor: pointer; transition: background 0.2s;
 }
 .profile-layer-btns button:hover { background: #1d4ed8; }
@@ -179,7 +174,7 @@ input:checked + .slider::before { transform: translateX(20px); }
 /* ✅ 알림 */
 .session-alert {
   position: fixed; 
-  top: 60px; right: 1rem;
+  top: 55px; right: 1rem;
   background: var(--top-alert-info-bg); color: var(--top-alert-info-text);
   padding: 6px 10px; border-radius: 6px; font-size: 13px;
   box-shadow: 0 2px 6px var(--top-shadow-color);
@@ -189,7 +184,12 @@ input:checked + .slider::before { transform: translateX(20px); }
 
 @keyframes fadeIn { from {opacity:0;transform:translateY(-6px);} to {opacity:1;transform:translateY(0);} }
 
+/* ✅ 모바일 대응 (🚩 최적화) */
 @media (max-width:640px){
   .right-section{right:0.5rem;gap:6px;}
-  .profile-layer{right:0.5rem;width:90%;padding:14px;}
+  .profile-layer {
+    right: 0.5rem; 
+    width: 210px; /* 🚩 90% -> 210px로 고정하여 우측 상단에 작게 표시 */
+    padding: 12px;
+  }
 }

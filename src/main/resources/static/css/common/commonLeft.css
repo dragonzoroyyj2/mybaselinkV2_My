@@ -2,8 +2,7 @@
    ✅ commonLeft.css (v1.3 - UX/계층 명확성 및 FIX)
    ---------------------------------------------------------------
    - 좌측 사이드바 / 서브메뉴 / 토글 / 다단계 5단 완전 대응
-   - FIX: 1단계 링크와 토글 링크의 스타일 미세 분리
-   - FIX: 메뉴 깊이에 따른 폰트 두께 조정
+   - FIX: 탑바(Top-bar) 하단에 밀착하며 탑바 아래 레이어에 위치
 ================================================================ */
 
 /* ---------------------------------------------------------------
@@ -42,17 +41,19 @@ body.dark-mode {
    🔹 사이드바 컨테이너
 ---------------------------------------------------------------- */
 .sidebar {
-  position: fixed;
-  top: 50px;
+  /* 🚩 탑바 아래 밀착 및 운명공동체 설정 */
+  position: absolute;
+  top: 0; /* layoutWrapper 내부 최상단(탑바 하단 지점)에 붙임 */
   left: 0;
   width: 240px;
-  height: calc(100vh - 50px);
+  height: 100%; /* 콘텐츠 높이와 동기화 */
+  min-height: calc(100vh - 50px);
   background: var(--sidebar-bg);
   border-right: 1px solid var(--sidebar-border);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
-  overflow-y: auto;
+  overflow-y: visible; /* 문서 전체 스크롤을 따름 */
   transition: transform 0.25s ease, background 0.25s ease;
-  z-index: 3500;
+  z-index: 3500; /* 탑바(5000)보다 아래에 위치 */
 }
 
 /* 메뉴 닫힘 (모바일) */
@@ -104,7 +105,7 @@ body.dark-mode .sidebar li {
   font-size: 14px;
   border-radius: 6px;
   transition: background 0.15s ease, color 0.15s ease;
-  font-weight: 500; /* 🚩 FIX: 기본 두께 조정 */
+  font-weight: 500;
 }
 
 .sidebar a i {
@@ -126,7 +127,7 @@ body.dark-mode .sidebar li {
 .sidebar a.active {
   background: var(--sidebar-active-bg);
   color: var(--sidebar-text);
-  font-weight: 700; /* 🚩 FIX: 활성 메뉴 강조 */
+  font-weight: 700;
 }
 
 /* 🌙 다크 모드 hover / active */
@@ -149,7 +150,7 @@ body.dark-mode .sidebar a.active {
   display: block;
 }
 
-/* 🚩 FIX: 서브메뉴 진입시 폰트 두께 완화 */
+/* 🚩 서브메뉴 진입시 폰트 두께 완화 */
 .submenu a {
   font-weight: 400; 
 }
@@ -190,7 +191,6 @@ body.dark-mode .sidebar a.active {
   flex-shrink: 0;
 }
 .has-submenu > a {
-  /* 🚩 FIX: 토글 아이콘 공간 확보 */
   justify-content: space-between; 
 }
 
@@ -204,12 +204,9 @@ body.dark-mode .sidebar a.active {
 @media (max-width: 768px) {
   .sidebar {
     width: 230px;
-    /* transform: translateX(-100%); (CSS 상단에 정의됨) */
-  }
-  .sidebar.open {
-    transform: translateX(0);
-  }
-  #sidebarOverlay.active {
-    display: block;
+    position: absolute;
+    top: 0;
+    height: 100%;
+    min-height: calc(var(--vh, 1vh) * 100 - 50px);
   }
 }
