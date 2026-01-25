@@ -17,7 +17,20 @@
     @media(max-width:640px){#chartCanvas,#macdCanvas{height:260px;}}
 
     .accordion-section { border-bottom: 1px solid #e5e7eb; }
-    .accordion-header { display:flex;justify-content:space-between;align-items:center;width:100%;padding:1rem 1.25rem;font-size:1.25rem;font-weight:700;cursor:pointer;transition:background-color 0.2s; }
+    
+    /* 헤더 높이 및 폰트 축소 */
+.accordion-header { 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.6rem 1rem; /* 상하 패딩을 1rem에서 0.6rem으로 축소 */
+  font-size: 1rem;      /* 폰트 크기를 1.25rem에서 1rem으로 축소 */
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s; 
+}
+    
     .accordion-header:hover { background-color:#eef2ff; }
 
     .accordion-content {
@@ -145,109 +158,178 @@ button:disabled {
 <div class="card bg-white border border-gray-200 rounded-xl p-5 mb-10 shadow-sm">
   <form id="analysisForm" class="space-y-4">
 
-    <div class="accordion-section">
-      <div class="accordion-header" onclick="toggleAccordion('analysisTypeContent', 'icon1')">
-        <span>1️⃣ 분석 유형 선택</span>
-        <i id="icon1" class="fas fa-chevron-down rotate-icon"></i>
-      </div>
-      <div id="analysisTypeContent" class="accordion-content open p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <label class="option-card-wrapper">
-          <input type="radio" name="analysisType" id="maRadio" value="long_term_down_trend" class="hidden" checked onclick="toggleMaPeriods()">
-          <div class="option-card border-2 p-4 rounded-xl">📉 MA 장기 하락 추세</div>
-        </label>
-        <label class="option-card-wrapper">
-          <input type="radio" name="analysisType" value="double_bottom" class="hidden" onclick="toggleMaPeriods()">
-          <div class="option-card border-2 p-4 rounded-xl">📈 이중바닥</div>
-        </label>
-        <label class="option-card-wrapper">
-          <input type="radio" name="analysisType" value="triple_bottom" class="hidden" onclick="toggleMaPeriods()">
-          <div class="option-card border-2 p-4 rounded-xl">📊 삼중바닥</div>
-        </label>
-        <label class="option-card-wrapper">
-          <input type="radio" name="analysisType" value="cup_and_handle" class="hidden" onclick="toggleMaPeriods()">
-          <div class="option-card border-2 p-4 rounded-xl">☕ 컵앤핸들</div>
-        </label>
-        
-     	<label class="option-card-wrapper">
-          <input type="radio" name="analysisType" value="half_cup" class="hidden" onclick="toggleMaPeriods()">
-          <div class="option-card border-2 p-4 rounded-xl">🌓 하프 앤 핸들</div>
-        </label>
-      </div>
-    </div>
+  <div class="accordion-section">
+  <div class="accordion-header" onclick="toggleAccordion('analysisTypeContent', 'icon1')">
+    <span class="flex items-center gap-2">1️⃣ 분석 유형 선택</span>
+    <i id="icon1" class="fas fa-chevron-down rotate-icon text-sm"></i>
+  </div>
+  <div id="analysisTypeContent" class="accordion-content open p-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+    
+    <label class="option-card-wrapper">
+      <input type="radio" name="analysisType" id="maRadio" value="long_term_down_trend" class="hidden" checked onclick="toggleMaPeriods()">
+      <div class="option-card border py-1.5 px-2 rounded-md text-xs sm:text-sm">📉 장기하락</div>
+    </label>
 
-    <!-- MA 옵션 -->
-	<div id="maPeriodsContainer" class="bg-indigo-50 rounded-lg p-4 mt-2">
-	  <h4 class="font-bold text-indigo-600 mb-2">MA 기간</h4>
-	  <div class="flex flex-wrap gap-4 items-center text-sm">
-	    <input type="checkbox" id="ma20" value="20" checked disabled class="mr-1">
-	    <label for="ma20" class="font-bold">20일 (필수)</label>
-	
-	    <input type="checkbox" id="ma50" name="maPeriods" value="50" checked>
-	    <label for="ma50">50일</label>
-	
-	    <input type="checkbox" id="ma200" name="maPeriods" value="200" checked>
-	    <label for="ma200">200일</label>
-	  </div>
-	</div>
+    <label class="option-card-wrapper">
+      <input type="radio" name="analysisType" value="double_bottom" class="hidden" onclick="toggleMaPeriods()">
+      <div class="option-card border py-1.5 px-2 rounded-md text-xs sm:text-sm">📈 이중바닥</div>
+    </label>
 
+    <label class="option-card-wrapper">
+      <input type="radio" name="analysisType" value="triple_bottom" class="hidden" onclick="toggleMaPeriods()">
+      <div class="option-card border py-1.5 px-2 rounded-md text-xs sm:text-sm">📊 삼중바닥</div>
+    </label>
 
-    <!-- 2️⃣ 실행 옵션 + 결과 개수 -->
-    <div class="accordion-section">
-      <div class="accordion-header" onclick="toggleAccordion('executionOptionsContent', 'icon2')">
-        <span>2️⃣ 실행 옵션</span>
-        <i id="icon2" class="fas fa-chevron-down rotate-icon"></i>
-      </div>
-      <div id="executionOptionsContent" class="accordion-content p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="p-4 bg-gray-50 border rounded-lg flex items-center gap-2">
-          <span class="text-purple-700 font-bold">🛠️ 작업자:</span>
-          <input id="workerCount" type="number" value="8" min="1" max="16" class="w-20 text-center border rounded-lg">
-        </div>
-        <div class="p-4 bg-gray-50 border rounded-lg flex items-center gap-2">
-          <span class="text-purple-700 font-bold">🔢 상위 N:</span>
-          <input id="topNCount" type="number" value="10" min="1" max="50" class="w-20 text-center border rounded-lg">
-        </div>
-      </div>
-    </div>
+    <label class="option-card-wrapper">
+      <input type="radio" name="analysisType" value="cup_and_handle" class="hidden" onclick="toggleMaPeriods()">
+      <div class="option-card border py-1.5 px-2 rounded-md text-xs sm:text-sm">☕ 컵앤핸들</div>
+    </label>
 
-  </form>
+    <label class="option-card-wrapper">
+      <input type="radio" name="analysisType" value="half_cup" class="hidden" onclick="toggleMaPeriods()">
+      <div class="option-card border py-1.5 px-2 rounded-md text-xs sm:text-sm">🌓 하프앤핸들</div>
+    </label>
 
-  <!-- 실행/취소 버튼 -->
-  <div class="flex flex-col sm:flex-row gap-4 mt-8">
-    <button id="runAnalysisBtn" onclick="runAnalysis()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl text-lg font-bold">🚀 분석 실행</button>
-    <button id="btnCancel" onclick="cancelAnalysis()" class="flex-1 bg-red-600 text-white py-3 rounded-xl text-lg font-bold" disabled>❌ 취소</button>
   </div>
 </div>
 
-<!-- 결과/로그 카드 -->
-<div class="card bg-white border rounded-xl p-5 mb-10 shadow-sm">
-  <h3 class="text-2xl font-bold mb-4">📊 분석 결과</h3>
-  	<div class="overflow-x-auto">
-		  <table class="min-w-full text-sm" id="resultTable">
-		    <thead class="bg-gray-100">
-		      <tr>
-		        <th class="p-3">순위</th>       
-		        <th class="p-3">종목코드</th>
-		        <th class="p-3">종목명</th>
-		        <th class="p-3">신호</th>
-		        <th class="p-3">MA 배열</th>
-		        <th class="p-3">크로스 여부</th>
-		        <th class="p-3">차트</th>
-		      </tr>
-		    </thead>
-		    <tbody id="resultTableBody"></tbody>
-		  </table>
-	</div>
+    <!-- MA 옵션 -->
+	<div id="maPeriodsContainer" class="bg-indigo-50/50 border border-indigo-100 rounded-lg px-3 py-1.5 mt-2 mb-4">
+  <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+    <div class="flex items-center gap-1.5">
+      <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">MA Periods</span>
+    </div>
+    
+    <div class="hidden sm:block w-px h-3 bg-indigo-200"></div>
+
+    <div class="flex items-center gap-4 text-sm">
+      <label class="flex items-center cursor-not-allowed opacity-70">
+        <input type="checkbox" id="ma20" value="20" checked disabled class="w-3.5 h-3.5 rounded border-gray-300 text-indigo-600 mr-1.5">
+        <span class="text-xs font-bold text-gray-700">20일 (필수)</span>
+      </label>
   
+      <label class="flex items-center cursor-pointer group">
+        <input type="checkbox" id="ma50" name="maPeriods" value="50" checked class="w-3.5 h-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-1.5">
+        <span class="text-xs text-gray-600 group-hover:text-indigo-600 transition-colors font-medium">50일</span>
+      </label>
   
-  <div id="noResultBox" class="hidden p-6 text-center text-gray-500">결과 없음</div>
+      <label class="flex items-center cursor-pointer group">
+        <input type="checkbox" id="ma200" name="maPeriods" value="200" checked class="w-3.5 h-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-1.5">
+        <span class="text-xs text-gray-600 group-hover:text-indigo-600 transition-colors font-medium">200일</span>
+      </label>
+    </div>
+  </div>
 </div>
 
-<div class="card bg-white border rounded-xl p-5 mb-10 shadow-sm">
-  <h3 class="text-2xl font-bold mb-4 flex items-center">
-    🪵 실시간 로그
-    <button id="copyLogBtn" class="ml-3 text-sm bg-indigo-600 text-white px-3 py-1 rounded-md">복사</button>
+
+    <!-- 2️⃣ 실행 옵션 + 결과 개수 -->
+<div class="accordion-section">
+  <div class="accordion-header" onclick="toggleAccordion('executionOptionsContent', 'icon2')">
+    <span class="flex items-center gap-2">2️⃣ 실행 옵션 및 필터</span>
+    <i id="icon2" class="fas fa-chevron-down rotate-icon text-sm"></i>
+  </div>
+  
+  <div id="executionOptionsContent" class="accordion-content open p-2">
+    <div class="grid grid-cols-3 gap-1.5">
+      
+      <div class="flex items-center justify-between px-2 h-8 bg-gray-50 border border-gray-200 rounded-md">
+        <div class="flex items-center gap-1 min-w-0">
+          <i class="fas fa-microchip text-gray-400 text-[9px]"></i>
+          <span class="text-[10px] font-bold text-gray-600 truncate">작업자</span>
+        </div>
+        <input id="workerCount" type="number" value="8" min="1" max="16" 
+               style="font-size: 10px !important;"
+               class="w-11 text-center bg-white border border-gray-200 rounded outline-none font-black text-indigo-600 h-6 focus:border-indigo-400">
+      </div>
+
+      <div class="flex items-center justify-between px-2 h-8 bg-gray-50 border border-gray-200 rounded-md">
+        <div class="flex items-center gap-1 min-w-0">
+          <i class="fas fa-list-ol text-gray-400 text-[9px]"></i>
+          <span class="text-[10px] font-bold text-gray-600 truncate">상위 N</span>
+        </div>
+        <input id="topNCount" type="number" value="20" min="1" max="50" 
+               style="font-size: 10px !important;"
+               class="w-11 text-center bg-white border border-gray-200 rounded outline-none font-black text-indigo-600 h-6 focus:border-indigo-400">
+      </div>
+
+      <div class="flex items-center justify-between px-2 h-8 bg-purple-50 border border-purple-100 rounded-md">
+        <div class="flex items-center gap-1 min-w-0">
+          <i class="fas fa-bolt text-purple-500 text-[9px]"></i>
+          <span class="text-[10px] font-bold text-purple-700 truncate">강제분석</span>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" id="forceAnalysis" class="sr-only peer">
+          <div class="w-7 h-3.5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-3.5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-purple-600"></div>
+        </label>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+	
+  </form>
+
+  <!-- 실행/취소 버튼 -->
+	<div class="flex gap-1.5 mt-3">
+  <button id="runAnalysisBtn" onclick="runAnalysis()" 
+          class="flex-1 flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white h-8 rounded-md transition-all shadow-sm active:scale-[0.98]">
+    <i class="fas fa-play text-[9px]"></i>
+    <span class="text-[11px] font-bold">분석 실행</span>
+  </button>
+  
+  <button id="btnCancel" onclick="cancelAnalysis()" 
+          class="flex-1 flex items-center justify-center gap-1.5 bg-rose-500 hover:bg-rose-600 disabled:bg-gray-100 disabled:text-gray-400 text-white h-8 rounded-md transition-all shadow-sm active:scale-[0.98]" 
+          disabled>
+    <i class="fas fa-stop text-[9px]"></i>
+    <span class="text-[11px] font-bold">분석 취소</span>
+  </button>
+</div>
+  
+</div>
+
+<!-- 결과/로그 카드 -->
+<div class="card bg-white border rounded-md p-3 mb-10 shadow-sm">
+  <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-gray-700">
+    <span class="text-indigo-500">📊</span> 분석 결과
   </h3>
-  <div id="logBox" class="h-64 bg-black text-green-300 p-3 overflow-y-auto font-mono text-xs rounded-md"><p>로그 대기중...</p></div>
+
+  <div class="overflow-x-auto border border-gray-100 rounded-md">
+    <table class="min-w-full table-fixed md:table-auto" id="resultTable">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-2 py-1.5 text-[11px] font-black text-gray-500 uppercase border-r border-gray-100 last:border-r-0">순위</th>       
+          <th class="px-2 py-1.5 text-[11px] font-black text-gray-500 uppercase border-r border-gray-100 last:border-r-0">종목코드</th>
+          <th class="px-2 py-1.5 text-[11px] font-black text-gray-500 uppercase border-r border-gray-100 last:border-r-0">종목명</th>
+          <th class="px-2 py-1.5 text-[11px] font-black text-gray-500 uppercase border-r border-gray-100 last:border-r-0">신호</th>
+          <th class="px-2 py-1.5 text-[11px] font-black text-gray-500 uppercase border-r border-gray-100 last:border-r-0">MA 배열</th>
+          <th class="px-2 py-1.5 text-[11px] font-black text-gray-500 uppercase border-r border-gray-100 last:border-r-0">크로스</th>
+          <th class="px-2 py-1.5 text-[11px] font-black text-gray-500 uppercase">차트</th>
+        </tr>
+      </thead>
+      <tbody id="resultTableBody" class="divide-y divide-gray-100 bg-white text-center">
+        </tbody>
+    </table>
+  </div>
+  
+  <div id="noResultBox" class="hidden py-10 text-center border-t border-gray-50">
+    <div class="flex flex-col items-center gap-2">
+      <i class="fas fa-search text-gray-300 text-xl"></i>
+      <span class="text-[11px] font-bold text-gray-400">분석 결과가 없습니다.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card bg-white border rounded-md p-3 mb-10 shadow-sm">
+  <h3 class="text-sm font-bold mb-3 flex items-center justify-between text-gray-700">
+    <div class="flex items-center gap-2">
+      <span class="text-indigo-500">📜</span> 실시간 로그
+    </div>
+    <button id="copyLogBtn" class="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-0.5 rounded transition-all">로그 복사</button>
+  </h3>
+  <div id="logBox" class="h-48 bg-gray-900 text-emerald-400 p-2 overflow-y-auto font-mono rounded-md border border-gray-800 shadow-inner" style="font-size: 10px !important;">
+    <p class="text-gray-500 opacity-50">[SYSTEM] 로그 대기 중...</p>
+  </div>
 </div>
 
 <!-- 📈 차트 모달 (완전 반응형 중앙 정렬 + 스크롤 락 + 애니메이션 적용) -->
@@ -302,7 +384,7 @@ button:disabled {
 /* ----------------------------------------------------------
  *  아코디언
  * ---------------------------------------------------------- */
-window.toggleAccordion = function(contentId, iconId) {
+/* window.toggleAccordion = function(contentId, iconId) {
   const content = document.getElementById(contentId);
   const icon = document.getElementById(iconId);
   const isOpen = content.classList.contains('open');
@@ -312,6 +394,21 @@ window.toggleAccordion = function(contentId, iconId) {
     document.querySelectorAll('.rotate-icon').forEach(i => { if (i !== icon) i.classList.remove('open'); });
   }
 
+  content.classList.toggle('open', !isOpen);
+  icon.classList.toggle('open', !isOpen);
+}; */
+
+/* ----------------------------------------------------------
+ * 아코디언 (개별 독립 토글 방식으로 수정)
+ * ---------------------------------------------------------- */
+window.toggleAccordion = function(contentId, iconId) {
+  const content = document.getElementById(contentId);
+  const icon = document.getElementById(iconId);
+  
+  // 현재 상태 반전 (열려있으면 닫고, 닫혀있으면 열기)
+  const isOpen = content.classList.contains('open');
+
+  // [수정 포인트] 다른 아코디언을 닫는 forEach 로직을 삭제했습니다.
   content.classList.toggle('open', !isOpen);
   icon.classList.toggle('open', !isOpen);
 };
@@ -475,44 +572,50 @@ window.toggleAccordion = function(contentId, iconId) {
   /* ----------------------------------------------------------
    * 결과 테이블 렌더링
    * ---------------------------------------------------------- */
-  function renderResults(list) {
-    $resultTableBody.innerHTML = "";
-    if (!list || list.length === 0) {
-      $noResultBox.classList.remove("hidden");
-      return;
-    }
-    $noResultBox.classList.add("hidden");
+   function renderResults(list) {
+	   $resultTableBody.innerHTML = "";
+	   if (!list || list.length === 0) {
+	     $noResultBox.classList.remove("hidden");
+	     return;
+	   }
+	   $noResultBox.classList.add("hidden");
 
-    list.forEach((item, index) => {
-      const rowId = `result-row-${item.ticker}`;
-      const tr = document.createElement("tr");
-      tr.className = 'hover:bg-gray-100';
+	   list.forEach((item, index) => {
+	     const rowId = `result-row-${item.ticker}`;
+	     const tr = document.createElement("tr");
+	     // 분위기에 맞춘 부드러운 호버 효과 및 배경색
+	     tr.className = 'hover:bg-indigo-50/50 transition-colors border-b border-gray-50';
 
-      const conditions = item.technical_conditions || {};
-      const cross =
-        conditions.goldencross_50_200_detected
-          ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">⭐ 골든</span>`
-          : conditions.deadcross_50_200_detected
-              ? `<span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">💀 데드</span>`
-              : '-';
+	     const conditions = item.technical_conditions || {};
+	     
+	     // 배지(Badge) 디자인도 슬림하게 변경
+	     const cross =
+	       conditions.goldencross_50_200_detected
+	         ? `<span class="bg-rose-500 text-white text-[9px] px-1.5 py-0.5 rounded font-black">⭐ 골든</span>`
+	         : conditions.deadcross_50_200_detected
+	             ? `<span class="bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded font-black">💀 데드</span>`
+	             : `<span class="text-gray-300 text-[10px]">-</span>`;
 
-      tr.innerHTML = `
-        <td class="p-3 border font-bold">${index + 1}</td>
-        <td class="p-3 border">${item.ticker || "-"}</td>
-        <td class="p-3 border">${item.name || "-"}</td>
-        <td class="p-3 border">${conditions.market_regime || "-"}</td>
-        <td class="p-3 border">${conditions.down_trend_status || "-"}</td>
-        <td class="p-3 border">${cross}</td>
-        <td class="p-3 border text-center">
-          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md"
-                  onclick="showChart('${item.ticker}', '${item.name}')">보기</button>
-        </td>
-      `;
-      $resultTableBody.appendChild(tr);
-    });
+	     // 모든 td에 font-size 10px !important 적용 및 패딩 축소
+	     const tdStyle = `style="font-size: 10px !important; padding: 4px 8px;"`;
 
-    appendLog(`[LOG] 결과 ${list.length}개 업데이트`);
-  }
+	     tr.innerHTML = `
+	       <td class="font-bold text-gray-400" ${tdStyle}>${(index + 1).toString().padStart(2, '0')}</td>
+	       <td class="font-medium text-gray-500" ${tdStyle}>${item.ticker || "-"}</td>
+	       <td class="font-black text-gray-800" ${tdStyle}>${item.name || "-"}</td>
+	       <td class="font-bold text-indigo-600" ${tdStyle}>${conditions.market_regime || "-"}</td>
+	       <td class="font-medium text-gray-600" ${tdStyle}>${conditions.down_trend_status || "-"}</td>
+	       <td ${tdStyle}>${cross}</td>
+	       <td class="text-center" style="padding: 4px 8px;">
+	         <button class="px-2 py-0.5 bg-gray-100 hover:bg-indigo-600 hover:text-white rounded text-[9px] font-black transition-all"
+	                 onclick="showChart('${item.ticker}', '${item.name}')">VIEW</button>
+	       </td>
+	     `;
+	     $resultTableBody.appendChild(tr);
+	   });
+
+	   appendLog(`[LOG] 결과 ${list.length}개 업데이트 완료`);
+	 }
 
 
   /* ----------------------------------------------------------
@@ -842,38 +945,42 @@ window.toggleAccordion = function(contentId, iconId) {
   /* ----------------------------------------------------------
    * 실행/취소
    * ---------------------------------------------------------- */
-  window.runAnalysis = async () => {
-    if ($runBtn.disabled) return;
+   window.runAnalysis = async () => {
+	   if ($runBtn.disabled) return;
 
-    $log.innerHTML = `<p class="opacity-70">분석 요청 중...</p>`;
-    $resultTableBody.innerHTML = "";
-    $noResultBox.classList.add("hidden");
+	   $log.innerHTML = `<p class="opacity-70">분석 요청 중...</p>`;
+	   $resultTableBody.innerHTML = "";
+	   $noResultBox.classList.add("hidden");
 
-    const pattern = getSelectedPattern();
-    const workers = document.getElementById("workerCount").value;
-    const topN = document.getElementById("topNCount").value;
-    const maPeriods = getMaPeriods();
+	   const pattern = getSelectedPattern();
+	   const workers = document.getElementById("workerCount").value;
+	   const topN = document.getElementById("topNCount").value;
+	   const maPeriods = getMaPeriods();
+	   
+	   // 🔥 추가: 강제 분석 여부 체크박스 값 가져오기
+	   const force = document.getElementById("forceAnalysis").checked;
 
-    const url =
-      `/api/stock/batch/athena/start`
-      + `?pattern=${encodeURIComponent(pattern)}`
-      + `&workers=${encodeURIComponent(workers)}`
-      + `&maPeriods=${encodeURIComponent(maPeriods)}`
-      + `&topN=${encodeURIComponent(topN)}`;
+	   const url =
+	     `/api/stock/batch/athena/start`
+	     + `?pattern=${encodeURIComponent(pattern)}`
+	     + `&workers=${encodeURIComponent(workers)}`
+	     + `&maPeriods=${encodeURIComponent(maPeriods)}`
+	     + `&topN=${encodeURIComponent(topN)}`
+	     + `&force=${force}`; // 🔥 서버 API로 force 인자 전달
 
-    try {
-      const res = await fetch(url,{ method:'POST' });
-      if (!res.ok) {
-        appendLog("[ERROR] 분석 시작 실패");
-      } else {
-        const data = await res.json();
-        currentTaskId = data.taskId;
-        appendLog(`[LOG] 분석 시작: TaskID ${currentTaskId}`);
-      }
-    } catch(e) {
-      appendLog("[FATAL] 분석 요청 오류: " + e.message);
-    }
-  };
+	   try {
+	     const res = await fetch(url,{ method:'POST' });
+	     if (!res.ok) {
+	       appendLog("[ERROR] 분석 시작 실패");
+	     } else {
+	       const data = await res.json();
+	       currentTaskId = data.taskId;
+	       appendLog(`[LOG] 분석 시작 (Force:${force}): TaskID ${currentTaskId}`);
+	     }
+	   } catch(e) {
+	     appendLog("[FATAL] 분석 요청 오류: " + e.message);
+	   }
+	 };
 
   window.cancelAnalysis = async () => {
     if (!currentTaskId) {

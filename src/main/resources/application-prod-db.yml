@@ -1,0 +1,28 @@
+###########################################################################
+# 🐘 DataSource (PostgreSQL 접속)
+# 💡 변수(${DB_URL})를 빼고 운영 서버의 정보를 직접 입력함
+###########################################################################
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    # ENV 변수 대신 직접 값을 할당하도록 들여쓰기 교정
+    url: jdbc:postgresql://211.194.66.163:5432/mybaselink_db?currentSchema=mybaselink
+    username: mybaseuser
+    password: mybaseuser1234  # 운영 서버 실제 비밀번호
+
+    hikari:
+      maximum-pool-size: 20      # 운영 환경은 접속자가 많을 수 있으니 조금 늘려줍니다
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      validation-timeout: 5000
+      leak-detection-threshold: 0
+
+  jpa:
+    hibernate:
+      ddl-auto: none # 중요! 운영 서버 데이터가 날아가지 않게 none 설정
+    show-sql: false  # 운영 로그 최적화
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

@@ -22,7 +22,8 @@ select {
 
 body {
     /* 더블 탭 확대/축소 비활성화 (전역 레이아웃/터치 Fix) */
-    touch-action: manipulation;
+	/* touch-action: manipulation; 👈 이걸 주석 처리하거나 아래처럼 변경하세요 */
+    touch-action: pan-x pan-y; /* 가로/세로 스크롤은 브라우저 기본 기능을 써라! */
 }
 
 /* ===============================================================
@@ -100,6 +101,12 @@ html, body {
   /* Top Bar (50px) + Footer (50px 가정) = 총 100px 제외 */
   min-height: calc(var(--vh) * 100 - 100px); 
   box-sizing: border-box;
+  
+  /* 🚩 추가: 컨테이너가 테이블 따라 옆으로 벌어지는 것 방지 */
+  width: 100%;
+  max-width: 100vw; 
+  overflow-x: hidden; 
+  position: relative;
 }
 .main-inner {
   max-width: 1600px;

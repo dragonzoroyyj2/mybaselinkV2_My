@@ -67,6 +67,9 @@ public class StockBatchAthenaAiController {
     // ===============================================================
     // ✅ analyze 시작
     // ===============================================================
+ // ===============================================================
+    // 🚀 analyze 시작 (GProd와 동일하게 force 옵션 추가)
+    // ===============================================================
     @PostMapping("/start")
     public ResponseEntity<?> start(
             Authentication auth,
@@ -74,57 +77,54 @@ public class StockBatchAthenaAiController {
             @RequestParam(defaultValue = "8") int workers,
             @RequestParam(defaultValue = "20,50,200") String maPeriods,
             @RequestParam(defaultValue = "10") int topN,
-            @RequestParam(defaultValue = "") String symbol
+            @RequestParam(defaultValue = "") String symbol,
+            @RequestParam(defaultValue = "false") boolean force  // 🔥 형님, 여기 force 추가했습니다!
     ) {
-
         String username = (auth != null && auth.getName() != null) ? auth.getName() : "anonymous";
         String taskId = UUID.randomUUID().toString();
 
-        log.info("🟢 [{}] AthenaAI 실행 요청 by {} (pattern={}, workers={}, maPeriods={}, topN={}, symbol={})",
-                taskId, username, pattern, workers, maPeriods, topN, symbol);
+        log.info("🟢 [{}] AthenaAI 실행 요청 by {} (force={}, pattern={}, workers={}, maPeriods={}, topN={}, symbol={})",
+                taskId, username, force, pattern, workers, maPeriods, topN, symbol);
 
-        // ===============================================================
-        // 💛 GProd와 동일 — 잔류 락 자동정리
-        // ===============================================================
+        // ✅ 1. 잔류 락 자동정리
         try {
             globalStockService.forceUnlockIfNoProcess();
         } catch (Exception e) {
             log.warn("⚠️ 잔류 락 자동정리 실패 (무시): {}", e.getMessage());
         }
 
-        // 현재 해당 메뉴(Athena)의 내부락 체크
-        if (athenaService.isLocked()) {
-            String runner = athenaService.getCurrentRunner();
-            LinkedHashMap<String, Object> body = new LinkedHashMap<>();
+        // ✅ 2. 전역 락 확인
+        if (globalStockService.isLocked()) {
+            String runner = globalStockService.getCurrentTaskInfo()
+                    .map(i -> i.user)
+                    .orElse("다른 사용자");
+
+            Map<String, Object> body = new LinkedHashMap<>();
             body.put("error", runner + "님이 이미 실행 중입니다.");
             return ResponseEntity.status(409).body(body);
         }
 
-        // 실행 시작
         try {
+            // ✅ 서비스 호출 시 force 파라미터 전달 (Service 쪽에도 boolean force 인자 추가 필요)
             athenaService.startUpdate(
-                    taskId,
-                    pattern,
-                    maPeriods,
-                    workers,
-                    topN,
-                    symbol,
-                    username
+                    taskId, 
+                    pattern, 
+                    maPeriods, 
+                    workers, 
+                    topN, 
+                    symbol, 
+                    username,
+                    force // 🔥 서비스로 force 전달
             );
 
-            LinkedHashMap<String, Object> body = new LinkedHashMap<>();
+            Map<String, Object> body = new LinkedHashMap<>();
             body.put("taskId", taskId);
             body.put("runner", username);
             return ResponseEntity.ok(body);
 
-        } catch (IllegalStateException e) {
-            LinkedHashMap<String, Object> body = new LinkedHashMap<>();
-            body.put("error", e.getMessage());
-            return ResponseEntity.status(409).body(body);
-
         } catch (Exception e) {
             log.error("⚠️ [{}] AthenaAI 실행 예외", taskId, e);
-            LinkedHashMap<String, Object> body = new LinkedHashMap<>();
+            Map<String, Object> body = new LinkedHashMap<>();
             body.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(body);
         }

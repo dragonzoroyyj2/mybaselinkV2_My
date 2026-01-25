@@ -1,58 +1,44 @@
 /* ===============================================================
-   ✅ commonLeft_op.js (v1.1 - 2025.11 실전 안정판)
+   ✅ commonLeft_op.js (v1.2 - 충돌 해결 버전)
    ---------------------------------------------------------------
-   - 사이드바 토글 (open/close)
-   - 서브메뉴 클릭 열기/닫기 정상화
-   - ESC / 외부 클릭 / 오버레이 닫기
+   - 서브메뉴(has-submenu) 클릭 시 열기/닫기 기능만 유지
+   - 외부 클릭 닫기/휠 닫기 로직은 layout에서 통합 관리하므로 제거
 ================================================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // left.html fragment 로드 후 약간 지연 실행
+  // left.html fragment 로드 대기
   setTimeout(() => {
-    const sidebar = document.querySelector(".sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
+    const sidebar = document.getElementById("left"); // ID #left 사용
     if (!sidebar) return;
 
-    // ✅ 서브메뉴 클릭 시 열기/닫기
+    // ✅ 서브메뉴 클릭 시 열기/닫기 (이 기능만 담당)
     sidebar.querySelectorAll(".has-submenu > a").forEach(a => {
-      a.addEventListener("click", (e) => {
+      // 기존 이벤트 제거를 위해 복제 후 교체 (확실한 초기화)
+      const newA = a.cloneNode(true);
+      a.parentNode.replaceChild(newA, a);
+
+      newA.addEventListener("click", (e) => {
         e.preventDefault();
-        const li = a.parentElement;
-        li.classList.toggle("open");
+        e.stopPropagation(); // ❗ 중요: 클릭 이벤트가 window로 퍼지지 않게 차단
+
+        const li = newA.parentElement;
+        const submenu = li.querySelector(".submenu");
+
+        if (submenu) {
+          const isOpen = li.classList.contains("open");
+          if (isOpen) {
+            li.classList.remove("open");
+            submenu.style.display = "none";
+          } else {
+            li.classList.add("open");
+            submenu.style.display = "block";
+          }
+        }
       });
     });
 
-    // ✅ 외부 클릭 시 닫기
-    document.addEventListener("click", (e) => {
-      if (!sidebar.contains(e.target) && !e.target.closest("#menuToggle")) {
-        sidebar.classList.remove("open");
-        overlay?.classList.remove("active");
-        overlay.style.display = "none";
-      }
-    });
-
-    // ✅ ESC 키로 닫기
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        sidebar.classList.remove("open");
-        overlay?.classList.remove("active");
-        overlay.style.display = "none";
-      }
-    });
-
-    // ✅ 오버레이 클릭 시 닫기
-    overlay?.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("active");
-      overlay.style.display = "none";
-    });
-
-    // ✅ 전역 함수: 상단 토글 버튼 연결
-    window.toggleSidebar = () => {
-      const isOpen = sidebar.classList.contains("open");
-      sidebar.classList.toggle("open", !isOpen);
-      overlay.classList.toggle("active", !isOpen);
-      overlay.style.display = !isOpen ? "block" : "none";
-    };
+    // 🚨 [삭제됨] 기존의 document click, keydown(ESC), overlay click 닫기 로직은
+    // default_layout.html의 통합 로직과 충돌하므로 여기서 모두 제거했습니다.
+    
   }, 200);
 });

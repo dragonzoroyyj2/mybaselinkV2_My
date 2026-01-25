@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-📘 athena_k_market_ai_prod.py (v1.1)
+📘 athena_k_market_ai_prod.py (v1.0)
 --------------------------------------------
 ✅ 한국 주식 시장 데이터 분석 및 기술적 패턴 감지 스크립트
     - 기능: 종목 분석 필터링 (analyze 모드), 차트 시각화 데이터 생성 (chart 모드)
     - 수정: --symbol 인자를 통한 단일 종목 분석 기능 추가
-    - 추가: 'half_cup' (그릇 허리) 로직 유지
-    - 추가: 'long_term_down_trend' (장기 하락 추세) 로직 추가
-    - 원본 유지: 700행 이상의 방대한 예외 처리 및 로깅 로직 전체 복구
+    - 추가: 'half_cup' (그릇 허리) 로직 추가 - 완성된 컵 모양은 제외하고 허리 구간만 추출
 """
 
 import os
@@ -235,7 +233,6 @@ def find_long_term_down_trend(df):
     drop_dist = (curr['SMA_200'] - curr['Close']) / curr['SMA_200']
     
     if is_ma200_down and is_perfect_reverse and drop_dist > 0.20:
-        # 정렬 점수로 활용할 이격도(%) 반환
         return True, curr['SMA_200'], 'Downward', drop_dist * 100
         
     return False, 0, 'None', 0
@@ -448,9 +445,6 @@ def check_ma_conditions(df, periods, analyze_patterns):
         
         # ★ 허리 구간 감지 (컵 모양 제외)
         _, _, hc_status, l_score = find_half_cup_waist(df)
-        
-        # ★ 장기 하락 추세 추가
-        _, _, ltd_status, ltd_score = find_long_term_down_trend(df)
 
         results['pattern_double_bottom_status'] = db_status
         results['db_neckline_price'] = db_price
@@ -463,10 +457,6 @@ def check_ma_conditions(df, periods, analyze_patterns):
         # ★ 허리 구간 결과 추가
         results['pattern_half_cup_status'] = hc_status
         results['hc_l_score'] = l_score # 정렬용 점수 보관
-        
-        # ★ 장기 하락 결과 추가
-        results['pattern_long_term_down_trend_status'] = ltd_status
-        results['ltd_score'] = ltd_score
 
     # 4. 시장 국면 (Market Regime)
     if 'MarketRegime' in df.columns and not df.empty:
@@ -518,11 +508,10 @@ def analyze_symbol(item, periods, analyze_patterns, pattern_type_filter, symbol_
                 is_match = analysis_results.get("goldencross_50_200_detected", False)
             elif pattern_type_filter == 'deadcross': 
                 is_match = analysis_results.get("deadcross_50_200_detected", False)
-            elif pattern_type_filter in ['double_bottom', 'triple_bottom', 'cup_and_handle', 'half_cup', 'long_term_down_trend']:
+            elif pattern_type_filter in ['double_bottom', 'triple_bottom', 'cup_and_handle', 'half_cup']:
                 status_key = f'pattern_{pattern_type_filter}_status'
                 status = analysis_results.get(status_key)
-                # Downward는 장기하락추세 전용 상태
-                is_match = status in ['Breakout', 'Potential', 'Downward']
+                is_match = status in ['Breakout', 'Potential']
             elif pattern_type_filter.startswith('regime:'):
                 if 'market_regime' in analysis_results:
                     try:
@@ -548,14 +537,8 @@ def analyze_symbol(item, periods, analyze_patterns, pattern_type_filter, symbol_
 
         if analysis_results:
             analysis_clean = {k: v for k, v in analysis_results.items() if v is not None}
-            
-            # ★ 정렬 점수 결정 로직
-            if pattern_type_filter == 'half_cup':
-                sort_score = analysis_clean.get('hc_l_score', 0)
-            elif pattern_type_filter == 'long_term_down_trend':
-                sort_score = analysis_clean.get('ltd_score', 0)
-            else:
-                sort_score = analysis_clean.get('market_regime', -1)
+            # ★ 하프컵 분석일 때는 l_score로 정렬, 그 외엔 market_regime으로 정렬
+            sort_score = analysis_clean.get('hc_l_score', 0) if pattern_type_filter == 'half_cup' else analysis_clean.get('market_regime', -1)
             
             return {
                 "ticker": code,
@@ -568,7 +551,7 @@ def analyze_symbol(item, periods, analyze_patterns, pattern_type_filter, symbol_
         logging.error(f"[ERROR] {code} {name} 분석 실패: {e}\n{traceback.format_exc()}")
         return None
 
-def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_filter, top_n, force=False, symbol_filter=None): 
+def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_filter, top_n, symbol_filter=None): 
     """병렬 처리를 이용해 전체 종목 분석을 실행하고, 일일 캐싱을 적용합니다."""
     
     cleanup_old_cache() 
@@ -577,14 +560,13 @@ def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_fi
     periods = [int(p.strip()) for p in ma_periods_str.split(',') if p.strip().isdigit()]
 
     today_str = datetime.now().strftime("%Y%m%d")
-    analyze_patterns = analyze_patterns_flag or (pattern_type_filter not in [None, 'ma', 'all_below_ma'] and not str(pattern_type_filter).startswith('regime:'))
+    analyze_patterns = analyze_patterns_flag or (pattern_type_filter not in [None, 'ma', 'all_below_ma'] and not pattern_type_filter.startswith('regime:'))
     
     cache_filter_key = f"{pattern_type_filter or 'ma_only'}_{'pattern' if analyze_patterns else 'no_pattern'}"
     cache_key = f"{today_str}_{cache_filter_key.replace(':', '_')}_{top_n}.json" 
     cache_path = CACHE_DIR / cache_key
     
-    # 🔥 수정: force 가 False 일 때만 캐시를 읽음 (force=True 이면 무조건 새로 분석)
-    if not force and not symbol_filter and cache_path.exists(): 
+    if not symbol_filter and cache_path.exists(): 
         try:
             with open(cache_path, 'r', encoding='utf-8') as f:
                 cached_data = json.load(f)
@@ -625,7 +607,7 @@ def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_fi
                 if r: results.append(r)
             except Exception: pass
 
-    # ★ 정렬 로직: sort_score 기준 내림차순
+    # ★ 정렬 로직: sort_score 기준 내림차순 (L자형 점수 높은 게 위로!)
     results.sort(key=lambda x: x.get('sort_score', -1), reverse=True)
     final_results = results[:top_n] if top_n > 0 else results
     
@@ -691,17 +673,10 @@ def generate_chart(symbol, ma_periods_str, chart_period):
         _, tb_neckline, tb_status, _ = find_triple_bottom(df_full, troughs_all)
         _, ch_neckline, ch_status, _ = find_cup_and_handle(df_full, peaks_all, troughs_all)
         _, hc_neckline, hc_status, _ = find_half_cup_waist(df_full)
-        _, ltd_neckline, ltd_status, _ = find_long_term_down_trend(df_full)
 
         pattern_data = []
         today_date = df_full.index[-1].strftime('%Y-%m-%d')
-        for p_name, p_neck, p_stat in [
-            ("DoubleBottom", db_neckline, db_status), 
-            ("TripleBottom", tb_neckline, tb_status), 
-            ("CupAndHandle", ch_neckline, ch_status), 
-            ("HalfCup", hc_neckline, hc_status),
-            ("LongTermDown", ltd_neckline, ltd_status)
-        ]:
+        for p_name, p_neck, p_stat in [("DoubleBottom", db_neckline, db_status), ("TripleBottom", tb_neckline, tb_status), ("CupAndHandle", ch_neckline, ch_status), ("HalfCup", hc_neckline, hc_status)]:
             if p_neck: pattern_data.append({"x": today_date, "y": p_neck, "type": p_name, "status": p_stat})
 
         safe_print_json({
@@ -721,11 +696,7 @@ def main():
     parser.add_argument("--chart_period", type=int, default=250)
     parser.add_argument("--symbol", type=str)
     parser.add_argument("--analyze_patterns", action="store_true")
-    
-    # 🔥 force 인자 추가 (이게 있어야 자바에서 보낸 --force를 인식함)
-    parser.add_argument("--force", action="store_true", help="캐시를 무시하고 강제 분석 실행")
-    
-    parser.add_argument("--pattern_type", type=str, choices=['ma', 'all_below_ma', 'double_bottom', 'triple_bottom', 'cup_and_handle', 'half_cup', 'long_term_down_trend', 'goldencross', 'deadcross', 'regime:0', 'regime:1', 'regime:2', 'regime:3'])
+    parser.add_argument("--pattern_type", type=str, choices=['ma', 'all_below_ma', 'double_bottom', 'triple_bottom', 'cup_and_handle', 'half_cup', 'goldencross', 'deadcross', 'regime:0', 'regime:1', 'regime:2', 'regime:3'])
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--top_n", type=int, default=10)
     
@@ -733,9 +704,8 @@ def main():
     setup_env(log_level=logging.DEBUG if args.debug else logging.INFO) 
     
     if args.mode == 'analyze':
-        analyze_patterns_flag = args.analyze_patterns or (args.pattern_type not in [None, 'ma', 'all_below_ma'] and not (args.pattern_type and str(args.pattern_type).startswith('regime:')))
-        # 🔥 args.force 추가 전달
-        run_analysis(args.workers, args.ma_periods, analyze_patterns_flag, args.pattern_type, args.top_n, args.force, args.symbol)
+        analyze_patterns_flag = args.analyze_patterns or (args.pattern_type not in [None, 'ma', 'all_below_ma'] and not (args.pattern_type and args.pattern_type.startswith('regime:')))
+        run_analysis(args.workers, args.ma_periods, analyze_patterns_flag, args.pattern_type, args.top_n, args.symbol)
     elif args.mode == 'chart':
         if not args.symbol: return
         generate_chart(args.symbol, args.ma_periods, args.chart_period)

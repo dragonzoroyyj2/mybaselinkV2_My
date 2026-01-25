@@ -252,12 +252,13 @@ public class StockBatchAthenaAiService {
         }
     }
 
-    // ===============================================================
-    // 🔥 Athena AI 분석 시작 (analyze 모드)
+ // ===============================================================
+    // 🔥 Athena AI 분석 시작 (analyze 모드) - force 인자 추가
     // ===============================================================
     @Async
     public void startUpdate(String taskId, String pattern, String maPeriods,
-                            int workers, int topN, String symbol, String username) {
+                            int workers, int topN, String symbol, String username, 
+                            boolean force) { // 🔥 파라미터 추가
 
         if (!globalStockService.acquireLock("ATHENA", username, taskId)) {
             throw new IllegalStateException("다른 사용자가 이미 실행 중입니다.");
@@ -287,35 +288,29 @@ public class StockBatchAthenaAiService {
         StringBuilder finalJsonBuffer = new StringBuilder();
 
         try {
-
-            // ===========================================================
-            // 🔥 패턴 매핑 (Python pattern_type 과 완전 정합)
-            // ===========================================================
+            // [중략: 패턴 매핑 로직 동일]
             String pythonPattern = switch (pattern) {
-                case "long_term_down_trend" -> "all_below_ma";
+                case "long_term_down_trend" -> "long_term_down_trend";
                 case "double_bottom" -> "double_bottom";
                 case "triple_bottom" -> "triple_bottom";
                 case "cup_and_handle" -> "cup_and_handle";
                 case "goldencross" -> "goldencross";
                 case "deadcross" -> "deadcross";
-                case "half_cup" -> null;  // ❌ 미지원
+                case "half_cup" -> "half_cup"; 
                 default -> pattern;
             };
 
             if (pythonPattern == null) {
-                throw new IllegalStateException("half_cup 패턴은 아직 지원되지 않습니다.");
+                throw new IllegalStateException("해당 패턴은 아직 지원되지 않습니다.");
             }
 
-            // ===========================================================
-            // 🔥 analyze_patterns 정확한 조건
-            // ===========================================================
             boolean analyzePatternsFlag =
                     !pythonPattern.equals("ma") &&
                     !pythonPattern.equals("all_below_ma") &&
                     !pythonPattern.startsWith("regime:");
 
             // ===========================================================
-            // 실제 실행 커맨드 구성
+            // 실제 실행 커맨드 구성 (force 인자 추가)
             // ===========================================================
             List<String> cmd = new ArrayList<>();
             cmd.add(pythonExe);
@@ -336,6 +331,12 @@ public class StockBatchAthenaAiService {
             cmd.add("--top_n");
             cmd.add(String.valueOf(topN));
 
+            // 🔥 force 가 true 이면 파이썬에 --force 인자 전달
+            if (force) {
+                cmd.add("--force");
+                log.info("🚀 [{}] 강제 업데이트 모드(--force) 활성화", taskId);
+            }
+
             if (analyzePatternsFlag) {
                 cmd.add("--analyze_patterns");
             }
@@ -348,8 +349,7 @@ public class StockBatchAthenaAiService {
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.directory(new File(workingDir));
 
-            log.info("🔥 AthenaAI 실행 파일 경로 확인: " + scriptPath);
-
+            // [이후 로직 로그 출력 및 프로세스 실행 동일...]
             pb.redirectErrorStream(true);
             pb.environment().put("PYTHONIOENCODING", "utf-8");
 

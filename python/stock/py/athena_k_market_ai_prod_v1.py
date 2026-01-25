@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-📘 athena_k_market_ai_prod.py (v1.1)
+📘 athena_k_market_ai_prod.py (v1.0)
 --------------------------------------------
 ✅ 한국 주식 시장 데이터 분석 및 기술적 패턴 감지 스크립트
     - 기능: 종목 분석 필터링 (analyze 모드), 차트 시각화 데이터 생성 (chart 모드)
     - 수정: --symbol 인자를 통한 단일 종목 분석 기능 추가
-    - 추가: 'half_cup' (그릇 허리) 로직 유지
-    - 추가: 'long_term_down_trend' (장기 하락 추세) 로직 추가
-    - 원본 유지: 700행 이상의 방대한 예외 처리 및 로깅 로직 전체 복구
 """
 
 import os
@@ -162,9 +159,9 @@ def cleanup_old_cache(days=7):
     logging.info(f"총 {deleted_count}개의 오래된 캐시 파일을 정리했습니다.")
 
 
-# =====================================================================================
-# 고급 특징 공학 및 클러스터링 로직
-# =====================================================================================
+# ==============================
+# 4. 고급 특징 공학 및 클러스터링 로직
+# ==============================
 
 def calculate_advanced_features(df: pd.DataFrame) -> pd.DataFrame:
     """고급 패턴 인식을 위해 기술적 지표를 특징(Feature)으로 추가합니다."""
@@ -214,32 +211,10 @@ def add_market_regime_clustering(df_full: pd.DataFrame, n_clusters=4) -> pd.Data
     return df_full
 
 
-# =====================================================================================
-# 1. MA장기하락추세 기술적 분석 패턴 로직 
-# =====================================================================================
-def find_long_term_down_trend(df):
-    """
-    ★ 형님의 'MA 장기 하락 추세': 
-    - 200일선이 완벽하게 우하향하고, 주가가 그 아래에서 계속 처박히는 종목
-    """
-    if len(df) < 250: return False, 0, 'None', 0
-    
-    curr = df.iloc[-1]
-    prev_20 = df.iloc[-20]
-    
-    # 200일선 우하향 여부
-    is_ma200_down = curr['SMA_200'] < prev_20['SMA_200']
-    # 완전 역배열 (현재가 < 20 < 50 < 200)
-    is_perfect_reverse = (curr['Close'] < curr['SMA_20'] < curr['SMA_50'] < curr['SMA_200'])
-    # 200일선과의 이격도 (얼마나 많이 떨어졌나)
-    drop_dist = (curr['SMA_200'] - curr['Close']) / curr['SMA_200']
-    
-    if is_ma200_down and is_perfect_reverse and drop_dist > 0.20:
-        # 정렬 점수로 활용할 이격도(%) 반환
-        return True, curr['SMA_200'], 'Downward', drop_dist * 100
-        
-    return False, 0, 'None', 0
-    
+# ==============================
+# 5. 기술적 분석 패턴 로직
+# ==============================
+
 def find_peaks_and_troughs(df, prominence_ratio=0.005, width=3):
     """주요 봉우리(Peaks)와 골짜기(Troughs) 인덱스를 찾습니다 (최근 250일 기준)."""
     recent_df = df.iloc[-250:].copy()
@@ -254,160 +229,98 @@ def find_peaks_and_troughs(df, prominence_ratio=0.005, width=3):
     start_idx = len(df) - len(recent_df)
     return peaks + start_idx, troughs + start_idx
 
-
-# =====================================================================================
-# 2. 이중 바닥 기술적 분석 패턴 로직 
-# =====================================================================================
-
-def find_double_bottom(df, troughs, tolerance=0.02, min_duration=20):
-    """
-    최근 1년 중 최저가 부근(5% 이내)에서만 형성된 꼭짓점만 인정합니다.
-    """
-    if len(df) < 250: return False, None, 'None', 0
-    
-    recent_df = df.iloc[-250:]
-    absolute_low = recent_df['Low'].min() # 최근 1년 전체 최저점
-    
-    recent_troughs = [t for t in troughs if t >= len(df) - 150]
-    if len(recent_troughs) < 2: return False, None, 'None', 0
+def find_double_bottom(df, troughs, tolerance=0.05, min_duration=30, min_retrace=0.1):
+    """이중 바닥 (Double Bottom) 패턴을 감지하고 넥라인 가격을 반환합니다."""
+    recent_troughs = [t for t in troughs if t >= len(df) - 250]
+    if len(recent_troughs) < 2: return False, None, None, None
     
     idx2, idx1 = recent_troughs[-1], recent_troughs[-2]
-    p1, p2 = df['Close'].iloc[idx1], df['Close'].iloc[idx2]
+    price1, price2 = df['Close'].iloc[idx1], df['Close'].iloc[idx2]
     
-    # [핵심] 꼭짓점이 거의 바닥인가? (최저가 대비 5% 이내만 허용)
-    is_at_absolute_bottom = (p1 <= absolute_low * 1.05) and (p2 <= absolute_low * 1.05)
-    if not is_at_absolute_bottom: return False, None, 'None', 0
-
-    # 바닥끼리의 가격 일치성 (오차 2% 이내로 초정밀)
-    if abs(p1 - p2) / min(p1, p2) > tolerance: return False, None, 'None', 0
+    if idx2 - idx1 < min_duration: return False, None, None, None 
+    
+    min_price = min(price1, price2)
+    max_price = max(price1, price2)
+    is_price_matching = (max_price - min_price) / min_price < tolerance
+    if not is_price_matching: return False, None, None, None
     
     interim_high = df['Close'].iloc[idx1:idx2].max()
+    neckline = interim_high
+    
+    retrace_from_bottom = neckline - min_price
+    if retrace_from_bottom / min_price < min_retrace: return False, None, None, None 
+    
     current_price = df['Close'].iloc[-1]
     
-    # 넥라인 근처에서 이제 막 고개 드는 종목만
-    if interim_high * 0.85 <= current_price <= interim_high * 1.10:
-        return True, interim_high, 'Potential', interim_high
+    is_breakout = current_price > neckline 
+    if is_breakout: return True, neckline, 'Breakout', neckline
     
-    return False, None, 'None', 0
+    retrace_ratio = (current_price - min_price) / (neckline - min_price) if neckline > min_price else 0
+    is_potential = retrace_ratio > 0.5 and current_price < neckline
+    if is_potential: return False, neckline, 'Potential', neckline
+    
+    return False, neckline, 'None', neckline 
 
-
-# =====================================================================================
-# 3. 삼중 바닥 기술적 분석 패턴 로직 
-# =====================================================================================
-def find_triple_bottom(df, troughs, tolerance=0.03):
-    """
-    세 개의 빨간 동그라미가 모두 1년 최저가 수준에 정렬되어야 합니다.
-    """
-    if len(df) < 250: return False, None, 'None', 0
-    
-    recent_df = df.iloc[-250:]
-    absolute_low = recent_df['Low'].min()
-    
-    recent_troughs = [t for t in troughs if t >= len(df) - 200]
-    if len(recent_troughs) < 3: return False, None, 'None', 0
+def find_triple_bottom(df, troughs, tolerance=0.05, min_duration_total=75, min_retrace=0.1):
+    """삼중 바닥 (Triple Bottom) 패턴을 감지하고 넥라인 가격을 반환합니다."""
+    recent_troughs = [t for t in troughs if t >= len(df) - 250]
+    if len(recent_troughs) < 3: return False, None, None, None
     
     idx3, idx2, idx1 = recent_troughs[-1], recent_troughs[-2], recent_troughs[-3]
-    prices = [df['Close'].iloc[idx1], df['Close'].iloc[idx2], df['Close'].iloc[idx3] ]
+    price1, price2, price3 = df['Close'].iloc[idx1], df['Close'].iloc[idx2], df['Close'].iloc[idx3]
     
-    # [핵심] 세 꼭짓점 모두 바닥권인가?
-    if not all(p <= absolute_low * 1.07 for p in prices): return False, None, 'None', 0
+    if idx3 - idx1 < min_duration_total: return False, None, None, None
     
-    # 세 바닥의 수평 유지 (형님 그림처럼 일직선)
-    if (max(prices) - min(prices)) / min(prices) > tolerance: return False, None, 'None', 0
+    min_price = min(price1, price2, price3)
+    max_price = max(price1, price2, price3)
+    is_price_matching = (max_price - min_price) / min_price < tolerance
+    if not is_price_matching: return False, None, None, None
     
-    neckline = df['Close'].iloc[idx1:idx3].max()
+    high1 = df['Close'].iloc[idx1:idx2].max()
+    high2 = df['Close'].iloc[idx2:idx3].max()
+    neckline = max(high1, high2)
+    
+    retrace_from_bottom = neckline - min_price
+    if retrace_from_bottom / min_price < min_retrace: return False, None, None, None
+    
     current_price = df['Close'].iloc[-1]
     
-    if neckline * 0.8 <= current_price <= neckline * 1.15:
-        return True, neckline, 'Potential', neckline
+    is_breakout = current_price > neckline
+    if is_breakout: return True, neckline, 'Breakout', neckline
     
-    return False, None, 'None', 0
-
-# =====================================================================================
-# 4. 컵 앤 핸들 기술적 분석 패턴 로직 
-# =====================================================================================
+    retrace_ratio = (current_price - min_price) / (neckline - min_price) if neckline > min_price else 0
+    is_potential = retrace_ratio > 0.5 and current_price < neckline
+    if is_potential: return False, neckline, 'Potential', neckline
+    
+    return False, neckline, 'None', neckline
 
 def find_cup_and_handle(df, peaks, troughs, handle_drop_ratio=0.3):
-    """
-    ★ 형님 전용 컵 앤 핸들 (Early-Stage Cup)
-    이미 완성된 컵은 제외하고, 급락 후 바닥을 다진 뒤 
-    이제 막 '오른쪽 손잡이'를 만들려는 초기 종목을 포착합니다.
-    """
-    if len(df) < 250: return False, None, 'None', 0
+    """컵 앤 핸들 (Cup and Handle) 패턴을 감지하고 넥라인 가격을 반환합니다."""
+    recent_peaks = [p for p in peaks if p >= len(df) - 250]
+    if len(recent_peaks) < 2: return False, None, None, None
     
-    recent_250 = df.iloc[-250:]
-    # 1. 컵의 시작점 (급락 전 언덕)과 바닥점 확인
-    peak_price = recent_250['High'].max()     # 컵의 왼쪽 끝
-    trough_price = recent_250['Low'].min()    # 컵의 바닥
+    peak_right_idx = recent_peaks[-1]
+    peak_right_price = df['Close'].iloc[peak_right_idx]
+    
+    handle_start_idx = peak_right_idx
+    handle_max_drop = peak_right_price * (1 - handle_drop_ratio) 
     current_price = df['Close'].iloc[-1]
+    neckline = peak_right_price 
     
-    # 2. 컵의 깊이 검증 (형님 그림처럼 깊게 파여야 함)
-    cup_depth_pct = (peak_price - trough_price) / peak_price
-    if cup_depth_pct < 0.30: return False, None, 'None', 0
+    is_handle_forming = (df['Close'].iloc[handle_start_idx:].max() <= peak_right_price) 
+    is_handle_forming &= (current_price > handle_max_drop) 
     
-    # 3. 'U자'가 되기 전 시작 지점 포착 (회복률 30% ~ 60% 구간)
-    # 전고점을 뚫으러 가는 80~90% 구간은 너무 늦었으므로 배제
-    recovery_rate = (current_price - trough_price) / (peak_price - trough_price)
-    
-    # 형님 그림판의 "U자가 되기 전" 구간 (핸들 형성 초입)
-    is_early_cup = (0.25 <= recovery_rate <= 0.55)
-    
-    if is_early_cup:
-        # 최근 20일간의 움직임이 바닥을 탈출하여 완만한 상승 곡선을 그리는지 확인
-        sma20 = df['SMA_20'].iloc[-1]
-        sma50 = df['SMA_50'].iloc[-1]
+    if is_handle_forming and current_price > neckline:
+        return True, neckline, 'Breakout', neckline 
+    if is_handle_forming and current_price <= neckline:
+        return False, neckline, 'Potential', neckline 
         
-        # 20일선이 고개를 들고 주가가 그 위에 안착했을 때가 찐 핸들 자리
-        if current_price > sma20:
-            # 랭킹 점수: 컵이 깊고 횡보가 적절했을수록 높은 점수
-            c_score = (cup_depth_pct * 100) + (recovery_rate * 50)
-            return True, peak_price, 'Potential', c_score
+    return False, neckline, 'None', neckline 
 
-    return False, None, 'None', 0
 
-# =====================================================================================
-# 5. 하프앤핸들 기술적 분석 패턴 로직 
-# =====================================================================================
-def find_half_cup_waist(df):
-    """
-    ★ 형님의 'L자형 바닥 탈출' 그림 반영
-    - 수정: 하락폭이 크고 바닥 횡보가 길수록 높은 랭킹 점수(l_score) 부여
-    """
-    if len(df) < 250: return False, None, 'None', 0
-    
-    recent_250 = df.iloc[-250:]
-    peak_price = recent_250['High'].max()     # 전고점
-    trough_price = recent_250['Low'].min()    # 최저점
-    current_price = df['Close'].iloc[-1]
-    
-    total_drop = peak_price - trough_price
-    if total_drop <= 0: return False, None, 'None', 0
-    
-    total_drop_pct = total_drop / peak_price
-    recovery_rate = (current_price - trough_price) / total_drop
-    
-    # 1. 찐 바닥 구간 필터링 (회복률 10%~35%로 더 보수적으로 잡음)
-    is_waist_zone = (0.10 <= recovery_rate <= 0.35) 
-    is_not_complete_cup = (current_price < peak_price * 0.70)
-    
-    if is_waist_zone and is_not_complete_cup:
-        # 횡보성 계산: 최근 40일간 바닥권에 머문 비율
-        bottom_threshold = trough_price * 1.15
-        days_at_bottom = (recent_250['Close'].iloc[-40:] <= bottom_threshold).sum()
-        
-        # ★ L-Score: (하락률 * 100) + (횡보일수 * 2) -> 이게 높을수록 정렬 상단
-        l_score = (total_drop_pct * 100) + (days_at_bottom * 2)
-        
-        sma20 = df['SMA_20'].iloc[-1]
-        # 고개 살짝 들기 (20일선 근처)
-        if current_price > sma20 * 0.98:
-            return True, peak_price, 'Potential', l_score
-             
-    return False, None, 'None', 0
-    
-# =====================================================================================
+# ==============================
 # 6. 기술적 조건 및 패턴 분석
-# =====================================================================================
+# ==============================
 
 def check_ma_conditions(df, periods, analyze_patterns):
     """이동 평균선 조건 및 패턴 분석을 수행하고 결과를 딕셔너리로 반환합니다."""
@@ -445,12 +358,6 @@ def check_ma_conditions(df, periods, analyze_patterns):
         _, _, db_status, db_price = find_double_bottom(df, troughs)
         _, _, tb_status, _ = find_triple_bottom(df, troughs)
         _, _, ch_status, ch_price = find_cup_and_handle(df, peaks, troughs)
-        
-        # ★ 허리 구간 감지 (컵 모양 제외)
-        _, _, hc_status, l_score = find_half_cup_waist(df)
-        
-        # ★ 장기 하락 추세 추가
-        _, _, ltd_status, ltd_score = find_long_term_down_trend(df)
 
         results['pattern_double_bottom_status'] = db_status
         results['db_neckline_price'] = db_price
@@ -459,14 +366,6 @@ def check_ma_conditions(df, periods, analyze_patterns):
 
         results['pattern_cup_and_handle_status'] = ch_status
         results['ch_neckline_price'] = ch_price
-        
-        # ★ 허리 구간 결과 추가
-        results['pattern_half_cup_status'] = hc_status
-        results['hc_l_score'] = l_score # 정렬용 점수 보관
-        
-        # ★ 장기 하락 결과 추가
-        results['pattern_long_term_down_trend_status'] = ltd_status
-        results['ltd_score'] = ltd_score
 
     # 4. 시장 국면 (Market Regime)
     if 'MarketRegime' in df.columns and not df.empty:
@@ -518,11 +417,10 @@ def analyze_symbol(item, periods, analyze_patterns, pattern_type_filter, symbol_
                 is_match = analysis_results.get("goldencross_50_200_detected", False)
             elif pattern_type_filter == 'deadcross': 
                 is_match = analysis_results.get("deadcross_50_200_detected", False)
-            elif pattern_type_filter in ['double_bottom', 'triple_bottom', 'cup_and_handle', 'half_cup', 'long_term_down_trend']:
+            elif pattern_type_filter in ['double_bottom', 'triple_bottom', 'cup_and_handle']:
                 status_key = f'pattern_{pattern_type_filter}_status'
                 status = analysis_results.get(status_key)
-                # Downward는 장기하락추세 전용 상태
-                is_match = status in ['Breakout', 'Potential', 'Downward']
+                is_match = status in ['Breakout', 'Potential']
             elif pattern_type_filter.startswith('regime:'):
                 if 'market_regime' in analysis_results:
                     try:
@@ -534,7 +432,7 @@ def analyze_symbol(item, periods, analyze_patterns, pattern_type_filter, symbol_
                 else:
                     is_match = False
             elif pattern_type_filter == 'ma':
-                is_match = all(analysis_results.get(f"above_ma{p}", False) for p in periods if p in [20, 50, 200]) 
+                is_match = all(analysis_results.get(f"above_ma{p}", False) for p in periods if p in [20, 50, 200]) # 20, 50, 200만 확인
             elif pattern_type_filter == 'all_below_ma':
                 is_match = all(
                     (df_analyze['Close'].iloc[-1] < df_analyze.get(f'SMA_{p}', df_analyze.get(f'ma{p}', 0)).iloc[-1])
@@ -544,18 +442,12 @@ def analyze_symbol(item, periods, analyze_patterns, pattern_type_filter, symbol_
                 is_match = False
 
         if pattern_type_filter and not is_match: 
+            logging.debug(f"[{code}] 필터 '{pattern_type_filter}' 불일치.")
             return None
 
         if analysis_results:
             analysis_clean = {k: v for k, v in analysis_results.items() if v is not None}
-            
-            # ★ 정렬 점수 결정 로직
-            if pattern_type_filter == 'half_cup':
-                sort_score = analysis_clean.get('hc_l_score', 0)
-            elif pattern_type_filter == 'long_term_down_trend':
-                sort_score = analysis_clean.get('ltd_score', 0)
-            else:
-                sort_score = analysis_clean.get('market_regime', -1)
+            sort_score = analysis_clean.get('market_regime', -1) 
             
             return {
                 "ticker": code,
@@ -568,7 +460,7 @@ def analyze_symbol(item, periods, analyze_patterns, pattern_type_filter, symbol_
         logging.error(f"[ERROR] {code} {name} 분석 실패: {e}\n{traceback.format_exc()}")
         return None
 
-def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_filter, top_n, force=False, symbol_filter=None): 
+def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_filter, top_n, symbol_filter=None): 
     """병렬 처리를 이용해 전체 종목 분석을 실행하고, 일일 캐싱을 적용합니다."""
     
     cleanup_old_cache() 
@@ -577,37 +469,51 @@ def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_fi
     periods = [int(p.strip()) for p in ma_periods_str.split(',') if p.strip().isdigit()]
 
     today_str = datetime.now().strftime("%Y%m%d")
-    analyze_patterns = analyze_patterns_flag or (pattern_type_filter not in [None, 'ma', 'all_below_ma'] and not str(pattern_type_filter).startswith('regime:'))
+    analyze_patterns = analyze_patterns_flag or (pattern_type_filter not in [None, 'ma', 'all_below_ma'] and not pattern_type_filter.startswith('regime:'))
     
+    # 캐시 키를 순수 패턴 기반으로 단순화
     cache_filter_key = f"{pattern_type_filter or 'ma_only'}_{'pattern' if analyze_patterns else 'no_pattern'}"
     cache_key = f"{today_str}_{cache_filter_key.replace(':', '_')}_{top_n}.json" 
     cache_path = CACHE_DIR / cache_key
     
-    # 🔥 수정: force 가 False 일 때만 캐시를 읽음 (force=True 이면 무조건 새로 분석)
-    if not force and not symbol_filter and cache_path.exists(): 
+    # 캐시 확인 및 로드 (단일 종목 분석이 아닐 때만 캐시 로드 시도)
+    if not symbol_filter and cache_path.exists(): 
         try:
             with open(cache_path, 'r', encoding='utf-8') as f:
                 cached_data = json.load(f)
+            logging.info(f"캐시 로드 성공: {cache_key}")
             sys.stdout.write(json.dumps(cached_data, ensure_ascii=False, indent=None, separators=(',', ':'), cls=CustomJsonEncoder) + "\n")
             sys.stdout.flush()
             sys.exit(0)
-        except Exception: pass
+        except Exception as e:
+            logging.error(f"캐시 파일 로드/파싱 실패: {e}. 재분석을 시도합니다.")
 
+    # 분석 실행 준비
     if 50 not in periods: periods.append(50)
     if 200 not in periods: periods.append(200)
 
     items = load_listing()
+    
+    # 단일 종목 필터링 로직
     if symbol_filter:
         items = [item for item in items if (item.get("Code") or item.get("code")) == symbol_filter]
+        if not items:
+            logging.error(f"지정된 종목 코드({symbol_filter})를 리스팅에서 찾을 수 없습니다.")
+            safe_print_json({"error": "SYMBOL_NOT_FOUND", "ticker": symbol_filter}, status_code=1)
+            return
     
     initial_item_count = len(items) 
+    total_symbols_loaded = len(load_listing()) 
+    
     if initial_item_count == 0:
-        safe_print_json({"error": "DATA_EMPTY"}, status_code=1)
+        safe_print_json({"error": "LISTING_DATA_EMPTY" if not symbol_filter else "SYMBOL_NOT_FOUND"}, status_code=1)
         return
 
     results = []
+    logging.info(f"분석 시작 (캐시 미스): 총 {initial_item_count} 종목, 필터: {pattern_type_filter or 'None'}")
     processed_count = 0
 
+    # 스레드 풀을 이용한 병렬 분석
     with ThreadPoolExecutor(max_workers=workers) as executor:
         future_to_item = {
             executor.submit(analyze_symbol, item, periods, analyze_patterns, pattern_type_filter): item
@@ -616,34 +522,61 @@ def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_fi
 
         for future in as_completed(future_to_item):
             processed_count += 1
+            
+            # 진행 상황 JSON 출력
             progress_percent = round((processed_count / initial_item_count) * 100, 2) 
-            sys.stdout.write(json.dumps({"mode": "progress", "progress_percent": progress_percent}, ensure_ascii=False) + "\n")
+            sys.stdout.write(json.dumps({
+                "mode": "progress",
+                "total_symbols": initial_item_count,
+                "processed_symbols": processed_count,
+                "progress_percent": progress_percent
+            }, ensure_ascii=False, cls=CustomJsonEncoder, indent=None, separators=(',', ':')) + "\n")
             sys.stdout.flush()
 
             try:
                 r = future.result()
                 if r: results.append(r)
-            except Exception: pass
+            except Exception as e:
+                code = future_to_item[future].get("Code") or future_to_item[future].get("code")
+                name = future_to_item[future].get("Name") or future_to_item[future].get("name")
+                logging.error(f"[ERROR] {code} {name} 처리 중 예외 발생: {e}")
 
-    # ★ 정렬 로직: sort_score 기준 내림차순
+    # 결과 정렬 및 상위 N개 선택
     results.sort(key=lambda x: x.get('sort_score', -1), reverse=True)
     final_results = results[:top_n] if top_n > 0 else results
     
     for r in final_results:
         r.pop('sort_score', None)
 
+    end_time = time.time()
+
+    data_check = {
+        "listing_file_exists": LISTING_FILE.exists(),
+        "total_symbols_loaded": total_symbols_loaded,
+        "symbols_processed": initial_item_count,
+        "symbols_filtered": len(results),
+        "symbols_returned": len(final_results),
+        "time_taken_sec": round(end_time - start_time, 2),
+    }
+
+    # 캐시 저장 (단일 종목 분석이 아닐 때만 저장)
     final_output = {
         "results": final_results,
         "mode": "analyze_result",
-        "filter": pattern_type_filter or 'ma_only'
+        "filter": pattern_type_filter or 'ma_only',
+        "data_check": data_check
     }
     
     if not symbol_filter:
         try:
             with open(cache_path, 'w', encoding='utf-8') as f:
                 json.dump(final_output, f, ensure_ascii=False, cls=CustomJsonEncoder, indent=None, separators=(',', ':'))
-        except Exception: pass
+            logging.info(f"분석 결과 캐시 저장 완료: {cache_key}")
+        except Exception as e:
+            logging.error(f"캐시 파일 저장 실패: {e}")
 
+    # 최종 결과 출력
+    logging.info(f"분석 완료 및 결과 반환. 총 소요 시간: {data_check['time_taken_sec']}초")
     safe_print_json(final_output, status_code=0)
 
 
@@ -652,93 +585,185 @@ def run_analysis(workers, ma_periods_str, analyze_patterns_flag, pattern_type_fi
 # ==============================
 
 def generate_chart(symbol, ma_periods_str, chart_period):
-    """단일 종목의 시계열 데이터를 Chart.js JSON 포맷으로 변환하여 반환합니다."""
+    """
+    단일 종목의 시계열 데이터를 Chart.js JSON 포맷으로 변환하여 반환합니다.
+    (크로스 지점 및 패턴 넥라인 정보 포함)
+    """
     code = symbol
     name = get_stock_name(code)
     periods = [int(p.strip()) for p in ma_periods_str.split(',') if p.strip().isdigit()] 
     path = DATA_DIR / f"{code}.parquet"
 
     if not path.exists():
-        safe_print_json({"error": "FILE_NOT_FOUND"}, status_code=1)
+        safe_print_json({"error": f"데이터 파일을 찾을 수 없음: {path}"}, status_code=1)
         return
 
     try:
         df = pd.read_parquet(path)
+        
         if df.index.dtype != 'datetime64[ns]' and 'Date' in df.columns:
             df = df.set_index('Date')
+            
+        if df.empty:
+            safe_print_json({"error": "데이터프레임이 비어 있습니다."}, status_code=1)
+            return
 
         df_full = calculate_advanced_features(df)
         df_for_chart = df_full.iloc[-chart_period:].copy()
 
-        ohlcv_data = [{"x": idx.strftime('%Y-%m-%d'), "o": r['Open'], "h": r['High'], "l": r['Low'], "c": r['Close'], "v": r['Volume']} for idx, r in df_for_chart.iterrows()]
-        
+        if df_for_chart.empty:
+            safe_print_json({"error": "특징 계산 후 데이터가 부족하여 차트 생성 불가."}, status_code=1)
+            return
+
+        # 1. 캔들스틱 데이터 포맷팅 (OHLCV)
+        ohlcv_data = []
+        for index, row in df_for_chart.iterrows():
+            ohlcv_data.append({
+                "x": index.strftime('%Y-%m-%d'), 
+                "o": row['Open'], "h": row['High'], "l": row['Low'], "c": row['Close'], "v": row['Volume']
+            })
+
+        # 2. 이동평균선(MA) 데이터 포맷팅
         ma_data = {}
         for p in periods:
-            ma_col = f'SMA_{p}'
-            if ma_col not in df_for_chart.columns:
-                df_for_chart[ma_col] = df_for_chart['Close'].rolling(window=p, min_periods=1).mean()
-            ma_data[f"MA{p}"] = [{"x": idx.strftime('%Y-%m-%d'), "y": r[ma_col]} for idx, r in df_for_chart.iterrows() if not pd.isna(r[ma_col])]
-        
-        macd_data = {
-            "MACD": [{"x": i.strftime('%Y-%m-%d'), "y": r['MACD']} for i, r in df_for_chart.iterrows()],
-            "Signal": [{"x": i.strftime('%Y-%m-%d'), "y": r['MACD_Signal']} for i, r in df_for_chart.iterrows()],
-            "Histogram": [{"x": i.strftime('%Y-%m-%d'), "y": r['MACD_Hist']} for i, r in df_for_chart.iterrows()]
-        }
+            ma_col_name = f'SMA_{p}'
+            if ma_col_name not in df_for_chart.columns:
+                 # 없는 MA를 다시 계산 (Parquet에 저장되지 않은 경우 대비)
+                 df_for_chart[ma_col_name] = df_for_chart['Close'].rolling(window=p, min_periods=1).mean() 
 
-        # 패턴 및 크로스 지점
+            ma_values = []
+            for index, row in df_for_chart.iterrows():
+                if not pd.isna(row[ma_col_name]):
+                    ma_values.append({"x": index.strftime('%Y-%m-%d'), "y": row[ma_col_name]})
+            ma_data[f"MA{p}"] = ma_values
+        
+        # 3. MACD 데이터 포맷팅
+        macd_data = {"MACD": [], "Signal": [], "Histogram": []}
+        for index, row in df_for_chart.iterrows():
+            date_str = index.strftime('%Y-%m-%d')
+            if not pd.isna(row['MACD']):
+                macd_data["MACD"].append({"x": date_str, "y": row['MACD']})
+            if not pd.isna(row['MACD_Signal']):
+                macd_data["Signal"].append({"x": date_str, "y": row['MACD_Signal']})
+            if not pd.isna(row['MACD_Hist']):
+                macd_data["Histogram"].append({"x": date_str, "y": row['MACD_Hist']})
+
+        # 4. 크로스 지점 감지 및 패턴 넥라인 정보 추가
+        cross_data = []
+        pattern_data = []
+        
+        ma50_col = 'SMA_50'
+        ma200_col = 'SMA_200'
+        
+        # 4-1. MA 크로스 지점 감지
+        if ma50_col in df_for_chart.columns and ma200_col in df_for_chart.columns:
+            ma_cross = df_for_chart[ma50_col] > df_for_chart[ma200_col]
+            cross_points = ma_cross[ma_cross != ma_cross.shift(1)]
+
+            for date, is_above in cross_points.items():
+                if date == df_for_chart.index[0]: continue
+                prev_above = ma_cross.shift(1).loc[date]
+                cross_type = ""
+                
+                if not prev_above and is_above: cross_type = "GoldenCross"
+                elif prev_above and not is_above: cross_type = "DeadCross"
+                
+                if cross_type:
+                    cross_data.append({"x": date.strftime('%Y-%m-%d'), "y": df_for_chart.loc[date, 'Close'], "type": cross_type})
+
+        # 4-2. 패턴 넥라인 정보 감지
         peaks_all, troughs_all = find_peaks_and_troughs(df_full)
+        
         _, db_neckline, db_status, _ = find_double_bottom(df_full, troughs_all)
         _, tb_neckline, tb_status, _ = find_triple_bottom(df_full, troughs_all)
         _, ch_neckline, ch_status, _ = find_cup_and_handle(df_full, peaks_all, troughs_all)
-        _, hc_neckline, hc_status, _ = find_half_cup_waist(df_full)
-        _, ltd_neckline, ltd_status, _ = find_long_term_down_trend(df_full)
 
-        pattern_data = []
         today_date = df_full.index[-1].strftime('%Y-%m-%d')
-        for p_name, p_neck, p_stat in [
-            ("DoubleBottom", db_neckline, db_status), 
-            ("TripleBottom", tb_neckline, tb_status), 
-            ("CupAndHandle", ch_neckline, ch_status), 
-            ("HalfCup", hc_neckline, hc_status),
-            ("LongTermDown", ltd_neckline, ltd_status)
-        ]:
-            if p_neck: pattern_data.append({"x": today_date, "y": p_neck, "type": p_name, "status": p_stat})
+        chart_min_close = df_for_chart['Close'].min()
+        chart_max_close = df_for_chart['Close'].max()
 
-        safe_print_json({
-            "ticker": code, "name": name, "mode": "chart_data",
-            "ohlcv_data": ohlcv_data, "ma_data": ma_data, "macd_data": macd_data, "pattern_points": pattern_data
-        }, status_code=0)
+        patterns_to_check = [
+            ("DoubleBottom", db_neckline, db_status),
+            ("TripleBottom", tb_neckline, tb_status),
+            ("CupAndHandle", ch_neckline, ch_status)
+        ]
 
-    except Exception:
-        safe_print_json({"error": "CHART_FAIL"}, status_code=1)
+        for p_name, p_neckline, p_status in patterns_to_check:
+            # 차트 범위 내에 넥라인이 있을 때만 표시
+            if p_neckline and (chart_min_close * 0.95 < p_neckline < chart_max_close * 1.05):
+                pattern_data.append({"x": today_date, "y": p_neckline, "type": p_name, "status": p_status})
 
 
+        # 5. 최종 결과 JSON 구성
+        final_output = {
+            "ticker": code,
+            "name": name,
+            "mode": "chart_data",
+            "ohlcv_data": ohlcv_data,
+            "ma_data": ma_data,
+            "macd_data": macd_data,
+            "cross_points": cross_data,
+            "pattern_points": pattern_data
+        }
+
+        safe_print_json(final_output, status_code=0)
+
+    except Exception as e:
+        logging.error(f"[ERROR] Chart.js 데이터 생성 실패 ({code} {name}): {e}\n{traceback.format_exc()}")
+        safe_print_json({"error": f"Chart.js 데이터 생성 실패: {e}"}, status_code=1)
+
+
+# main 함수 수정 (argparse 인자 목록 반영)
 def main():
+    """스크립트의 메인 실행 함수입니다. 인수를 파싱하고 모드별 함수를 호출합니다."""
     parser = argparse.ArgumentParser(description="주식 데이터 분석 및 차트 데이터 생성 스크립트")
-    parser.add_argument("--mode", type=str, required=True, choices=['analyze', 'chart'])
-    parser.add_argument("--workers", type=int, default=os.cpu_count() * 2)
-    parser.add_argument("--ma_periods", type=str, default="20,50,200")
-    parser.add_argument("--chart_period", type=int, default=250)
-    parser.add_argument("--symbol", type=str)
-    parser.add_argument("--analyze_patterns", action="store_true")
     
-    # 🔥 force 인자 추가 (이게 있어야 자바에서 보낸 --force를 인식함)
-    parser.add_argument("--force", action="store_true", help="캐시를 무시하고 강제 분석 실행")
+    # 요청하신 인자 목록 반영
+    parser.add_argument("--mode", type=str, required=True, choices=['analyze', 'chart'], help="실행 모드 선택: 'analyze' 또는 'chart'")
+    parser.add_argument("--workers", type=int, default=os.cpu_count() * 2, help="분석 모드에서 사용할 최대 스레드 수")
+    parser.add_argument("--ma_periods", type=str, default="20,50,200", help="이동 평균선 기간 지정 (쉼표로 구분, 예: 5,20,50)")
+    parser.add_argument("--chart_period", type=int, default=250, help="차트 모드에서 표시할 거래일 수 (기본값: 250일)")
     
-    parser.add_argument("--pattern_type", type=str, choices=['ma', 'all_below_ma', 'double_bottom', 'triple_bottom', 'cup_and_handle', 'half_cup', 'long_term_down_trend', 'goldencross', 'deadcross', 'regime:0', 'regime:1', 'regime:2', 'regime:3'])
-    parser.add_argument("--debug", action="store_true")
-    parser.add_argument("--top_n", type=int, default=10)
+    # --symbol 인자는 analyze와 chart 모두에서 사용될 수 있으므로, 따로 정의합니다.
+    parser.add_argument("--symbol", type=str, help="분석 또는 차트 모드에서 사용할 단일 종목 코드 (Ticker)")
     
+    parser.add_argument("--analyze_patterns", action="store_true", help="패턴 감지 활성화")
+    parser.add_argument("--pattern_type", type=str,
+                          choices=['ma', 'all_below_ma', 'double_bottom', 'triple_bottom', 'cup_and_handle', 'goldencross', 'deadcross', 'regime:0', 'regime:1', 'regime:2', 'regime:3'],
+                          help="분석 모드에서 필터링할 패턴 종류 (예: goldencross, regime:0)")
+    parser.add_argument("--debug", action="store_true", help="디버그 모드 활성화 (로깅 레벨 DEBUG)")
+    parser.add_argument("--top_n", type=int, default=10, help="분석 결과 중 상위 N개 종목만 반환 (0 이하: 전체 반환)")
+    
+
     args = parser.parse_args()
-    setup_env(log_level=logging.DEBUG if args.debug else logging.INFO) 
+    
+    # 로깅 레벨 설정
+    log_level = logging.DEBUG if args.debug else logging.INFO
+    setup_env(log_level=log_level) 
     
     if args.mode == 'analyze':
-        analyze_patterns_flag = args.analyze_patterns or (args.pattern_type not in [None, 'ma', 'all_below_ma'] and not (args.pattern_type and str(args.pattern_type).startswith('regime:')))
-        # 🔥 args.force 추가 전달
-        run_analysis(args.workers, args.ma_periods, analyze_patterns_flag, args.pattern_type, args.top_n, args.force, args.symbol)
+        # analyze_patterns 플래그가 설정되었거나, pattern_type이 MA/Regime 필터가 아닌 경우 패턴 분석 활성화
+        analyze_patterns_flag = args.analyze_patterns or (args.pattern_type not in [None, 'ma', 'all_below_ma'] and not (args.pattern_type and args.pattern_type.startswith('regime:')))
+        
+        run_analysis(
+            workers=args.workers,
+            ma_periods_str=args.ma_periods,
+            analyze_patterns_flag=analyze_patterns_flag, # 플래그를 함수로 전달
+            pattern_type_filter=args.pattern_type,
+            top_n=args.top_n,
+            symbol_filter=args.symbol 
+        )
     elif args.mode == 'chart':
-        if not args.symbol: return
-        generate_chart(args.symbol, args.ma_periods, args.chart_period)
+        # chart 모드 실행
+        if not args.symbol:
+            safe_print_json({"error": "MISSING_ARGUMENT", "reason": "차트 모드는 --symbol 인자를 필수로 요구합니다."}, status_code=1)
+            return
+            
+        generate_chart(
+            symbol=args.symbol,
+            ma_periods_str=args.ma_periods,
+            chart_period=args.chart_period
+        )
 
 if __name__ == "__main__":
     main()

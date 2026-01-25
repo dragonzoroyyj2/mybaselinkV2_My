@@ -72,59 +72,57 @@
 	| **데스크탑 기본** | `> 1024px`      | 노트북/PC             	 | 기본 레이아웃 유지           		|
   */
   document.addEventListener("DOMContentLoaded", () => {
-    const sidebar = document.querySelector(".sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
+	  const sidebar = document.getElementById("left");
+	  const overlay = document.getElementById("sidebarOverlay");
 
-    // ✅ 공통 사이드바 닫기 함수
-    function forceCloseSidebar() {
-      if (sidebar && sidebar.classList.contains("open")) {
-        sidebar.classList.remove("open");
-        if (overlay) overlay.style.display = "none";
-      }
-    }
+	  function forceCloseSidebar() {
+	    if (sidebar && sidebar.classList.contains("open")) {
+	      sidebar.classList.remove("open");
+	      if (overlay) overlay.style.display = "none";
+	    }
+	  }
 
-    // ✅ 전역 토글 함수
-    window.toggleSidebar = () => {
-      if (!sidebar) return;
-      const isOpen = sidebar.classList.contains("open");
-      if (isOpen) {
-        forceCloseSidebar();
-      } else {
-        sidebar.classList.add("open");
-        if (overlay) overlay.style.display = "block";
-      }
-    };
+	  window.toggleSidebar = () => {
+	    if (!sidebar) return;
+	    const isOpen = sidebar.classList.contains("open");
+	    if (isOpen) {
+	      forceCloseSidebar();
+	    } else {
+	      sidebar.classList.add("open");
+	      if (overlay) overlay.style.display = "block";
+	    }
+	  };
 
-    // 🚨 [필살기] 스크롤바 유무와 상관없이 '동작' 감지 시 닫기
-    const handleCloseAction = (e) => {
-      if (!sidebar || !sidebar.classList.contains("open")) return;
-      
-      // 🚩 e.target.closest 에러 방지용 체크
-      if (!e.target || typeof e.target.closest !== 'function') return;
+	  const handleCloseAction = (e) => {
+	    if (!sidebar || !sidebar.classList.contains("open")) return;
 
-      // 1. 사이드바 내부에서 발생하는 동작은 무시
-      if (e.target.closest('.sidebar')) return;
-      // 2. 메뉴 버튼 클릭은 toggleSidebar가 처리하도록 무시
-      if (e.target.closest('#menuToggle')) return;
+	    // 🚩 [필터 1] 이벤트가 발생한 지점이 레프트 메뉴 내부라면 절대 닫지 않음
+	    // e.composedPath()를 쓰면 이벤트가 거쳐온 모든 경로를 확인해서 더 정확합니다.
+	    const path = e.composedPath();
+	    if (path.includes(sidebar)) return;
 
-      // 3. 그 외 모든 휠 동작, 터치 이동, 스크롤 발생 시 사이드바 닫기
-      forceCloseSidebar();
-    };
+	    // 🚩 [필터 2] 토글 버튼 영역 무시
+	    const toggleBtn = document.getElementById('menuToggle');
+	    if (toggleBtn && path.includes(toggleBtn)) return;
 
-    // [마우스 휠] 스크롤바 없어도 휠 굴리면 감지
-    window.addEventListener("wheel", handleCloseAction, {passive: true, capture: true});
-    
-    // [터치 이동] 모바일에서 스와이프 시 감지
-    window.addEventListener("touchmove", handleCloseAction, {passive: true, capture: true});
-    
-    // [기존 클릭] 빈 공간 클릭 시 닫기
-    window.addEventListener("mousedown", handleCloseAction, true);
-    
-    // [기존 스크롤] 혹시 모를 실제 스크롤 발생 시 대응
-    window.addEventListener("scroll", handleCloseAction, true);
+	    // 🚩 위 영역들이 아니면 (즉, 컨텐츠 영역이면) 닫기
+	    forceCloseSidebar();
+	  };
 
-    overlay?.addEventListener("click", forceCloseSidebar);
-  });
+	  // ✅ wheel(휠): 컨텐츠 영역에서 하면 닫히고, 레프트 안에서 하면 유지됨
+	  window.addEventListener("wheel", handleCloseAction, { passive: true });
+
+	  // ✅ mousedown(클릭): 컨텐츠 영역 클릭 시 닫힘
+	  window.addEventListener("mousedown", handleCloseAction);
+
+	  // ✅ touchmove(모바일 터치): 컨텐츠 영역 스와이프 시 닫힘
+	  window.addEventListener("touchmove", handleCloseAction, { passive: true });
+
+	  // ⚠️ [주의] window scroll 리스너는 타겟 구분이 안 되므로 삭제했습니다.
+	  // 이래야 레프트 안에서 휠 할 때 안 사라집니다.
+
+	  overlay?.addEventListener("click", forceCloseSidebar);
+	});
   </script>
 
   <script src="/js/common/common_loadseq_1_Loading_op.js"></script>
