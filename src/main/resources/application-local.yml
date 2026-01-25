@@ -33,10 +33,6 @@ python:
   working:
     dir: "${python.root.path}/python/stock/py"
 
-
-  update_stock_listing:
-    path: "${python.root.path}/python/stock/py/update_stock_listing.py"
-
   update_stock_listing_prod:
     path: "${python.root.path}/python/stock/py/update_stock_listing_prod.py"
 
@@ -50,12 +46,6 @@ python:
     stock_listing_prod:
       path: "${python.root.path}/python/data/stock_list/stock_listing_prod.json"
 
-  news:
-    news_search_dart_list:
-      path: "${python.root.path}/python/stock/py/news_search_dart_list.py"
-
-    news_search_naver_list:
-      path: "${python.root.path}/python/stock/py/news_search_naver_list.py"
 
 ###########################################################################
 # ? DataSource (PostgreSQL 접속)

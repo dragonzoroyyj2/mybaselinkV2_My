@@ -32,9 +32,6 @@ python:
   working:
     dir: "${python.root.path}/python/stock/py"
 
-  update_stock_listing:
-    path: "${python.root.path}/python/stock/py/update_stock_listing.py"
-
   update_stock_listing_prod:
     path: "${python.root.path}/python/stock/py/update_stock_listing_prod.py"
 

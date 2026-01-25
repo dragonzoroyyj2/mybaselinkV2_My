@@ -304,3 +304,8 @@ pyarrow.lib.ArrowInvalid: Could not open Parquet input source '<Buffer>': Parque
 2026-01-09 15:39:51,005 - INFO - root - 분석 시작 (캐시 미스): 총 2901 종목, 필터: triple_bottom
 2026-01-09 15:45:39,616 - INFO - root - 분석 결과 캐시 저장 완료: 20260109_triple_bottom_pattern_10.json
 2026-01-09 15:45:39,616 - INFO - root - 분석 완료 및 결과 반환. 총 소요 시간: 348.68초
+2026-01-25 15:44:55,676 - INFO - root - 만료된 (7일 이상) 캐시 파일 정리 시작.
+2026-01-25 15:44:55,680 - INFO - root - 총 3개의 오래된 캐시 파일을 정리했습니다.
+2026-01-25 15:44:55,738 - INFO - root - 분석 시작 (캐시 미스): 총 2894 종목, 필터: all_below_ma
+2026-01-25 15:49:53,501 - INFO - root - 분석 결과 캐시 저장 완료: 20260125_all_below_ma_no_pattern_10.json
+2026-01-25 15:49:53,501 - INFO - root - 분석 완료 및 결과 반환. 총 소요 시간: 297.82초
