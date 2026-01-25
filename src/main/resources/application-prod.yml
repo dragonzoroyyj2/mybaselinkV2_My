@@ -1,11 +1,11 @@
 ###########################################################################
 # application-prod.yml
-# ?? Prod (운영/회사) 환경 전용 설정 파일
+# 🎯 Prod (운영/회사) 환경 전용 설정 파일
 # - 공통(application.yml)을 상속받고, 아래 값들만 덮어씀
 ###########################################################################
 
 ###########################################################################
-# ?? 서버 쿠키 정책 (HTTP 서비스이므로 secure=false 유지)
+# 🍪 서버 쿠키 정책 (HTTP 서비스이므로 secure=false 유지)
 ###########################################################################
 app:
   cookie:
@@ -14,7 +14,7 @@ app:
     secure: ${COOKIE_SECURE:false}
 
 ###########################################################################
-# ?? Python 실행 환경 설정 (운영 서버 Windows 환경 가정)
+# 🐍 Python 실행 환경 설정 (운영 서버 Windows 환경 가정)
 ###########################################################################
 python:
   # 1. 서버에 설치된 Python 실행 파일의 절대 경로 (ENV: PYTHON_EXECUTABLE)
@@ -47,20 +47,19 @@ python:
 
 
 ###########################################################################
-# ? DataSource (PostgreSQL 접속)
-# ?? 보안 확보: DB 인증 정보는 반드시 환경 변수(ENV)로 주입
+# 🐘 DataSource (PostgreSQL 접속)
+# 💡 변수(${DB_URL})를 빼고 운영 서버의 정보를 직접 입력함
 ###########################################################################
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    # ENV: DB_URL (사용자 기준 유지)
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/mybaselink_db?currentSchema=mybaselink} 
-    # ENV: DB_USERNAME (사용자 기준 유지)
-    username: ${DB_USERNAME:mybaseuser}
-    # ENV: DB_PASSWORD (사용자 기준 유지)
-    password: ${DB_PASSWORD:mybaseuser1234} 
+    # ENV 변수 대신 직접 값을 할당하도록 들여쓰기 교정
+    url: jdbc:postgresql://211.194.66.163:5432/mybaselink_db?currentSchema=mybaselink
+    username: mybaseuser
+    password: mybaseuser1234  # 운영 서버 실제 비밀번호
+
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: 20      # 운영 환경은 접속자가 많을 수 있으니 조금 늘려줍니다
       minimum-idle: 2
       connection-timeout: 30000
       idle-timeout: 600000
@@ -70,8 +69,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none # ✅ 운영 안정화를 위해 validate로 변경 완료
-    show-sql: false
+      ddl-auto: none # 중요! 운영 서버 데이터가 날아가지 않게 none 설정
+    show-sql: false  # 운영 로그 최적화
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
