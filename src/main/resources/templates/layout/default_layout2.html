@@ -41,11 +41,6 @@
   <link rel="stylesheet" href="/css/common/commonToast.css">
   <link rel="stylesheet" href="/css/common/commonTop.css">
   <link rel="stylesheet" href="/css/common/commonLeft.css">
-
-  <style>
-    /* 페이지 하단 여백 확보 (정보 바 높이만큼) */
-    body { padding-bottom: 28px !important; }
-  </style>
 </head>
 
 <body style="position: relative; margin: 0; padding: 0;">
@@ -60,17 +55,15 @@
     <div th:replace="~{fragments/left :: leftFragment}"></div>
 
     <main id="mainContentArea" style="flex: 1; min-width: 0;">
-      <!-- 레이아웃 본문 섹션 -->
       <div class="content" layout:fragment="content"></div>
     </main>
   </div>
 
-  <!-- ✅ 환율 정보 바 (Thymeleaf 표준 문법 적용) -->
-<footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
+  <footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
 
   <script>
   /*
-  | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적                       |
+  | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적               		|
 	| ----------- 	| ------------------- | ------------------------- | -------------------- 				|
 	| **초소형폰** | `max-width: 360px`  | iPhone SE, Galaxy A10e    | 최소 대응 (기본 텍스트/버튼 축소) |
 	| **소형폰** | `max-width: 480px`  | Galaxy S8, iPhone 12 mini | 모바일 세로 모드 기준         	|
@@ -104,6 +97,7 @@
 	    if (!sidebar || !sidebar.classList.contains("open")) return;
 
 	    // 🚩 [필터 1] 이벤트가 발생한 지점이 레프트 메뉴 내부라면 절대 닫지 않음
+	    // e.composedPath()를 쓰면 이벤트가 거쳐온 모든 경로를 확인해서 더 정확합니다.
 	    const path = e.composedPath();
 	    if (path.includes(sidebar)) return;
 
@@ -123,6 +117,9 @@
 
 	  // ✅ touchmove(모바일 터치): 컨텐츠 영역 스와이프 시 닫힘
 	  window.addEventListener("touchmove", handleCloseAction, { passive: true });
+
+	  // ⚠️ [주의] window scroll 리스너는 타겟 구분이 안 되므로 삭제했습니다.
+	  // 이래야 레프트 안에서 휠 할 때 안 사라집니다.
 
 	  overlay?.addEventListener("click", forceCloseSidebar);
 	});

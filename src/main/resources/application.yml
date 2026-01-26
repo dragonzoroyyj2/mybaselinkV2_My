@@ -4,7 +4,7 @@
 ###########################################################################
 spring:
   profiles:
-    active: local  # 기본값은 로컬
+    active: prod  # 기본값은 로컬
     group:
       # 1. 로컬 개발 세트 (로컬 설정 + 로컬 DB)
       "local": "local,local-db"

@@ -52,7 +52,7 @@ public class NewsRssTypeAService {
         // 2. RSS 수집 실행
         collectRssNews();
 
-        // 3. DB 데이터 조회 및 변환 (형님표 Map 구조)
+        // 3. DB 데이터 조회 및 변환
         List<NewsRssEntity> entities = repository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         List<Map<String, Object>> filtered = entities.stream().map(this::convertToMap).collect(Collectors.toCollection(ArrayList::new));
 
@@ -62,7 +62,7 @@ public class NewsRssTypeAService {
             filtered.removeIf(item -> !item.get("title").toString().toLowerCase().contains(s));
         }
 
-        // 5. 페이징 처리 (형님 로직)
+        // 5. 페이징 처리
         return applyPagination(filtered, page, size, mode, pagination);
     }
 
@@ -70,12 +70,25 @@ public class NewsRssTypeAService {
         for (Map<String, String> source : RSS_SOURCES) {
             try {
                 HttpHeaders headers = new HttpHeaders();
-                headers.set("User-Agent", "Mozilla/5.0");
-                ResponseEntity<byte[]> response = restTemplate.exchange(source.get("url"), HttpMethod.GET, new HttpEntity<>(headers), byte[].class);
+                headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+                headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+
+                ResponseEntity<byte[]> response = restTemplate.exchange(
+                    source.get("url"), 
+                    HttpMethod.GET, 
+                    new HttpEntity<>(headers), 
+                    byte[].class
+                );
+
+                if (response.getBody() == null) continue;
 
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                // 보안을 위한 설정 추가 (XXE 공격 방지)
+                factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 Document doc = builder.parse(new ByteArrayInputStream(response.getBody()));
+                doc.getDocumentElement().normalize();
+                
                 NodeList items = doc.getElementsByTagName("item");
 
                 for (int i = 0; i < items.getLength(); i++) {
@@ -83,7 +96,6 @@ public class NewsRssTypeAService {
                     String title = getTagValue("title", item);
                     String link = getTagValue("link", item);
                     
-                    // 🚩 중복 체크 + 긍정 키워드 체크
                     if (isPositive(title) && !repository.existsByLink(link) && !repository.existsByTitle(title)) {
                         repository.save(new NewsRssEntity(
                             title, link, source.get("name"), 
@@ -92,17 +104,24 @@ public class NewsRssTypeAService {
                         ));
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                // 에러 발생 시 로그만 찍고 다음 소스로 넘어감
+                System.err.println("[RSS 수집 실패] " + source.get("name") + " : " + e.getMessage());
+            }
         }
     }
 
     private boolean isPositive(String title) {
+        if (title == null) return false;
         return POSITIVE_KEYWORDS.stream().anyMatch(title::contains);
     }
 
     private String getTagValue(String tag, Element element) {
-        NodeList nlList = element.getElementsByTagName(tag).item(0).getChildNodes();
-        return nlList.item(0).getNodeValue().trim();
+        NodeList nlList = element.getElementsByTagName(tag);
+        if (nlList.getLength() > 0 && nlList.item(0).hasChildNodes()) {
+            return nlList.item(0).getFirstChild().getNodeValue().trim();
+        }
+        return "";
     }
 
     private Map<String, Object> convertToMap(NewsRssEntity entity) {
@@ -117,16 +136,19 @@ public class NewsRssTypeAService {
 
     private Map<String, Object> applyPagination(List<Map<String, Object>> list, int page, int size, String mode, boolean pagination) {
         Map<String, Object> result = new HashMap<>();
+        int totalElements = list.size();
+        
         if (!pagination || "client".equalsIgnoreCase(mode)) {
             result.put("content", list);
-            result.put("totalElements", list.size());
+            result.put("totalElements", totalElements);
             return result;
         }
+        
         int start = page * size;
-        int end = Math.min(start + size, list.size());
-        result.put("content", (start >= list.size()) ? new ArrayList<>() : list.subList(start, end));
-        result.put("totalElements", list.size());
-        result.put("totalPages", (int) Math.ceil((double) list.size() / size));
+        int end = Math.min(start + size, totalElements);
+        result.put("content", (start >= totalElements) ? new ArrayList<>() : list.subList(start, end));
+        result.put("totalElements", totalElements);
+        result.put("totalPages", (int) Math.ceil((double) totalElements / size));
         return result;
     }
 }

@@ -34,52 +34,17 @@ public class NewsDartTypeAService {
             "영업이익증가", "무상증자", "자사주소각", "자사주취득", "인수", "합병", "단일판매"
     );
 
+    /** ✅ 네이버 서비스 스타일로 통합된 리스트 조회 */
     @Transactional
-    public void collectAndSave() {
-        LocalDate targetLocalDate = LocalDate.now();
-        if (LocalTime.now().isBefore(LocalTime.of(7, 30))) targetLocalDate = targetLocalDate.minusDays(1);
-        String targetDate = targetLocalDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-        try {
-            String url = "https://opendart.fss.or.kr/api/list.json";
-            // 🚩 [수정] fromHttpUrl 대신 fromUriString 사용
-            String targetUrl = UriComponentsBuilder.fromUriString(url) 
-                    .queryParam("crtfc_key", API_KEY)
-                    .queryParam("bgnde", targetDate)
-                    .queryParam("endde", targetDate)
-                    .queryParam("page_count", "100")
-                    .toUriString();
-
-            String response = restTemplate.getForObject(targetUrl, String.class);
-            if (response == null) return;
-
-            JSONObject json = new JSONObject(response);
-            if ("000".equals(json.optString("status"))) {
-                JSONArray list = json.getJSONArray("list");
-                for (int i = 0; i < list.length(); i++) {
-                    JSONObject obj = list.getJSONObject(i);
-                    String corpCls = obj.optString("corp_cls");
-                    if (!Arrays.asList("Y", "K", "N").contains(corpCls)) continue;
-
-                    String link = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + obj.optString("rcept_no");
-                    if (repository.existsByLink(link)) continue;
-
-                    String corpCode = obj.optString("corp_code");
-                    String feature = profitStatusCache.computeIfAbsent(corpCode, this::getProfitStatusFromDart);
-
-                    NewsDartEntity entity = new NewsDartEntity(
-                            obj.optString("report_nm"), link, obj.optString("corp_name"),
-                            obj.optString("rcept_dt"), LocalDateTime.now(),
-                            getMarketName(corpCls), feature
-                    );
-                    repository.save(entity);
-                }
-            }
-            repository.deleteByRawDateBefore(LocalDateTime.now().minusDays(3));
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-
     public Map<String, Object> getList(int page, int size, String search, String mode, boolean pagination) {
+        
+        // 1. [청소] 3일 지난 데이터 삭제
+        repository.deleteByRawDateBefore(LocalDateTime.now().minusDays(3));
+
+        // 2. [수집] 실시간 DART 데이터 긁어와서 저장 (중복 제외)
+        collectAndSave();
+
+        // 3. [조회] DB 데이터 가져와서 Map 리스트로 변환
         List<NewsDartEntity> entities = repository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         
         List<Map<String, Object>> filtered = entities.stream()
@@ -101,11 +66,15 @@ public class NewsDartTypeAService {
             })
             .collect(Collectors.toList());
 
+        // 4. [결과 반환] 페이징 처리
         Map<String, Object> result = new HashMap<>();
         int totalElements = filtered.size();
+        
         if (!pagination || "client".equalsIgnoreCase(mode)) {
-            result.put("content", filtered); result.put("page", 0);
-            result.put("totalPages", 1); result.put("totalElements", totalElements);
+            result.put("content", filtered);
+            result.put("page", 0);
+            result.put("totalPages", 1);
+            result.put("totalElements", totalElements);
             return result;
         }
 
@@ -115,9 +84,60 @@ public class NewsDartTypeAService {
                                           ? new ArrayList<>() 
                                           : filtered.subList(start, Math.min(start + size, totalElements));
 
-        result.put("content", paged); result.put("page", page);
-        result.put("totalPages", totalPages); result.put("totalElements", totalElements);
+        result.put("content", paged);
+        result.put("page", page);
+        result.put("totalPages", totalPages);
+        result.put("totalElements", totalElements);
         return result;
+    }
+
+    /** ✅ 데이터 수집 로직 (Private으로 변경하여 getList 내부에서 호출) */
+    private void collectAndSave() {
+        LocalDate targetLocalDate = LocalDate.now();
+        // 아침 7:30 전이면 어제 공시부터 가져옴
+        if (LocalTime.now().isBefore(LocalTime.of(7, 30))) targetLocalDate = targetLocalDate.minusDays(1);
+        String targetDate = targetLocalDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        try {
+            String url = "https://opendart.fss.or.kr/api/list.json";
+            String targetUrl = UriComponentsBuilder.fromUriString(url) 
+                    .queryParam("crtfc_key", API_KEY)
+                    .queryParam("bgnde", targetDate)
+                    .queryParam("endde", targetDate)
+                    .queryParam("page_count", "100")
+                    .toUriString();
+
+            String response = restTemplate.getForObject(targetUrl, String.class);
+            if (response == null) return;
+
+            JSONObject json = new JSONObject(response);
+            if ("000".equals(json.optString("status"))) {
+                JSONArray list = json.getJSONArray("list");
+                for (int i = 0; i < list.length(); i++) {
+                    JSONObject obj = list.getJSONObject(i);
+                    String corpCls = obj.optString("corp_cls");
+                    if (!Arrays.asList("Y", "K", "N").contains(corpCls)) continue;
+
+                    String link = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + obj.optString("rcept_no");
+                    
+                    // 🚩 중복 체크: 이미 저장된 링크면 패스
+                    if (repository.existsByLink(link)) continue;
+
+                    String corpCode = obj.optString("corp_code");
+                    // 재무 상태 확인 (속도 저하 방지를 위해 캐시 사용)
+                    String feature = profitStatusCache.computeIfAbsent(corpCode, this::getProfitStatusFromDart);
+
+                    NewsDartEntity entity = new NewsDartEntity(
+                            obj.optString("report_nm"), link, obj.optString("corp_name"),
+                            obj.optString("rcept_dt"), LocalDateTime.now(),
+                            getMarketName(corpCls), feature
+                    );
+                    repository.save(entity);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private String getProfitStatusFromDart(String corpCode) {
@@ -130,7 +150,6 @@ public class NewsDartTypeAService {
         for (String year : years) {
             for (String[] r : reports) {
                 try {
-                    // 🚩 [수정] 여기도 fromUriString으로 변경
                     String targetUrl = UriComponentsBuilder.fromUriString(url) 
                             .queryParam("crtfc_key", API_KEY)
                             .queryParam("corp_code", corpCode)

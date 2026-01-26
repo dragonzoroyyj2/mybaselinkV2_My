@@ -1,59 +1,257 @@
-<!--
-/**
- * ✅ bottom.html (v1.0 - 2025.11 최소 안정판)
- * ---------------------------------------------------------------
- * - 불필요한 영역 완전 제거
- * - 연도 자동 갱신
- * - 헤더/본문과 시각적 톤 통일
- * - 다크모드 완전 대응
- */
--->
-
 <div th:fragment="bottomFragment">
+  <!-- ✅ 환율 및 지수 정보 바 (Footer 상단 위치, 반응형 및 다크모드 완벽 대응) -->
+  <div class="bottom-info-bar">
+    <div class="info-bar-content">
+      <!-- 주요 외환/지수 그룹 (USD 환율, 나스닥, 다우, 코스피, 코스닥) -->
+      <div class="info-main-scroll">
+        <div class="info-group">
+          <span class="label-text">USD</span>
+          <span class="value-text" id="val-usd" th:text="${exchange != null ? exchange.USD : '1,342'}">1,342</span>
+        </div>
+        
+        <!-- ✅ 나스닥 (NASDAQ) 동적 바인딩 -->
+        <div class="info-group">
+          <span class="label-text">나스닥</span>
+          <span class="value-text" id="val-nasdaq">
+            <th:block th:if="${stockIndices != null && stockIndices.NASDAQ != null}">
+              <span th:text="${stockIndices.NASDAQ}">16,397</span>
+              <span th:class="${stockIndices.NASDAQ_TYPE == 'up' ? 'up-color' : 'down-color'}" 
+                    th:text="${stockIndices.NASDAQ_TYPE == 'up' ? '▲' : '▼'}">▲</span>
+            </th:block>
+            <th:block th:unless="${stockIndices != null && stockIndices.NASDAQ != null}">16,397 <span class="up-color">▲</span></th:block>
+          </span>
+        </div>
+
+        <!-- ✅ 다우산업 (DOW) 동적 바인딩 -->
+        <div class="info-group">
+          <span class="label-text">다우</span>
+          <span class="value-text" id="val-dow">
+            <th:block th:if="${stockIndices != null && stockIndices.DOW != null}">
+              <span th:text="${stockIndices.DOW}">38,671</span>
+              <span th:class="${stockIndices.DOW_TYPE == 'up' ? 'up-color' : 'down-color'}" 
+                    th:text="${stockIndices.DOW_TYPE == 'up' ? '▲' : '▼'}">▲</span>
+            </th:block>
+            <th:block th:unless="${stockIndices != null && stockIndices.DOW != null}">38,671 <span class="up-color">▲</span></th:block>
+          </span>
+        </div>
+
+        <!-- ✅ 코스피 (KOSPI) 동적 바인딩 -->
+        <div class="info-group">
+          <span class="label-text">코스피</span>
+          <span class="value-text" id="val-kospi">
+            <th:block th:if="${stockIndices != null && stockIndices.KOSPI != null}">
+              <span th:text="${stockIndices.KOSPI}">2,580</span>
+              <span th:class="${stockIndices.KOSPI_TYPE == 'up' ? 'up-color' : 'down-color'}" 
+                    th:text="${stockIndices.KOSPI_TYPE == 'up' ? '▲' : '▼'}">▼</span>
+            </th:block>
+            <th:block th:unless="${stockIndices != null && stockIndices.KOSPI != null}">2,580 <span class="down-color">▼</span></th:block>
+          </span>
+        </div>
+
+        <!-- ✅ 코스닥 (KOSDAQ) 동적 바인딩 -->
+        <div class="info-group">
+          <span class="label-text">코스닥</span>
+          <span class="value-text" id="val-kosdaq">
+            <th:block th:if="${stockIndices != null && stockIndices.KOSDAQ != null}">
+              <span th:text="${stockIndices.KOSDAQ}">850</span>
+              <span th:class="${stockIndices.KOSDAQ_TYPE == 'up' ? 'up-color' : 'down-color'}" 
+                    th:text="${stockIndices.KOSDAQ_TYPE == 'up' ? '▲' : '▼'}">▲</span>
+            </th:block>
+            <th:block th:unless="${stockIndices != null && stockIndices.KOSDAQ != null}">850 <span class="up-color">▲</span></th:block>
+          </span>
+        </div>
+      </div>
+      
+      <!-- 업데이트 및 제어 그룹 -->
+      <div class="info-control-group">
+        <div class="info-group update-group">
+          <span class="label-text"><i class="fa-regular fa-clock" style="font-size: 6px;"></i></span>
+          <!-- ✅ 업데이트 시간 동적 바인딩 (지수 데이터 기준 우선) -->
+          <span class="value-text" id="val-time" 
+                th:text="${stockIndices != null && stockIndices.updateTime != null ? stockIndices.updateTime : (exchange != null && exchange['updateTime'] != null ? exchange['updateTime'] : '실시간')}">00:00</span>
+        </div>
+        <div class="refresh-btn" id="btn-refresh-info" title="정보 업데이트" onclick="handleExchangeRefresh(event)">
+          <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer-bar">
     <span>© <span id="currentYear"></span> MyBaseLink Inc. All Rights Reserved.</span>
   </footer>
 
   <style>
     /* ============================================================
-       ✅ Footer Layout (단일 문구 전용)
+       ✅ 하단 정보 바 (Bottom Info Bar) - 초슬림(Ultra-Compact) 버전
     ============================================================ */
+    .bottom-info-bar {
+      position: fixed;
+      bottom: 30px; /* 푸터 높이 축소에 따른 조정 */
+      left: 0;
+      width: 100%;
+      height: 18px; /* 20px -> 18px 축소 */
+      background: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      z-index: 2400;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 -1px 2px rgba(0,0,0,0.02);
+      transition: height 0.2s ease;
+    }
+
+    .info-bar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0 4px; /* 여백 최소화 */
+      gap: 3px;
+    }
+
+    .info-main-scroll {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px; /* 간격 더 축소 */
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex: 1;
+    }
+    .info-main-scroll::-webkit-scrollbar { display: none; }
+
+    .info-control-group {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      border-left: 1px solid #f1f5f9;
+      padding-left: 4px;
+    }
+
+    .info-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      white-space: nowrap;
+    }
+
+    .label-text {
+      color: #64748b;
+      font-weight: 800;
+      font-size: 7.5px; /* 8px -> 7.5px 축소 */
+      letter-spacing: -0.04em;
+    }
+
+    .value-text {
+      color: #334155;
+      font-weight: 700;
+      font-size: 8.5px; /* 9px -> 8.5px 축소 */
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+
+    .up-color { color: #ef4444; font-size: 5.5px; }
+    .down-color { color: #3b82f6; font-size: 5.5px; }
+
+    .refresh-btn {
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 7.5px; /* 아이콘 크기 축소 */
+      display: flex;
+      align-items: center;
+      padding: 1px;
+    }
+    .refresh-btn:hover { color: #475569; }
+    .spinning { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* ✅ Footer 스타일 축소 (36px -> 30px) */
     .footer-bar {
-      position: relative;
+      position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 42px;
-      background: var(--primary-bg, #f3f4f6);
-      border-top: 1px solid var(--border-color, #d1d5db);
-      color: var(--text-color, #374151);
-      font-size: 0.85rem;
+      height: 30px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      color: #9ca3af;
+      font-size: 8px; /* 9px -> 8px 축소 */
       display: flex;
       align-items: center;
       justify-content: center;
-      box-sizing: border-box;
       z-index: 2500;
     }
 
-    /* 🌙 다크모드 */
-    body.dark-mode .footer-bar {
-      background: #1e293b;
-      border-top-color: #334155;
-      color: #e2e8f0;
-    }
+    /* 🌙 다크모드 대응 */
+    body.dark-mode .bottom-info-bar { background: #1e293b; border-top-color: #334155; }
+    body.dark-mode .footer-bar { background: #0f172a; border-top-color: #1e293b; color: #64748b; }
+    body.dark-mode .label-text { color: #94a3b8; }
+    body.dark-mode .value-text { color: #f1f5f9; }
+    body.dark-mode .info-control-group { border-left-color: #334155; }
 
-    /* 📱 반응형 */
-    @media (max-width: 768px) {
-      .footer-bar {
-        font-size: 0.8rem;
-        padding: 8px 0;
-      }
+    /* 📱 초소형 모바일 반응형 최적화 */
+    @media (max-width: 380px) {
+      .info-main-scroll { gap: 4px; }
+      .label-text { font-size: 7px; letter-spacing: -0.05em; }
+      .value-text { font-size: 8px; }
+      .info-bar-content { padding: 0 2px; }
     }
   </style>
 
-  <script>
+  <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("currentYear").textContent = new Date().getFullYear();
+      const yearEl = document.getElementById("currentYear");
+      if(yearEl) yearEl.textContent = new Date().getFullYear();
     });
+
+    /**
+     * ✅ 환율 및 지수 정보 갱신 로직 (독립 실행형)
+     */
+    (function initStockBar() {
+      let __isExchangeFetching = false;
+
+      window.handleExchangeRefresh = async function(e) {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        if (__isExchangeFetching) return;
+
+        const icon = document.getElementById('refresh-icon');
+        const btn = document.getElementById('btn-refresh-info');
+
+        __isExchangeFetching = true;
+        if (icon) icon.classList.add('spinning');
+        if (btn) btn.style.opacity = '0.5';
+
+        try {
+          const response = await fetch('/api/exchange/latest?nocache=' + Date.now());
+          if (response.ok) {
+            const data = await response.json();
+            
+            if (data.USD) document.getElementById('val-usd').innerText = data.USD;
+            
+            const updateIndex = (id, value, type) => {
+              const el = document.getElementById(id);
+              if (!el || !value) return;
+              const colorClass = type === 'up' ? 'up-color' : 'down-color';
+              const iconMark = type === 'up' ? '▲' : '▼';
+              el.innerHTML = `${value} <span class="${colorClass}">${iconMark}</span>`;
+            };
+
+            if (data.NASDAQ) updateIndex('val-nasdaq', data.NASDAQ, data.NASDAQ_TYPE || 'up');
+            if (data.DOW) updateIndex('val-dow', data.DOW, data.DOW_TYPE || 'up');
+            if (data.KOSPI) updateIndex('val-kospi', data.KOSPI, data.KOSPI_TYPE || 'down');
+            if (data.KOSDAQ) updateIndex('val-kosdaq', data.KOSDAQ, data.KOSDAQ_TYPE || 'up');
+
+            if (data.updateTime) document.getElementById('val-time').innerText = data.updateTime;
+          }
+        } catch (err) {
+          console.error("Exchange & Index Update Error:", err);
+        } finally {
+          setTimeout(() => {
+            if (icon) icon.classList.remove('spinning');
+            if (btn) btn.style.opacity = '1';
+            __isExchangeFetching = false;
+          }, 600);
+        }
+      };
+    })();
   </script>
 </div>

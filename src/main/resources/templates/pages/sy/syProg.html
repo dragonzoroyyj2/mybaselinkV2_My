@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>프로그램 관리 - MyBaseLink</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --hover-bg: #f8fafc;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --font-sm: 0.75rem;
+            --font-base: 0.85rem;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-size: var(--font-base);
+            margin: 0;
+            color: var(--text-main);
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            line-height: 1.5;
+        }
+
+        /* 메인 컨테이너 */
+        .content-container {
+            padding: 20px 20px 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        /* 페이지 헤더 */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            padding: 0 4px;
+        }
+        .page-header h2 {
+            font-size: 1.1rem;
+            margin: 0;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.025em;
+        }
+        .breadcrumb {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        /* [조회 영역] 크기에 따라 행이 유연하게 늘어남 */
+        .search-panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap; /* 너비가 부족하면 다음 행으로 넘김 */
+            align-items: flex-end;
+            gap: 12px;
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1 1 180px; /* 기본 너비 180px, 공간 있으면 늘어남 */
+            min-width: 140px;
+        }
+
+        .search-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            padding-left: 2px;
+        }
+
+        .search-group input, .search-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            width: 100%;
+            height: 38px;
+            box-sizing: border-box;
+            background-color: #fdfdfd;
+            transition: border-color 0.2s;
+        }
+        .search-group input:focus { border-color: var(--primary-color); outline: none; background-color: #fff; }
+
+        .search-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+            /* 모바일에서 버튼이 한 행을 다 차지하게 하거나 우측 정렬 */
+            margin-left: auto; 
+        }
+
+        /* 관리 레이아웃 그리드 */
+        .admin-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 400px; 
+            gap: 16px;
+            align-items: start;
+        }
+
+        /* 패널 스타일 */
+        .panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-height: calc(100vh - 220px);
+        }
+
+        .panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* 테이블 디자인 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .data-table thead th {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            padding: 10px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-sub);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            z-index: 10;
+        }
+        .data-table tbody td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+        .data-table tr:hover { background-color: var(--hover-bg); cursor: pointer; }
+        .data-table tr.selected { background-color: #eff6ff; }
+        .data-table tr.selected td { color: var(--primary-color); font-weight: 600; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .status-y { background: #dcfce7; color: #15803d; }
+        .status-n { background: #fee2e2; color: #b91c1c; }
+
+        /* 폼 디자인 */
+        .form-body { padding: 20px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-sub);
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        .form-group textarea { line-height: 1.4; resize: none; }
+
+        /* 버튼 */
+        .btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            height: 38px;
+        }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-success { background: var(--success-color); color: white; }
+        .btn-outline { background: #fff; border: 1px solid var(--border-color); color: var(--text-sub); }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* [반응형 최적화] */
+        @media (max-width: 1024px) {
+            .admin-wrapper { grid-template-columns: 1fr; }
+            .panel { max-height: none; position: static; }
+        }
+
+        @media (max-width: 640px) {
+            .content-container { padding: 12px; }
+            .search-panel { padding: 12px; gap: 10px; }
+            .search-group { flex: 1 1 100%; } /* 모바일에서 검색조건 하나가 한 줄 차지 */
+            .search-actions { width: 100%; margin-top: 4px; }
+            .search-actions .btn { flex: 1; }
+            
+            .data-table thead th:nth-child(1),
+            .data-table tbody td:nth-child(1) { width: 80px; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="content-container">
+        <!-- 상단 타이틀 -->
+        <div class="page-header">
+            <div class="page-title">
+                <h2><i class="fas fa-th-list"></i> 프로그램 마스터 관리</h2>
+            </div>
+            <div class="breadcrumb">
+                Settings <i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i> <strong>Programs</strong>
+            </div>
+        </div>
+
+        <!-- 조회 영역: 크기에 따라 늘어나는 행 -->
+        <div class="search-panel">
+            <div class="search-group">
+                <label>프로그램 검색</label>
+                <input type="text" id="searchKeyword" placeholder="ID 또는 프로그램명 입력">
+            </div>
+            <div class="search-group">
+                <label>사용 여부</label>
+                <select id="searchUseYn">
+                    <option value="">전체 상태</option>
+                    <option value="Y">사용 중</option>
+                    <option value="N">미사용</option>
+                </select>
+            </div>
+            <div class="search-actions">
+                <button class="btn btn-outline" onclick="resetSearch()"><i class="fas fa-redo"></i> 초기화</button>
+                <button class="btn btn-primary" onclick="loadPrograms()"><i class="fas fa-search"></i> 데이터 조회</button>
+            </div>
+        </div>
+
+        <div class="admin-wrapper">
+            <!-- 목록 영역 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-list"></i> 프로그램 목록</h3>
+                    <button class="btn btn-success" style="height: 30px; padding: 0 10px; font-size: 0.75rem;" onclick="addNewProgram()">
+                        <i class="fas fa-plus"></i> 신규 등록
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">코드 ID</th>
+                                <th>프로그램 명칭</th>
+                                <th style="width: 80px; text-align: center;">상태</th>
+                            </tr>
+                        </thead>
+                        <tbody id="programListBody">
+                            <!-- 스크립트로 렌더링 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 상세 정보 카드 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-edit"></i> 상세 설정</h3>
+                </div>
+                <div class="panel-body form-body">
+                    <form id="programDetailForm">
+                        <div class="form-group">
+                            <label>프로그램 ID</label>
+                            <input type="text" id="progId" placeholder="예: PROG_001">
+                        </div>
+                        <div class="form-group">
+                            <label>프로그램 명칭</label>
+                            <input type="text" id="progName" placeholder="표시될 이름">
+                        </div>
+                        <div class="form-group">
+                            <label>호출 URL</label>
+                            <input type="text" id="progUrl" placeholder="/api/v1/...">
+                        </div>
+                        <div class="form-group">
+                            <label>상태값</label>
+                            <select id="useYn">
+                                <option value="Y">사용 (Active)</option>
+                                <option value="N">중지 (Inactive)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>비고 설명</label>
+                            <textarea id="progDesc" rows="4" placeholder="프로그램에 대한 상세 설명을 입력하세요."></textarea>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" class="btn btn-outline" onclick="resetForm()">작성취소</button>
+                            <button type="button" class="btn btn-primary" onclick="saveProgram()">
+                                <i class="fas fa-save"></i> 설정 저장
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="pageScript">
+<script>
+    // 원본 로직 유지 (샘플 데이터)
+    const mockPrograms = [
+        { id: 'SYS_MENU_01', name: '메뉴 구조 관리', url: '/sys/menu', useYn: 'Y', desc: '시스템 메뉴 구성을 관리합니다.' },
+        { id: 'SYS_PROG_01', name: '프로그램 관리', url: '/sys/prog', useYn: 'Y', desc: '프로그램 마스터 정보를 관리합니다.' },
+        { id: 'USR_MNG_01', name: '사용자 관리', url: '/usr/list', useYn: 'Y', desc: '사용자 계정 권한을 제어합니다.' },
+        { id: 'AUTH_MNG_01', name: '권한 정책 설정', url: '/auth/policy', useYn: 'Y', desc: '접근 권한 정책을 정의합니다.' },
+        { id: 'LOG_VIEW_01', name: '시스템 로그 조회', url: '/log/view', useYn: 'N', desc: '과거 이력 로그를 확인합니다.' }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadPrograms();
+    });
+
+    function loadPrograms() {
+        const body = document.getElementById('programListBody');
+        body.innerHTML = '';
+
+        mockPrograms.forEach(prog => {
+            const tr = document.createElement('tr');
+            tr.onclick = () => selectProgram(prog.id);
+            tr.innerHTML = `
+                <td><strong>${prog.id}</strong></td>
+                <td>${prog.name}</td>
+                <td style="text-align: center;">
+                    <span class="status-badge ${prog.useYn === 'Y' ? 'status-y' : 'status-n'}">
+                        ${prog.useYn === 'Y' ? '사용' : '중지'}
+                    </span>
+                </td>
+            `;
+            body.appendChild(tr);
+        });
+    }
+
+    function selectProgram(id) {
+        const prog = mockPrograms.find(p => p.id === id);
+        if(!prog) return;
+
+        document.querySelectorAll('#programListBody tr').forEach(tr => {
+            tr.classList.remove('selected');
+            if(tr.cells[0].innerText === id) tr.classList.add('selected');
+        });
+
+        document.getElementById('progId').value = prog.id;
+        document.getElementById('progId').readOnly = true;
+        document.getElementById('progId').style.backgroundColor = '#f8fafc';
+        
+        document.getElementById('progName').value = prog.name;
+        document.getElementById('progUrl').value = prog.url;
+        document.getElementById('useYn').value = prog.useYn;
+        document.getElementById('progDesc').value = prog.desc;
+    }
+
+    function addNewProgram() {
+        document.querySelectorAll('#programListBody tr').forEach(tr => tr.classList.remove('selected'));
+        document.getElementById('programDetailForm').reset();
+        document.getElementById('progId').readOnly = false;
+        document.getElementById('progId').style.backgroundColor = '#fff';
+        document.getElementById('progId').focus();
+    }
+
+    function saveProgram() {
+        const id = document.getElementById('progId').value;
+        if(!id) {
+            alert('아이디를 입력해 주세요.');
+            return;
+        }
+        alert(`[${id}] 정보가 안전하게 저장되었습니다.`);
+    }
+
+    function resetForm() {
+        document.getElementById('programDetailForm').reset();
+    }
+
+    function resetSearch() {
+        document.getElementById('searchKeyword').value = '';
+        document.getElementById('searchUseYn').value = '';
+        loadPrograms();
+    }
+</script>
+</th:block>
+
+</body>
+</html>

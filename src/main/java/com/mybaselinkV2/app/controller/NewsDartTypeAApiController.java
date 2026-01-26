@@ -28,10 +28,4 @@ public class NewsDartTypeAApiController {
         return service.getList(page, size, search, mode, pagination);
     }
     
-    /** 🚀 수동 수집 (테스트용) */
-    @GetMapping("/collect")
-    public String collect() {
-        service.collectAndSave();
-        return "DART 데이터 수집 완료!";
-    }
 }

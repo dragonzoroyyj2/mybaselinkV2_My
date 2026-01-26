@@ -43,8 +43,70 @@
   <link rel="stylesheet" href="/css/common/commonLeft.css">
 
   <style>
-    /* 페이지 하단 여백 확보 (정보 바 높이만큼) */
-    body { padding-bottom: 28px !important; }
+    /* 하단 고정 정보 바 - 초슬림 버전 */
+    .info-bar-fixed {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #f1f5f9; /* 라이트모드: 연한 회색 */
+      border-top: 1px solid #e2e8f0;
+      z-index: 6000;
+      padding: 4px 0; /* 높이 대폭 축소 */
+      box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
+    }
+
+    /* 다크모드 대응: body.dark-mode 클래스가 있을 때 적용 */
+    body.dark-mode .info-bar-fixed {
+      background: #1e293b; /* 원본의 다크 네이비 유지 */
+      border-top: 1px solid #334155;
+      box-shadow: 0 -1px 5px rgba(0,0,0,0.3);
+    }
+
+    .info-bar-container {
+      width: 100%;
+      display: flex;
+      justify-content: space-around; /* 요소를 균등 배분하여 한 화면에 꽉 차게 */
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 5px;
+    }
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .info-label {
+      font-size: 10px; /* 글씨 작게 조정 */
+      color: #64748b; /* 라이트모드 라벨 */
+      font-weight: 500;
+    }
+    body.dark-mode .info-label {
+      color: #94a3b8; /* 다크모드 라벨 */
+    }
+
+    .info-value {
+      font-size: 11px; /* 글씨 작게 조정 */
+      font-weight: 600;
+      color: #1e293b; /* 라이트모드 값 */
+    }
+    body.dark-mode .info-value {
+      color: #f8fafc; /* 다크모드 값 */
+    }
+
+    .val-up { color: #f87171; font-size: 9px; }
+    .val-down { color: #60a5fa; font-size: 9px; }
+
+    /* 모바일 대응: 글자 크기 추가 축소하여 한 줄 유지 */
+    @media (max-width: 480px) {
+      .info-label { font-size: 8px; }
+      .info-value { font-size: 9px; }
+      .info-item { gap: 2px; }
+    }
+
+    body { padding-bottom: 25px !important; } /* 바 높이가 줄어든 만큼 여백도 조정 */
   </style>
 </head>
 
@@ -60,17 +122,45 @@
     <div th:replace="~{fragments/left :: leftFragment}"></div>
 
     <main id="mainContentArea" style="flex: 1; min-width: 0;">
-      <!-- 레이아웃 본문 섹션 -->
       <div class="content" layout:fragment="content"></div>
     </main>
   </div>
 
-  <!-- ✅ 환율 정보 바 (Thymeleaf 표준 문법 적용) -->
-<footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
+  <footer th:replace="~{fragments/bottom :: bottomFragment}"></footer>
+
+  <!-- 하단 고정 정보 바: 높이 최소화 및 균등 배분 -->
+<!-- 하단 고정 정보 바: Thymeleaf 변수 적용 -->
+<aside class="info-bar-fixed">
+  <div class="info-bar-container">
+    <div class="info-item">
+      <span class="info-label">USD</span>
+      <span class="info-value" th:text="${exchange.USD}">1,342</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">JPY(100)</span>
+      <span class="info-value" th:text="${exchange.JPY}">920</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">EUR</span>
+      <span class="info-value" th:text="${exchange.EUR}">1,450</span>
+    </div>
+    <!-- 업데이트 시간 표시 (선택 사항) -->
+    <div class="info-item" th:if="${exchange.updateTime != null}">
+      <span class="info-label">갱신</span>
+      <span class="info-value" style="font-size: 8px;" th:text="${exchange.updateTime}">-</span>
+    </div>
+    
+    <!-- 주식 데이터는 현재 서비스에 없으므로 일단 유지하거나 숨김 처리 -->
+    <div class="info-item">
+      <span class="info-label">나스닥</span>
+      <span class="info-value">16,397<span class="val-up">↑</span></span>
+    </div>
+  </div>
+</aside>
 
   <script>
   /*
-  | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적                       |
+  | 구분          | 화면폭(px)          | 디바이스 예시             | 반응형 목적               		|
 	| ----------- 	| ------------------- | ------------------------- | -------------------- 				|
 	| **초소형폰** | `max-width: 360px`  | iPhone SE, Galaxy A10e    | 최소 대응 (기본 텍스트/버튼 축소) |
 	| **소형폰** | `max-width: 480px`  | Galaxy S8, iPhone 12 mini | 모바일 세로 모드 기준         	|
@@ -104,6 +194,7 @@
 	    if (!sidebar || !sidebar.classList.contains("open")) return;
 
 	    // 🚩 [필터 1] 이벤트가 발생한 지점이 레프트 메뉴 내부라면 절대 닫지 않음
+	    // e.composedPath()를 쓰면 이벤트가 거쳐온 모든 경로를 확인해서 더 정확합니다.
 	    const path = e.composedPath();
 	    if (path.includes(sidebar)) return;
 
@@ -123,6 +214,9 @@
 
 	  // ✅ touchmove(모바일 터치): 컨텐츠 영역 스와이프 시 닫힘
 	  window.addEventListener("touchmove", handleCloseAction, { passive: true });
+
+	  // ⚠️ [주의] window scroll 리스너는 타겟 구분이 안 되므로 삭제했습니다.
+	  // 이래야 레프트 안에서 휠 할 때 안 사라집니다.
 
 	  overlay?.addEventListener("click", forceCloseSidebar);
 	});

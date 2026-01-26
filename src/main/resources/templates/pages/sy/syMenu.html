@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>메뉴 관리 - MyBaseLink</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --border-color: #e4e7ed;
+            --text-main: #303133;
+            --text-sub: #606266;
+            --hover-bg: #f5f7fa;
+            --danger-color: #f56c6c;
+            --success-color: #67c23a;
+            --common-font-size: 0.85rem; 
+        }
+
+        /* 브라우저 전체 스크롤 허용 (이전 계정관리와 동일한 컨셉 유지) */
+        body {
+            background-color: var(--bg-color);
+            font-size: 13px;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .content-container {
+            padding: 20px;
+            padding-bottom: 60px; /* [수정] 하단 카드가 바닥에 붙지 않도록 여백 추가 */
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 5px;
+        }
+        .page-header h2 {
+            font-size: 1.1rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .breadcrumb {
+            font-size: 0.75rem;
+            color: #909399;
+        }
+
+        .admin-wrapper {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            /* [수정] 고정 높이를 주되 화면 높이에 따라 유동적으로 변하게 설정 */
+            height: calc(100vh - 180px); 
+            min-height: 600px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .panel-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+            background-color: #fff;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 패널 내부 스크롤 */
+        .panel-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 트리 메뉴 스타일 */
+        .menu-tree { list-style: none; padding: 0; margin: 0; }
+        .tree-item { margin: 2px 0; }
+        
+        .tree-node {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            justify-content: space-between;
+            font-size: var(--common-font-size);
+            border: 1px solid transparent;
+        }
+
+        .tree-node:hover { 
+            background-color: var(--hover-bg); 
+            border-color: var(--border-color);
+        }
+        
+        .tree-node.active {
+            background-color: #ecf5ff;
+            border-color: #b3d8ff;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .node-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-sub);
+            transition: transform 0.2s;
+        }
+
+        .tree-children {
+            padding-left: 24px; 
+        }
+
+        /* 버튼 및 폼 스타일 */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem; 
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { background: #357abd; }
+        .btn-danger { background: var(--danger-color); color: white; }
+        .btn-outline { background: #fff; border: 1px solid var(--border-color); color: var(--text-sub); }
+        .btn-outline:hover { background: var(--hover-bg); }
+        
+        .btn-sm-icon {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            justify-content: center;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-sub);
+        }
+        .btn-sm-icon:hover { color: var(--primary-color); background: #f0f7ff; }
+
+        .form-section-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-color);
+            width: fit-content;
+            color: var(--text-main);
+        }
+
+        .grid-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px 25px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-form { grid-template-columns: 1fr 1fr; }
+            .full-width { grid-column: span 2; }
+        }
+
+        .form-group { margin-bottom: 10px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: var(--common-font-size);
+            color: var(--text-main);
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+        .form-group input:focus { outline: none; border-color: var(--primary-color); }
+
+        .icon-preview-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .icon-preview {
+            width: 42px;
+            height: 42px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .empty-info {
+            padding: 100px 0;
+            text-align: center;
+            color: #909399;
+            font-size: var(--common-font-size);
+        }
+
+        /* 커스텀 스크롤바 */
+        .panel-body::-webkit-scrollbar { width: 6px; }
+        .panel-body::-webkit-scrollbar-track { background: transparent; }
+        .panel-body::-webkit-scrollbar-thumb { background: #dcdfe6; border-radius: 10px; }
+        .panel-body::-webkit-scrollbar-thumb:hover { background: #c0c4cc; }
+
+        @media (max-width: 1024px) {
+            .admin-wrapper { grid-template-columns: 1fr; }
+            .panel { height: auto; max-height: 600px; position: static; }
+        }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="content-container">
+        <div class="page-header">
+            <div class="page-title">
+                <h2><i class="fas fa-list-ul"></i> 메뉴 관리</h2>
+            </div>
+            <div class="breadcrumb">
+                <i class="fas fa-folder-open"></i>
+                <span>시스템 관리 / 메뉴 관리</span>
+            </div>
+        </div>
+
+        <div class="admin-wrapper">
+            <!-- 좌측: 메뉴 트리 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-sitemap"></i> 메뉴 구조</h3>
+                    <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="addNewMenu(null)">
+                        <i class="fas fa-plus"></i> 최상위 추가
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div id="menuTreeContainer">
+                        <!-- 트리 렌더링 영역 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우측: 상세 정보 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-edit"></i> 메뉴 상세 설정</h3>
+                    <div id="actionButtons" style="display: none;">
+                        <button class="btn btn-danger" style="padding: 5px 12px; font-size: 0.8rem;" onclick="deleteMenu()">삭제</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <!-- 초기 상태 메시지 -->
+                    <div id="emptyFormMessage" class="empty-info">
+                        <i class="fas fa-mouse-pointer fa-3x" style="margin-bottom: 20px; opacity: 0.2;"></i>
+                        <p>좌측 트리에서 메뉴를 선택하거나<br>새 메뉴를 추가해 주세요.</p>
+                    </div>
+
+                    <!-- 상세 폼 영역 -->
+                    <div id="menuFormContainer" style="display: none;">
+                        <form id="menuDetailForm">
+                            <input type="hidden" id="menuId">
+                            <input type="hidden" id="parentId">
+
+                            <div>
+                                <div class="form-section-title">메뉴 속성 정보</div>
+                                
+                                <div class="grid-form">
+                                    <div class="form-group">
+                                        <label>상위 메뉴명</label>
+                                        <input type="text" id="parentName" readonly style="background: #f9f9f9; color: #999; cursor: not-allowed;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>메뉴 명 <span style="color:var(--danger-color)">*</span></label>
+                                        <input type="text" id="menuName" placeholder="메뉴 명칭을 입력하세요">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>연결 URL</label>
+                                        <input type="text" id="menuUrl" placeholder="예: /admin/system">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>정렬 순번</label>
+                                        <input type="number" id="sortOrder" value="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>메뉴 아이콘</label>
+                                        <div class="icon-preview-box">
+                                            <div class="icon-preview" id="iconPreview"><i class="fas fa-star"></i></div>
+                                            <input type="text" id="menuIcon" oninput="updateIconPreview(this.value)" placeholder="fas fa-home">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>사용 여부</label>
+                                        <select id="useYn">
+                                            <option value="Y">사용 (Active)</option>
+                                            <option value="N">미사용 (Inactive)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label>메뉴 설명</label>
+                                        <textarea id="menuDesc" rows="4" style="resize: none;" placeholder="해당 메뉴의 기능 및 설명을 입력하세요"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="button-group">
+                                <button type="button" class="btn btn-outline" onclick="resetForm()">취소</button>
+                                <button type="button" class="btn btn-primary" onclick="saveMenu()">
+                                    <i class="fas fa-save"></i> 설정 저장
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="pageScript">
+<script>
+    /**
+     * 초기 Mock 데이터 및 로직 유지
+     */
+    let mockMenus = [
+        {
+            id: 10, parentId: null, name: '뉴스 관리', url: '#', icon: 'fas fa-newspaper', sortOrder: 1, useYn: 'Y', desc: '뉴스 수집 및 관리 서비스',
+            children: [
+                { id: 11, parentId: 10, name: 'RSS 통합 뉴스', url: '/news/rss', icon: 'fas fa-rss', sortOrder: 1, useYn: 'Y' },
+                { id: 12, parentId: 10, name: 'DART 공시 리스트', url: '/news/dart', icon: 'fas fa-file-invoice', sortOrder: 2, useYn: 'Y' }
+            ]
+        },
+        {
+            id: 20, parentId: null, name: '시스템 관리', url: '#', icon: 'fas fa-cog', sortOrder: 2, useYn: 'Y',
+            children: [
+                { id: 21, parentId: 20, name: '사용자 계정 관리', url: '/admin/users', icon: 'fas fa-user-cog', sortOrder: 1, useYn: 'Y' },
+                { id: 22, parentId: 20, name: '권한 및 메뉴 설정', url: '/admin/auth', icon: 'fas fa-shield-alt', sortOrder: 2, useYn: 'Y' }
+            ]
+        }
+    ];
+
+    let currentMenuId = null;
+
+    document.addEventListener("DOMContentLoaded", () => renderTree());
+
+    function renderTree() {
+        const container = document.getElementById('menuTreeContainer');
+        function buildHtml(items) {
+            let html = '<ul class="menu-tree">';
+            items.sort((a, b) => a.sortOrder - b.sortOrder).forEach(item => {
+                const hasChildren = item.children && item.children.length > 0;
+                html += `
+                    <li class="tree-item" id="tree-item-${item.id}">
+                        <div class="tree-node ${currentMenuId === item.id ? 'active' : ''}" onclick="selectMenu(${item.id})">
+                            <div class="node-left">
+                                <span class="toggle-icon" onclick="toggleFolder(event, ${item.id})" style="${!hasChildren ? 'visibility:hidden' : ''}">
+                                    <i class="fas fa-caret-down"></i>
+                                </span>
+                                <i class="${item.icon}" style="width: 16px; text-align: center; opacity: 0.6;"></i>
+                                <span>${item.name}</span>
+                            </div>
+                            <button class="btn btn-sm-icon" title="하위 메뉴 추가" onclick="event.stopPropagation(); addNewMenu(${item.id})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        ${hasChildren ? `<div class="tree-children" id="children-${item.id}">${buildHtml(item.children)}</div>` : ''}
+                    </li>
+                `;
+            });
+            return html + '</ul>';
+        }
+        container.innerHTML = buildHtml(mockMenus);
+    }
+
+    function toggleFolder(e, id) {
+        e.stopPropagation();
+        const item = document.getElementById(`tree-item-${id}`);
+        const childContainer = document.getElementById(`children-${id}`);
+        const icon = e.currentTarget.querySelector('i');
+        
+        if (item.classList.contains('collapsed')) {
+            item.classList.remove('collapsed');
+            childContainer.style.display = 'block';
+            icon.className = 'fas fa-caret-down';
+        } else {
+            item.classList.add('collapsed');
+            childContainer.style.display = 'none';
+            icon.className = 'fas fa-caret-right';
+        }
+    }
+
+    function selectMenu(id) {
+        currentMenuId = id;
+        const menu = findMenuInArray(mockMenus, id);
+        if (!menu) return;
+
+        document.getElementById('emptyFormMessage').style.display = 'none';
+        document.getElementById('menuFormContainer').style.display = 'block';
+        document.getElementById('actionButtons').style.display = 'block';
+        
+        document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('active'));
+        const activeNode = document.querySelector(`#tree-item-${id} > .tree-node`);
+        if(activeNode) activeNode.classList.add('active');
+
+        document.getElementById('menuId').value = menu.id;
+        document.getElementById('parentId').value = menu.parentId || '';
+        document.getElementById('parentName').value = getParentName(menu.parentId);
+        document.getElementById('menuName').value = menu.name;
+        document.getElementById('menuUrl').value = menu.url;
+        document.getElementById('sortOrder').value = menu.sortOrder;
+        document.getElementById('menuIcon').value = menu.icon;
+        document.getElementById('useYn').value = menu.useYn;
+        document.getElementById('menuDesc').value = menu.desc || '';
+        
+        updateIconPreview(menu.icon);
+    }
+
+    function addNewMenu(parentId) {
+        currentMenuId = null;
+        document.getElementById('emptyFormMessage').style.display = 'none';
+        document.getElementById('menuFormContainer').style.display = 'block';
+        document.getElementById('actionButtons').style.display = 'none';
+        
+        document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('active'));
+        document.getElementById('menuDetailForm').reset();
+        document.getElementById('menuId').value = '';
+        document.getElementById('parentId').value = parentId || '';
+        document.getElementById('parentName').value = parentId ? getParentName(parentId) : '최상위 메뉴';
+        updateIconPreview('fas fa-circle');
+    }
+
+    function saveMenu() {
+        alert('메뉴 설정이 저장되었습니다.');
+        renderTree();
+    }
+
+    function deleteMenu() {
+        if(confirm('이 메뉴를 삭제하시겠습니까? 하위 메뉴가 있는 경우 함께 삭제될 수 있습니다.')) {
+            removeMenuFromArray(mockMenus, currentMenuId);
+            currentMenuId = null;
+            renderTree();
+            resetForm();
+        }
+    }
+
+    function resetForm() {
+        if (currentMenuId) selectMenu(currentMenuId);
+        else {
+            document.getElementById('menuFormContainer').style.display = 'none';
+            document.getElementById('emptyFormMessage').style.display = 'block';
+        }
+    }
+
+    function updateIconPreview(val) {
+        document.getElementById('iconPreview').innerHTML = `<i class="${val || 'fas fa-question'}"></i>`;
+    }
+
+    function findMenuInArray(arr, id) {
+        for (let item of arr) {
+            if (item.id === id) return item;
+            if (item.children) {
+                const found = findMenuInArray(item.children, id);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    function removeMenuFromArray(arr, id) {
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].id === id) { arr.splice(i, 1); return true; }
+            if (arr[i].children && removeMenuFromArray(arr[i].children, id)) return true;
+        }
+        return false;
+    }
+
+    function getParentName(parentId) {
+        if (!parentId) return '최상위 메뉴';
+        const parent = findMenuInArray(mockMenus, parseInt(parentId));
+        return parent ? parent.name : '알 수 없음';
+    }
+</script>
+</th:block>
+
+</body>
+</html>

@@ -127,6 +127,46 @@
       padding: 6px 0; /* 높이 축소 */
     }
 
+    .info-bar-container {
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0 10px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      border-right: 1px solid #334155;
+    }
+
+    .info-item:last-child { border-right: none; }
+
+    .info-label {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .info-value {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .val-up { color: #f87171; }
+    .val-down { color: #60a5fa; }
+
     /* 모바일 대응 */
     @media (max-width: 640px) {
       .dashboard-table th, .dashboard-table td {
@@ -134,6 +174,8 @@
         font-size: 0.75rem;
       }
       .card-value { font-size: 1.2rem; }
+      .info-bar-container { justify-content: flex-start; }
+      .info-item { flex-shrink: 0; }
     }
   </style>
 </head>
@@ -228,7 +270,31 @@
     </div>
   </div>
 
-
+  <!-- 하단 고정 정보 바 (요청하신 항목으로 변경) -->
+  <footer class="">
+    <div class="info-bar-container">
+      <div class="info-item">
+        <span class="info-label">환율(USD)</span>
+        <div class="info-value">1,342.5 <span class="val-up">▲</span></div>
+      </div>
+      <div class="info-item">
+        <span class="info-label">나스닥</span>
+        <div class="info-value">16,397 <span class="val-up">↑</span></div>
+      </div>
+      <div class="info-item">
+        <span class="info-label">다우종합</span>
+        <div class="info-value">39,872 <span class="val-up">↑</span></div>
+      </div>
+      <div class="info-item">
+        <span class="info-label">코스피</span>
+        <div class="info-value">2,724 <span class="val-down">↓</span></div>
+      </div>
+      <div class="info-item">
+        <span class="info-label">코스닥</span>
+        <div class="info-value">865.3 <span class="val-down">↓</span></div>
+      </div>
+    </div>
+  </footer>
 </div>
 
 </body>

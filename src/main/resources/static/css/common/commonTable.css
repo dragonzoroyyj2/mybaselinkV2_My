@@ -1,8 +1,9 @@
 /* ===============================================================
-   ✅ commonTable.css (v1.7 - 모바일 드래그 현상 FIX 완결판)
+   ✅ commonTable.css (v1.8 - 대각선 울렁거림 & 배경 비침 FIX)
    ---------------------------------------------------------------
+   - FIX: 테이블 대각선 흐름(Free Scroll) 차단 및 가로/세로 축 고정
+   - FIX: 모바일 스크롤 바운스 시 배경 뚫림(하얀 잔상) 방지
    - FIX: 테이블이 드래그앤드롭처럼 통째로 움직이는 현상 방지
-   - FIX: 모바일 가로 스크롤 바운스 시 배경 비침 방지
 ================================================================ */
 
 :root {
@@ -35,30 +36,33 @@ body.dark-mode {
   color: var(--table-text);
 }
 
-/* 🧾 테이블 컨테이너 - 덜렁거림 방지 핵심 수정 */
+/* 🧾 테이블 컨테이너 - 울렁거림 방지 최종 튜닝 */
 .table-container {
   width: 100%;
-  max-width: 100%; /* 화면 폭 이탈 방지 */
-  background: var(--table-bg);
+  max-width: 100%; 
+  background: var(--table-bg) !important; /* 🚩 배경 뚫림 방지 핵심 */
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   position: relative;
   
-  /* 🚩 핵심: 가로 스크롤은 허용하되, 객체 드래그 동작은 차단 */
+  /* 🚩 핵심 1: 가로/세로 스크롤 명시 및 바운스(고무줄) 차단 */
   overflow-x: auto !important;
-  overflow-y: auto;
-  overscroll-behavior-x: contain; /* 페이지 전체가 밀리는 현상 방지 */
-  touch-action: pan-x pan-y;     /* 터치 시 스크롤만 허용 */
+  overflow-y: auto !important;
+  overscroll-behavior: none; /* 👈 페이지 전체가 꿀렁이며 하얀 배경 보이는 것 차단 */
+
+  /* 🚩 핵심 2: 대각선 이동 방지 및 터치 액션 스크롤로 한정 */
+  touch-action: pan-x pan-y; 
   
   max-height: 75vh;
   background-clip: padding-box;
   
-  /* 🚩 FIX: 붕 뜨는 레이어 현상 제거 (translateZ 삭제) */
+  /* 🚩 핵심 3: 레이어 붕 뜨는 현상 방지 */
   backface-visibility: hidden; 
   -webkit-overflow-scrolling: touch;
+  isolation: isolate;
 }
 
-/* ✅ 테이블 본체 - 컨테이너 안에서만 돌게 고정 */
+/* ✅ 테이블 본체 - 레일 위에 올린 것처럼 고정 */
 table {
   width: 100%;
   min-width: 900px;
@@ -66,11 +70,13 @@ table {
   background: var(--table-bg);
   table-layout: auto;
   border-spacing: 0;
-  /* 드래그 대상이 아님을 명시 */
   -webkit-user-drag: none; 
+  
+  /* 🚩 핵심 4: 테이블 자체가 흔들리지 않도록 설정 */
+  display: table;
 }
 
-/* ✅ 헤더 고정 */
+/* ✅ 헤더 고정 (원본 유지) */
 thead {
   background: var(--table-header-bg);
   border-bottom: 1px solid var(--table-border);
@@ -86,7 +92,7 @@ thead th {
   border-bottom: 1px solid var(--table-border);
 }
 
-/* ✅ 셀 스타일 */
+/* ✅ 셀 스타일 (원본 유지) */
 th, td {
   border-bottom: 1px solid var(--table-border);
   padding: 10px 8px;
@@ -105,24 +111,31 @@ th {
   text-align: center;
 }
 
-td {
-  font-size: 13px;
-}
+td { font-size: 13px; }
 
-/* ✅ 이하 기존 스타일 동일 유지 (생략) */
+/* ✅ 짝수행 음영 및 기타 스타일 (원본 유지) */
 tbody tr:nth-child(even) td { background: var(--table-row-alt); }
 td a { color: var(--table-link); text-decoration: none; }
-.table-container td[colspan] { color: #6b7280; font-size: 13px; padding: 30px 0; text-align: center; }
+td a:hover { text-decoration: underline; }
+
+.table-container td[colspan] {
+  color: #6b7280;
+  font-size: 13px;
+  padding: 30px 0;
+  text-align: center;
+}
+
 input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
-.table-container th.checkbox-col, .table-container td.checkbox-col,
+
+.table-container th.checkbox-col,
+.table-container td.checkbox-col,
 .table-container th:first-child:has(input[type="checkbox"]),
 .table-container td:first-child:has(input[type="checkbox"]) {
   width: 40px; min-width: 40px; text-align: center;
 }
 
-
 /* ==========================================================
-   ✅ 로딩 오버레이 (테이블 기준)
+   ✅ 로딩 오버레이 & 스피너 (원본 유지)
 ========================================================== */
 .table-loading-overlay {
   position: absolute;
@@ -135,72 +148,19 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
   border-radius: 10px;
   pointer-events: none;
 }
+.table-spinner-wrap { display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; }
+.table-spinner-wrap .spinner { width: 40px; height: 40px; border: 4px solid var(--table-spinner-border); border-top-color: var(--table-spinner-accent); border-radius: 50%; animation: spin 1s linear infinite; }
 
-.table-spinner-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  width: 100%;
-}
+.global-loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; background: var(--global-overlay-bg); z-index: 9999; }
+.global-spinner-wrap { display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; }
+.global-spinner-wrap .spinner { width: 48px; height: 48px; border: 5px solid var(--table-spinner-border); border-top-color: var(--table-spinner-accent); border-radius: 50%; animation: spin 1s linear infinite; }
 
-.table-spinner-wrap .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--table-spinner-border);
-  border-top-color: var(--table-spinner-accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ==========================================================
-   ✅ 전역 로딩 스피너 (화면 중앙 고정형)
+   ✅ 반응형 세분화 (원본 유지)
 ========================================================== */
-.global-loading-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  background: var(--global-overlay-bg); /* 🚩 FIX: 전역 오버레이 변수 사용 */
-  z-index: 9999;
-}
-
-.global-spinner-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%; width: 100%;
-}
-
-.global-spinner-wrap .spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid var(--table-spinner-border);
-  border-top-color: var(--table-spinner-accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ==========================================================
-   ✅ 반응형 세분화
-========================================================== */
-@media (max-width: 360px) {
-  th, td { font-size: 11.5px; padding: 6px; }
-  .table-spinner-wrap .spinner { width: 26px; height: 26px; }
-}
-@media (max-width: 480px) {
-  th, td { font-size: 12px; padding: 7px; }
-  table { min-width: 600px; }
-}
-@media (max-width: 768px) {
-  th, td { font-size: 12.5px; padding: 8px; }
-}
-@media (max-width: 1024px) {
-  th, td { font-size: 13px; padding: 9px; }
-}
+@media (max-width: 360px) { th, td { font-size: 11.5px; padding: 6px; } .table-spinner-wrap .spinner { width: 26px; height: 26px; } }
+@media (max-width: 480px) { th, td { font-size: 12px; padding: 7px; } table { min-width: 600px; } }
+@media (max-width: 768px) { th, td { font-size: 12.5px; padding: 8px; } }
+@media (max-width: 1024px) { th, td { font-size: 13px; padding: 9px; } }
