@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
  * ✅ StockListService (조회 전용 JSON 기반)
  * --------------------------------------------------------
  * - 파일 기반 데이터 조회 (stock_listing.json)
- * - 파일 없을 시 경고 반환
+ * - script_json_path 주입 경로 사용
  * - 검색 + 페이징 + 엑셀 다운로드 전용
  * --------------------------------------------------------
  */
@@ -33,22 +32,20 @@ public class StockListService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Value("${python.stock.stock_listing.path:}")
-    private String localPath;
+    @Value("${python.stock.json.path}")
+    private String script_json_path;
 
-    /** ✅ JSON 파일 경로 탐색 */
+    /** ✅ JSON 파일 경로 탐색 (주입된 경로 우선 사용) */
     private File resolveJsonFile() {
         try {
-            if (StringUtils.hasText(localPath)) {
-                File file = new File(localPath);
+            if (StringUtils.hasText(script_json_path)) {
+                File file = new File(script_json_path);
                 if (file.exists() && file.isFile()) {
                     return file;
                 }
             }
-            File defaultFile = new ClassPathResource("data/stock_listing.json").getFile();
-            if (defaultFile.exists()) return defaultFile;
-        } catch (Exception ignored) {
-            // 경로 탐색 실패 시 무시
+        } catch (Exception e) {
+            System.err.println("⚠️ 경로 탐색 실패: " + e.getMessage());
         }
         return null;
     }
@@ -58,11 +55,13 @@ public class StockListService {
         try {
             File jsonFile = resolveJsonFile();
             if (jsonFile == null || !jsonFile.exists()) {
-                System.err.println("⚠️ [경고] stock_listing.json 파일을 찾을 수 없습니다.");
+                System.err.println("⚠️ [경고] 설정된 경로에서 stock_listing.json 파일을 찾을 수 없습니다: " + script_json_path);
                 return Collections.emptyList();
             }
+            
             List<Map<String, Object>> list =
                     mapper.readValue(jsonFile, new TypeReference<List<Map<String, Object>>>() {});
+            
             for (int i = 0; i < list.size(); i++) {
                 list.get(i).put("id", i + 1);
             }
@@ -83,7 +82,7 @@ public class StockListService {
                     "page", 0,
                     "totalPages", 0,
                     "totalElements", 0,
-                    "warning", "데이터 파일이 존재하지 않거나 비어 있습니다."
+                    "warning", "데이터 파일이 존재하지 않거나 비어 있습니다. (" + script_json_path + ")"
             );
         }
 
@@ -131,7 +130,7 @@ public class StockListService {
     public ResponseEntity<byte[]> downloadExcel(String search) {
         List<Map<String, Object>> data = readJsonList();
         if (data.isEmpty()) {
-            byte[] msg = "⚠️ 데이터 파일이 존재하지 않거나 비어 있습니다.".getBytes(StandardCharsets.UTF_8);
+            byte[] msg = ("⚠️ 데이터 파일이 존재하지 않습니다: " + script_json_path).getBytes(StandardCharsets.UTF_8);
             return ResponseEntity.status(404)
                     .header(HttpHeaders.CONTENT_TYPE, "text/plain; charset=UTF-8")
                     .body(msg);

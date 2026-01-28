@@ -1,9 +1,9 @@
 /* ===============================================================
-   ✅ commonTable.css (v2.8 - 드롭다운 통합 및 원본 유지)
+   ✅ commonTable.css (v2.9 - 우측 공백 해결 및 유동 너비 적용)
    ---------------------------------------------------------------
-   - FIX: 로딩 오버레이 영역 제한 및 중앙 정렬
-   - FIX: [드롭다운 통합] 테이블 컨테이너 밖으로 메뉴가 튀어나오도록 수정
-   - 유지: 기존 v2.5의 극초소형 폰트 및 모바일 최적화 로직 100% 유지
+   - FIX: 우측 하얀 공백 현상 해결 (width: 100% 강제)
+   - FIX: 제목 컬럼 유동 너비 확보를 위한 table-layout 최적화
+   - FIX: 드롭다운 메뉴 최상단 노출 유지
 ================================================================ */
 
 :root {
@@ -45,8 +45,8 @@ body.dark-mode {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   position: relative;
   
-  /* 🚩 [중요] 드롭다운이 옆으로 튀어나와야 하므로 visible 필수 */
-  overflow-x: visible !important; 
+  /* 🚩 [중요] 가로 스크롤이 필요할 때만 생기도록 처리 */
+  overflow-x: auto !important; 
   overflow-y: auto !important;
   
   overscroll-behavior: none;
@@ -54,17 +54,17 @@ body.dark-mode {
   max-height: 75vh;
   min-height: 350px; 
   background-clip: padding-box;
-  backface-visibility: hidden; 
   -webkit-overflow-scrolling: touch;
 }
 
-/* ✅ 테이블 본체 */
+/* ✅ 테이블 본체 수정 */
 table {
-  width: 100%;
-  min-width: 1000px; 
-  border-collapse: separate; /* 🚩 드롭다운 겹침 방지를 위해 separate 권장 */
+  width: 100% !important; /* 🚩 100%로 설정하여 하얀 공백 제거 */
+  min-width: 1100px; /* 🚩 내용이 깨지지 않는 최소한의 너비만 유지 */
+  border-collapse: separate; 
   border-spacing: 0;
   background: var(--table-bg);
+  /* 🚩 fixed 해제 혹은 유동적 운용: script에서 설정한 너비를 지키되 남는공간 활용 */
   table-layout: fixed; 
 }
 
@@ -74,10 +74,9 @@ thead th {
   top: 0;
   background: var(--table-header-bg);
   color: var(--table-header-text);
-  z-index: 10; /* 드롭다운 메뉴(9999)보다는 낮게 */
+  z-index: 100; /* 🚩 드롭다운과의 간섭을 위해 z-index 조정 */
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   border-bottom: 1px solid var(--table-border);
-  overflow: visible !important;
 }
 
 /* ✅ 셀 공통 스타일 */
@@ -86,15 +85,22 @@ th, td {
   padding: 10px 8px;
   vertical-align: middle;
   color: var(--table-text);
+  /* 🚩 제목 등이 너무 길면 말줄임표 처리 */
   white-space: nowrap;
-  /* 🚩 td에서 메뉴가 튀어나올 수 있도록 overflow 숨김 해제 */
+  overflow: hidden; 
+  text-overflow: ellipsis;
+}
+
+/* 🚩 [수정] 드롭다운이 포함된 셀은 메뉴가 보여야 하므로 overflow hidden 해제 */
+td:has(.app-dropdown), 
+td.column-mstock { 
   overflow: visible !important; 
 }
 
 th { font-weight: 600; font-size: 13px; text-align: center; }
-td { font-size: 13px; text-align: left; }
+td { font-size: 12px; text-align: left; } /* 🚩 폰트 크기 살짝 조정 */
 
-/* 🚩 [추가] 앱 드롭다운 스타일 통합 */
+/* 🚩 앱 드롭다운 스타일 */
 .app-dropdown {
     position: relative;
     display: inline-block;
@@ -103,13 +109,13 @@ td { font-size: 13px; text-align: left; }
 .app-dropbtn {
     background-color: #4f46e5;
     color: white;
-    padding: 5px 10px;
+    padding: 5px 8px;
     font-size: 11px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    min-width: 75px;
+    min-width: 70px;
 }
 
 .app-dropdown-content {
@@ -118,33 +124,29 @@ td { font-size: 13px; text-align: left; }
     right: 0;
     top: 100%;
     background-color: #ffffff;
-    min-width: 140px;
-    box-shadow: 0px 8px 24px rgba(0,0,0,0.3);
-    z-index: 99999 !important; /* 화면 최상단 */
-    border: 1px solid #ccc;
+    min-width: 130px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    z-index: 1000 !important; 
+    border: 1px solid #ddd;
     border-radius: 4px;
-    text-align: left;
 }
 
 .app-dropdown-content a {
     color: #333 !important;
-    padding: 10px 15px;
+    padding: 8px 12px;
     text-decoration: none !important;
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     border-bottom: 1px solid #f0f0f0;
 }
 
-.app-dropdown-content a:last-child { border-bottom: none; }
-.app-dropdown-content a:hover { background-color: #f1f5ff; color: #4f46e5 !important; }
-
-.app-dropdown:hover .app-dropdown-content {
-    display: block !important;
-}
+.app-dropdown-content a:hover { background-color: #f1f5ff; }
+.app-dropdown:hover .app-dropdown-content { display: block !important; }
 
 /* 기존 로직 유지 */
 tbody tr:nth-child(even) td { background: var(--table-row-alt); }
 td a { color: var(--table-link); text-decoration: none; }
+
 .global-loading-overlay { 
   position: absolute; 
   top: 0; left: 0; width: 100%; height: 100%; 
@@ -152,10 +154,8 @@ td a { color: var(--table-link); text-decoration: none; }
   background: var(--global-overlay-bg); z-index: 99; border-radius: 10px;
 }
 .global-spinner-wrap .spinner { 
-  width: 48px; height: 48px; border: 5px solid var(--table-spinner-border); 
+  width: 40px; height: 40px; border: 4px solid var(--table-spinner-border); 
   border-top-color: var(--table-spinner-accent); border-radius: 50%; 
   animation: spin 1s linear infinite; 
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* 반응형 생략 (기존 v2.7과 동일하게 유지) */

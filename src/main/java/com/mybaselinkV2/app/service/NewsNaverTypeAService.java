@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mybaselinkV2.app.entity.NewsIntegratedEntity;
 import com.mybaselinkV2.app.repository.NewsIntegratedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -27,47 +29,62 @@ public class NewsNaverTypeAService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DateTimeFormatter naverDateFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
     
-    // 🚩 화면 표시용 날짜 포맷 (DART 서비스와 동일하게 설정)
+    // 🚩 화면 표시용 날짜 포맷
     private final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    @Value("${python.stock.json.path}")
+    private String script_json_path;
+    
     @Autowired
     public NewsNaverTypeAService(NewsIntegratedRepository repository) {
         this.repository = repository;
     }
-
+          
     private final List<String> MAJOR_KEYWORDS = Arrays.asList(
             "수주", "공급계약", "흑자전환", "공시", "M&A", "MOU", "투자",
             "상한가", "특징주", "독점", "유상증자", "국책과제", "무상증자", "인수", "단일판매",
             "상승", "돌파", "최고치", "실적개선", "사상최대", "급등", "신고가", "강세"
     );
 
-    /** ✅ JSON에서 종목명 로드 (로직 유지) */
+    /** ✅ JSON에서 종목명 로드 (주입된 script_json_path 사용) */
     private List<String> getStockMasterFromJson() {
         try {
-            String path = "python/data/stock_list/stock_listing.json";
-            File jsonFile = new File(path);
-            if (!jsonFile.exists()) jsonFile = new File("/MyBaseLinkV2/" + path);
-            if (!jsonFile.exists()) return new ArrayList<>();
+            // 🚩 하드코딩 경로 제거하고 형님이 만든 script_json_path 사용
+            File jsonFile = new File(script_json_path);
+            
+            if (!jsonFile.exists()) {
+                System.out.println("⚠️ [Naver] 종목 리스트 파일을 찾을 수 없습니다: " + script_json_path);
+                return new ArrayList<>();
+            }
 
+            // StandardCharsets.UTF_8 명시로 인코딩 깨짐 방지
             JsonNode root = objectMapper.readTree(jsonFile);
             List<String> stockList = new ArrayList<>();
             if (root.isArray()) {
                 for (JsonNode node : root) {
-                    if (node.has("Name")) stockList.add(node.get("Name").asText().trim());
+                    if (node.has("Name")) {
+                        String name = node.get("Name").asText().trim();
+                        if (!name.isEmpty()) stockList.add(name);
+                    }
                 }
             }
+            // 글자수가 긴 것부터 매칭되도록 정렬
             stockList.sort((a, b) -> Integer.compare(b.length(), a.length()));
             return stockList;
-        } catch (IOException e) { return new ArrayList<>(); }
+        } catch (IOException e) { 
+            e.printStackTrace();
+            return new ArrayList<>(); 
+        }
     }
 
-    /** ✅ 종목코드로 찾기 (로직 유지) */
+    /** ✅ 종목코드로 찾기 (주입된 script_json_path 사용) */
     private String findStockCodeByName(String stockName) {
-        if (stockName == null || stockName.isEmpty()) return "";
+        if (stockName == null || stockName.isEmpty() || stockName.equals("네이버뉴스")) return "";
         try {
-            String path = "python/data/stock_list/stock_listing.json";
-            File jsonFile = new File(path);
-            if (!jsonFile.exists()) jsonFile = new File("/MyBaseLinkV2/" + path);
+            // 🚩 여기도 script_json_path 사용
+            File jsonFile = new File(script_json_path);
+            if (!jsonFile.exists()) return "";
+
             JsonNode root = objectMapper.readTree(jsonFile);
             if (root.isArray()) {
                 String targetName = stockName.replace(" ", "").toUpperCase();
@@ -84,10 +101,12 @@ public class NewsNaverTypeAService {
         return "";
     }
 
-    /** ✅ 종목명 추출 (로직 유지) */
+    /** ✅ 종목명 추출 (추출 로직 유지) */
     private String extractStockName(String title, List<String> stockMaster) {
-        if (title == null || title.isEmpty()) return "";
-        String cleanTitle = title.replace(" ", "").toUpperCase();
+        if (title == null || title.isEmpty() || stockMaster == null || stockMaster.isEmpty()) return "";
+        
+        String cleanTitle = title.replaceAll("[^가-힣a-zA-Z0-9]", "").toUpperCase();
+        
         for (String stock : stockMaster) {
             String originStock = stock.toUpperCase().replace(" ", "");
             if (cleanTitle.contains(originStock)) return stock;
@@ -115,7 +134,6 @@ public class NewsNaverTypeAService {
         return (daysBetween == 0) ? "오늘" : daysBetween + "일 전";
     }
 
-    /** ✅ 리스트 조회 */
     public Map<String, Object> getList(int page, int size, String search, String mode, boolean pagination) {
         repository.deleteByRawDateBefore(LocalDateTime.now().minusDays(3));
         collectAndSave(search);
@@ -135,7 +153,6 @@ public class NewsNaverTypeAService {
         return applyPagination(filtered, page, size, mode, pagination);
     }
 
-    /** ✅ 데이터 수집 및 저장 */
     private void collectAndSave(String search) {
         List<String> targets = (search != null && !search.trim().isEmpty() && !search.equals("1")) 
                                ? Collections.singletonList(search) : MAJOR_KEYWORDS;
@@ -164,7 +181,7 @@ public class NewsNaverTypeAService {
                         String stockName = extractStockName(cleanTitle, stockMaster);
                         
                         String finalStockName = (stockName != null && !stockName.isEmpty()) ? stockName : "네이버뉴스";
-                        String stockCode = findStockCodeByName(stockName);
+                        String stockCode = findStockCodeByName(finalStockName);
                         String feature = findMatchedKeyword(cleanTitle);
 
                         repository.save(new NewsIntegratedEntity(
@@ -185,7 +202,6 @@ public class NewsNaverTypeAService {
 
     private String safeStr(Object obj) { return obj == null ? "" : obj.toString(); }
 
-    /** ✅ Map 변환: rawDate 포맷팅 및 regDate 키 추가 */
     private Map<String, Object> convertToMap(NewsIntegratedEntity entity) {
         Map<String, Object> map = new HashMap<>();
         map.put("id", entity.getId());
@@ -194,7 +210,6 @@ public class NewsNaverTypeAService {
         map.put("stockName", entity.getStockName());
         map.put("stockCode", entity.getStockCode()); 
         
-        // 🚩 핵심: 너무 긴 날짜 대신 포맷팅된 문자열로 전달 (DART와 통일)
         String formattedDate = entity.getRawDate().format(displayFormatter);
         map.put("regDate", formattedDate);
         map.put("rawDate", formattedDate);

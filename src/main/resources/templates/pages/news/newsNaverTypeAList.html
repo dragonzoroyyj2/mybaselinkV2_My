@@ -128,27 +128,52 @@
 
 <th:block layout:fragment="pageScript">
 <script>
-/** 증권사 앱 통합 호출 함수 */
+/** * ✅ 기기별 최적화 앱 호출 함수 (iPhone/Android/PC 통합)
+ */
 function openBrokerApp(type, stockCode) {
     if (!stockCode || stockCode.trim() === "") {
         alert("종목 코드가 없습니다.");
         return;
     }
 
-    let url = "";
-    switch(type) {
-        case 'mstock': url = `mstock://open?page=1101&code=${stockCode}`; break;
-        case 'kiwoom': url = `kiwoommts://open?page=100&code=${stockCode}`; break;
-        case 'kakao':  url = `kakaotalk://kakaopay/securities/stock_detail?stock_code=${stockCode}`; break;
-        case 'toss':   url = `supertoss://stock/detail?code=${stockCode}`; break;
-        case 'namu':   url = `nhqvnamu://open?page=stockDetail&code=${stockCode}`; break;
-        case 'kb':     url = `kbsec://open?page=1001&code=${stockCode}`; break;
-        case 'shinhan':url = `shinhanalpha://open?page=stock&code=${stockCode}`; break;
-        default: return;
-    }
+    const ua = navigator.userAgent.toLowerCase();
+    const isAndroid = /android/i.test(ua);
+    const isIos = /iphone|ipad|ipod/i.test(ua);
     
-    // 복잡한 기기 판단 없이 즉시 실행 시도
-    location.href = url;
+    let url = "";
+
+    // 1. 기기별 호출 주소(Scheme/Intent) 설정
+    switch(type) {
+        case 'mstock': 
+            if (isAndroid) {
+                url = `intent://open?page=1101&code=${stockCode}#Intent;scheme=mstock;package=com.miraeasset.trade;end`;
+            } else {
+                url = `mstock://open?page=1101&code=${stockCode}`;
+            }
+            break;
+        case 'kiwoom': 
+            url = isAndroid
+                ? `intent://open?page=100&code=${stockCode}#Intent;scheme=kiwoommts;package=com.pantech.app.kiwoom;end`
+                : `kiwoommts://open?page=100&code=${stockCode}`;
+            break;
+        case 'toss': url = `supertoss://stock/detail?code=${stockCode}`; break;
+        case 'kakao': url = `kakaotalk://kakaopay/securities/stock_detail?stock_code=${stockCode}`; break;
+        case 'namu': url = `nhqvnamu://open?page=stockDetail&code=${stockCode}`; break;
+        default: url = `mstock://open?page=1101&code=${stockCode}`;
+    }
+
+    // 2. 실행 방식 결정 (아이폰은 직접 assign이 가장 잘 먹힘)
+    if (isIos) {
+        // 아이폰 사파리/크롬 최적화
+        window.location.href = url;
+    } else {
+        // 안드로이드 및 기타: 가상 클릭 방식
+        const a = document.createElement('a');
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); }, 100);
+    }
 }
 
 

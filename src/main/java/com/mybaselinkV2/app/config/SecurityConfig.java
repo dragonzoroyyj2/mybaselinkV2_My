@@ -112,18 +112,21 @@ public class SecurityConfig {
                 auth.requestMatchers("/", "/login", "/logout", "/auth/**").permitAll();
                 
                 // ✅ 전역 상태 조회 (403 방지용 - 로그인 없이 접근 가능)
-                auth.requestMatchers("/api/global/status").permitAll();
+                auth.requestMatchers("/api/global/status", "/api/global/sse").permitAll();
                 
                 // 🚀 핵심 수정: Spring 기본 에러 처리 URL 허용 ( permitAll() 엔드포인트에서 발생하는 403 에러 방지)
                 auth.requestMatchers("/error").permitAll();
+                
+                // ✅ 내 정보 조회 허용 (화면에서 currentUser 판단용)
+                auth.requestMatchers("/auth/me").permitAll();
                 
                 
                 // ✅ SSE -JWT 기반
                 /*
                  * SSE 는 특성상: permitAll()
-					헤더 제한이 많고 CORS / Cookie 정책이 까다롭고
-					Spring Security 6.x 의 AuthorizationFilter 에 매우 민감함
-					인증처리 필터(JWT 필터)보다 앞단에서 AccessDenied 가 발생할 수 있음
+                    헤더 제한이 많고 CORS / Cookie 정책이 까다롭고
+                    Spring Security 6.x 의 AuthorizationFilter 에 매우 민감함
+                    인증처리 필터(JWT 필터)보다 앞단에서 AccessDenied 가 발생할 수 있음
                  */
                 auth.requestMatchers(
                         "/api/stock/batch/sse",
@@ -133,19 +136,28 @@ public class SecurityConfig {
                         "/api/stock/lastCloseDownward/sse"
                 ).permitAll();
                 
+                // 🚀 [추가] GProd 실행 및 공시 리스트 API 허용 (Access Denied 방지)
+                auth.requestMatchers(
+                        "/api/stock/batch/gprod/start",
+                        "/api/stock/batch/gprod/cancel/**",
+                        "/api/newsDartTypeAList",
+                        "/api/newsRssTypeAList"
+                ).permitAll();
+                
                 
                 auth.requestMatchers(
-                	    "/api/python/list",
-                	    "/api/python/upload",
-                	    "/api/python/check-existence",
-                	    "/api/python/run/**",
-                	    "/api/python/delete/**",
-                	    "/api/python/batch-run",
-                	    "/api/python/batch-delete",
-                	    "/api/python/batch-deploy"
-                	).authenticated(); 
+                        "/api/python/list",
+                        "/api/python/upload",
+                        "/api/python/check-existence",
+                        "/api/python/run/**",
+                        "/api/python/delete/**",
+                        "/api/python/batch-run",
+                        "/api/python/batch-delete",
+                        "/api/python/batch-deploy"
+                    ).authenticated(); 
 
                 // ✅ 그 외 모든 API와 페이지는 인증 필수
+                // 🚩 주의: 위의 permitAll 경로들이 이 설정보다 먼저 선언되어야 함
                 auth.requestMatchers("/api/**", "/pages/**").authenticated();
                 auth.anyRequest().authenticated();
             })

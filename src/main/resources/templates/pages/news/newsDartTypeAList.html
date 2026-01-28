@@ -7,21 +7,29 @@
 <head>
   <meta charset="UTF-8">
   <title>전자공시시스템-공시</title>
+  <style>
+    /* 테이블 우측 공백 제거 및 레이아웃 최적화 */
+    .table-container table { table-layout: fixed !important; width: 100% !important; }
+    .column-title { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* 종목명 링크 스타일 */
+    .stock-link { color: #2563eb !important; font-weight: bold; text-decoration: underline; cursor: pointer; }
+    .stock-link:hover { color: #1d4ed8 !important; }
+  </style>
 </head>
 
 <body>
 <div layout:fragment="content">
 
   <div class="content-container">
-		<div class="page-header">
-		  <div class="page-title">
-		    <h2 th:text="${pageTitle} ?: '📄 기본 페이지 제목'">공시</h2>
-		  </div>
-		  <div class="breadcrumb">
-		    <i class="fas fa-folder-open"></i>
-		    <span th:text="${breadcrumb} ?: '시스템 / 기본 경로'"> 뉴스 / 공시</span>
-		  </div>
-		</div>    
+    <div class="page-header">
+      <div class="page-title">
+        <h2 th:text="${pageTitle} ?: '📄 기본 페이지 제목'">공시</h2>
+      </div>
+      <div class="breadcrumb">
+        <i class="fas fa-folder-open"></i>
+        <span th:text="${breadcrumb} ?: '시스템 / 기본 경로'"> 뉴스 / 공시</span>
+      </div>
+    </div>    
 
     <div class="toolbar">
       <div class="search-group">
@@ -41,14 +49,10 @@
       </div>
     </div>
 
-	<!-- 시작 : 공통 테이블 구조 -->
     <div style="position: relative;">
         <div id="globalLoading" class="global-loading-overlay">
-            <div class="global-spinner-wrap">
-                <div class="spinner"></div>
-            </div>
+            <div class="global-spinner-wrap"><div class="spinner"></div></div>
         </div>
-
         <div class="table-container">
           <table>
             <thead id="headerTable"></thead>
@@ -58,151 +62,133 @@
     </div> 
     
     <div id="pagination" class="pagination"></div>
-    <!-- 종료 : 공통 테이블 구조 -->
-    
-    </div>
-
+  </div>
 </div>
 
 <th:block layout:fragment="pageScript">
 <script>
-/** 증권사 앱 통합 호출 함수 */
+/** * ✅ 기기별 최적화 앱 호출 함수 (iPhone/Android/PC 통합)
+ */
 function openBrokerApp(type, stockCode) {
     if (!stockCode || stockCode.trim() === "") {
         alert("종목 코드가 없습니다.");
         return;
     }
 
-    let url = "";
-    switch(type) {
-        case 'mstock': url = `mstock://open?page=1101&code=${stockCode}`; break;
-        case 'kiwoom': url = `kiwoommts://open?page=100&code=${stockCode}`; break;
-        case 'kakao':  url = `kakaotalk://kakaopay/securities/stock_detail?stock_code=${stockCode}`; break;
-        case 'toss':   url = `supertoss://stock/detail?code=${stockCode}`; break;
-        case 'namu':   url = `nhqvnamu://open?page=stockDetail&code=${stockCode}`; break;
-        case 'kb':     url = `kbsec://open?page=1001&code=${stockCode}`; break;
-        case 'shinhan':url = `shinhanalpha://open?page=stock&code=${stockCode}`; break;
-        default: return;
-    }
+    const ua = navigator.userAgent.toLowerCase();
+    const isAndroid = /android/i.test(ua);
+    const isIos = /iphone|ipad|ipod/i.test(ua);
     
-    // 복잡한 기기 판단 없이 즉시 실행 시도
-    location.href = url;
+    let url = "";
+
+    // 1. 기기별 호출 주소(Scheme/Intent) 설정
+    switch(type) {
+        case 'mstock': 
+            if (isAndroid) {
+                url = `intent://open?page=1101&code=${stockCode}#Intent;scheme=mstock;package=com.miraeasset.trade;end`;
+            } else {
+                url = `mstock://open?page=1101&code=${stockCode}`;
+            }
+            break;
+        case 'kiwoom': 
+            url = isAndroid
+                ? `intent://open?page=100&code=${stockCode}#Intent;scheme=kiwoommts;package=com.pantech.app.kiwoom;end`
+                : `kiwoommts://open?page=100&code=${stockCode}`;
+            break;
+        case 'toss': url = `supertoss://stock/detail?code=${stockCode}`; break;
+        case 'kakao': url = `kakaotalk://kakaopay/securities/stock_detail?stock_code=${stockCode}`; break;
+        case 'namu': url = `nhqvnamu://open?page=stockDetail&code=${stockCode}`; break;
+        default: url = `mstock://open?page=1101&code=${stockCode}`;
+    }
+
+    // 2. 실행 방식 결정 (아이폰은 직접 assign이 가장 잘 먹힘)
+    if (isIos) {
+        // 아이폰 사파리/크롬 최적화
+        window.location.href = url;
+    } else {
+        // 안드로이드 및 기타: 가상 클릭 방식
+        const a = document.createElement('a');
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); }, 100);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   initUnifiedList({
-	    mode: "server",
-	    pagination: true,
-	    apiUrl: "/api/newsDartTypeAList",
-	    tableBodySelector: "#dataTable",
-	    paginationSelector: "#pagination",
-	    searchInputSelector: "#searchInput",
-	    searchBtnSelector: "#searchBtn",
-	    addBtnSelector: "#addBtn",
-	    modalId: "#addModal",
-	    saveBtnSelector: "#saveBtn",
-	    closeBtnSelector: "[data-close]",
-	    checkAllSelector: "#checkAll",
-	    deleteSelectedBtnSelector: "#deleteSelectedBtn",
-	    detailModalId: "#detailModal",
-	    updateBtnSelector: "#updateBtn",
-	    excelBtnSelector: "#excelBtn",
-	    
-	    excelFileName: "엑셀리스트.xlsx",
-	    
-	    columns: [
-	      { columnId: "id", label: "No" , align: "center", width: "30px"},
-	      { columnId: "stockCode", label: "stockCode", hidden: true},
-	      { columnId: "stockName", label: "회사명", width: "80px"},
-	      { columnId: "featureOption", label: "재무상태" , align: "center", width: "90px",
-	    	  formatter: (val, row) => {
-	              if (!val || val.includes("재무미확인")) {
-	                  return `<span class="badge" style="background:#ccc; color:#fff">미확인</span>`;
-	              }
-	              if (val.includes("흑자")) {
-	                  return `<b style="color:#e74c3c;"><i class="fa-solid fa-caret-up"></i> ${val}</b>`;
-	              } else if (val.includes("적자")) {
-	                  return `<b style="color:#3498db;"><i class="fa-solid fa-caret-down"></i> ${val}</b>`;
-	              }
-	              return val;
-	          }  
-	      },
-	      { columnId: "title", label: "공시제목" , width: "200px"},
-	      { columnId: "link", label: "링크" , isExternalLink:true, width: "50px"},
-	      { columnId: "mstock", label: "mstock" ,  width: "60px",
-	    	  align: "center",
-	          formatter: (val, row) => {
-	              if (row.stockCode && row.stockCode.length >= 6) {
-	                  return `
-	                      <div class="app-dropdown" onclick="event.stopPropagation();">
-	                          <button class="app-dropbtn">앱 선택 ▾</button>
-	                          <div class="app-dropdown-content">
-	                              <a href="javascript:void(0)" onclick="openBrokerApp('mstock', '${row.stockCode}')">미래에셋</a>
-	                              <a href="javascript:void(0)" onclick="openBrokerApp('kiwoom', '${row.stockCode}')">키움 영웅문</a>
-	                              <a href="javascript:void(0)" onclick="openBrokerApp('kakao', '${row.stockCode}')">카카오페이</a>
-	                              <a href="javascript:void(0)" onclick="openBrokerApp('toss', '${row.stockCode}')">토스증권</a>
-	                              <a href="javascript:void(0)" onclick="openBrokerApp('namu', '${row.stockCode}')">NH 나무</a>
-	                              <a href="javascript:void(0)" onclick="openBrokerApp('kb', '${row.stockCode}')">KB M-able</a>
-	                              <a href="javascript:void(0)" onclick="openBrokerApp('shinhan', '${row.stockCode}')">신한 알파</a>
-	                          </div>
-	                      </div>
-	                  `;
-	              }
-	              return "-";
-	          } 
-	      },
-	      { columnId: "serverStatus", label: "시장" , align: "center", width: "70px"},
-	      { columnId: "rawDate", label: "접수일" , align: "center", width: "90px"}
-	    ],
-	    pageSize: 10,
-	    pageGroupSize: window.pageGroupSize, enableRowClickDetail: false,
-	    enableDetailView: false,
-	    buttons: { search: true, searchInput: true, add: false, deleteSelected: false, excel: false },
-	    detailViewButtons: { update: true, delete: false },
-	    
-	    
-		//onAddModalOpen: () => console.log("➕ Add Modal Open"),
-	    //onDetailModalOpen: (id) => console.log("🔍 Detail Modal Open:", id),
-	    //onDeleteSuccess: (ids) => console.log("🗑️ Deleted:", ids),
-	    
-	    
-	    // ✅ 조회 DB 실행인 완료된 후 콜백 함수
-	    onRenderSuccess: () => {
-	        console.log("✅ [뉴스 리스트] 데이터 렌더링이 완료되었습니다.");
-	        const rows = document.querySelectorAll("#dataTable tr");
-	        rows.forEach(row => {
-	            if (row.innerText.includes("급등")) {
-	                row.style.backgroundColor = "#fffde7";
-	            }
-	            const statusCell = row.lastElementChild; 
-	            if (statusCell && statusCell.innerText.trim() === "OFF") {
-	                statusCell.innerHTML = `<span style="background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 11px;">OFF</span>`;
-	            } else if (statusCell && statusCell.innerText.trim() === "ON") {
-	                statusCell.innerHTML = `<span style="background: #dcfce7; color: #22c55e; padding: 2px 6px; border-radius: 4px; font-size: 11px;">ON</span>`;
-	            }
-	        });
-	    },
+      mode: "server",
+      pagination: true,
+      apiUrl: "/api/newsDartTypeAList",
+      tableBodySelector: "#dataTable",
+      paginationSelector: "#pagination",
+      searchInputSelector: "#searchInput",
+      searchBtnSelector: "#searchBtn",
+      excelBtnSelector: "#excelBtn",
+      excelFileName: "공시리스트.xlsx",
+      
+      columns: [
+        { columnId: "id", label: "No" , align: "center", width: "50px"},
+        { columnId: "stockCode", label: "stockCode", hidden: true},
+        
+        // 🚩 회사명 클릭 시 아이폰/안드로이드 즉시 실행
+        { columnId: "stockName", label: "회사명", width: "80px", align: "left",
+          /*   formatter: (val, row) => {
+                if (row.stockCode) {
+                    return `<span class="stock-link" onclick="openBrokerApp('mstock', '${row.stockCode}')">${val}</span>`;
+                }
+                return val;
+            } */
+        },
+        
+        { columnId: "featureOption", label: "재무상태" , align: "center", width: "80px",
+            formatter: (val, row) => {
+                if (!val || val.includes("재무미확인")) return `<span class="badge" style="background:#ccc; color:#fff">미확인</span>`;
+                if (val.includes("흑자")) return `<b style="color:#e74c3c;"><i class="fa-solid fa-caret-up"></i> ${val}</b>`;
+                if (val.includes("적자")) return `<b style="color:#3498db;"><i class="fa-solid fa-caret-down"></i> ${val}</b>`;
+                return val;
+            }  
+        },
+        
+        // 🚩 제목 유동 너비 (우측 공백 제거)
+        { columnId: "title", label: "공시제목" , width: "140px", className: "column-title" },
+        
+        { columnId: "link", label: "링크" , isExternalLink:true, width: "50px", align: "center"},
+        { columnId: "mstock", label: "앱" ,  width: "50px", align: "center",
+            formatter: (val, row) => {
+                if (row.stockCode && row.stockCode.length >= 6) {
+                    return `
+                        <div class="app-dropdown" onclick="event.stopPropagation();">
+                            <button class="app-dropbtn">선택 ▾</button>
+                            <div class="app-dropdown-content">
+                                <a href="javascript:void(0)" onclick="openBrokerApp('mstock', '${row.stockCode}')">미래에셋</a>
+                                <a href="javascript:void(0)" onclick="openBrokerApp('kiwoom', '${row.stockCode}')">키움</a>
+                                <a href="javascript:void(0)" onclick="openBrokerApp('toss', '${row.stockCode}')">토스</a>
+                                <a href="javascript:void(0)" onclick="openBrokerApp('kakao', '${row.stockCode}')">카카오</a>
+                            </div>
+                        </div>
+                    `;
+                }
+                return "-";
+            } 
+        },
+        { columnId: "serverStatus", label: "시장" , align: "center", width: "50px"},
+        { columnId: "rawDate", label: "접수일" , align: "center", width: "80px"}
+      ],
+      pageSize: 15,
+      pageGroupSize: window.pageGroupSize, 
+      enableRowClickDetail: false,
+      enableDetailView: false,
+      buttons: { search: true, searchInput: true, add: false, deleteSelected: false, excel: false }
   });
-  // 종료 - initUnifiedList
-  
 
+  // 엔터키 검색
   const searchInput = document.getElementById("searchInput");
-  const searchBtn = document.getElementById("searchBtn");
-  searchInput.addEventListener("keydown", e => {
-	  if (e.key === "Enter") searchBtn.click(); 
-  });
-  
-  const customFilterBtn = document.getElementById("customFilterBtn");
-  if (customFilterBtn) {
-    customFilterBtn.addEventListener("click", () => {
-      alert("🎯 커스텀 필터 실행");
-      unifiedListManager.loadList(0, "web", "filter=active");
-    });
+  if(searchInput) {
+      searchInput.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("searchBtn").click(); });
   }
-  
 });
 </script>
 </th:block>
-
 </body>
 </html>

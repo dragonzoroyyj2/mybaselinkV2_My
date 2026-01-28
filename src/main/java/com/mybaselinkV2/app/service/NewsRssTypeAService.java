@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mybaselinkV2.app.entity.NewsIntegratedEntity;
 import com.mybaselinkV2.app.repository.NewsIntegratedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ public class NewsRssTypeAService {
     // 🚩 화면 표시용 날짜 포맷 (통일)
     private final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    @Value("${python.stock.json.path}")
+    private String script_json_path;
+
     @Autowired
     public NewsRssTypeAService(NewsIntegratedRepository repository) {
         this.repository = repository;
@@ -56,33 +60,42 @@ public class NewsRssTypeAService {
         "신기술", "상용화", "국산화", "최초", "IPO", "상장", "액면분할", "무상증자", "배당", "특징주"
     );
 
-    /** ✅ 종목 마스터 로드 (로직 유지) */
+    /** ✅ 종목 마스터 로드 (script_json_path 사용) */
     private List<String> getStockMasterFromJson() {
         try {
-            String path = "python/data/stock_list/stock_listing.json";
-            File jsonFile = new File(path);
-            if (!jsonFile.exists()) jsonFile = new File("/MyBaseLinkV2/" + path);
-            if (!jsonFile.exists()) return new ArrayList<>();
+            // 🚩 하드코딩 로직 제거 및 주입된 경로 사용
+            File jsonFile = new File(script_json_path);
+            
+            if (!jsonFile.exists()) {
+                System.out.println("⚠️ [RSS] 종목 리스트 파일을 찾을 수 없습니다: " + script_json_path);
+                return new ArrayList<>();
+            }
 
             JsonNode root = objectMapper.readTree(jsonFile);
             List<String> stockList = new ArrayList<>();
             if (root.isArray()) {
                 for (JsonNode node : root) {
-                    if (node.has("Name")) stockList.add(node.get("Name").asText().trim());
+                    if (node.has("Name")) {
+                        String name = node.get("Name").asText().trim();
+                        if (!name.isEmpty()) stockList.add(name);
+                    }
                 }
             }
             stockList.sort((a, b) -> Integer.compare(b.length(), a.length()));
             return stockList;
-        } catch (IOException e) { return new ArrayList<>(); }
+        } catch (IOException e) { 
+            e.printStackTrace();
+            return new ArrayList<>(); 
+        }
     }
 
-    /** ✅ 종목 코드로 찾기 (로직 유지) */
+    /** ✅ 종목 코드로 찾기 (script_json_path 사용) */
     private String findStockCodeByName(String stockName) {
         if (stockName == null || stockName.isEmpty()) return "";
         try {
-            String path = "python/data/stock_list/stock_listing.json";
-            File jsonFile = new File(path);
-            if (!jsonFile.exists()) jsonFile = new File("/MyBaseLinkV2/" + path);
+            File jsonFile = new File(script_json_path);
+            if (!jsonFile.exists()) return "";
+
             JsonNode root = objectMapper.readTree(jsonFile);
             if (root.isArray()) {
                 String targetName = stockName.replace(" ", "").toUpperCase();
@@ -99,13 +112,17 @@ public class NewsRssTypeAService {
         return "";
     }
 
-    /** ✅ 종목명 추출 (로직 유지) */
+    /** ✅ 종목명 추출 (추출 로직 고도화 적용) */
     private String extractStockName(String title, List<String> stockMaster) {
-        if (title == null || title.isEmpty()) return "";
-        String cleanTitle = title.replace(" ", "").toUpperCase();
+        if (title == null || title.isEmpty() || stockMaster == null || stockMaster.isEmpty()) return "";
+        
+        // 특수문자 제거 후 매칭률 향상
+        String cleanTitle = title.replaceAll("[^가-힣a-zA-Z0-9]", "").toUpperCase();
+        
         for (String stock : stockMaster) {
             String originStock = stock.toUpperCase().replace(" ", "");
             if (cleanTitle.contains(originStock)) return stock;
+            
             if (originStock.length() >= 4) {
                 String head = originStock.substring(0, 2);
                 String tail = originStock.substring(2);
@@ -125,7 +142,7 @@ public class NewsRssTypeAService {
         return (daysBetween == 0) ? "오늘" : daysBetween + "일 전";
     }
 
-    /** ✅ 리스트 조회 (필터링 및 Map 변환) */
+    /** ✅ 리스트 조회 */
     public Map<String, Object> getList(int page, int size, String search, String mode, boolean pagination) {
         repository.deleteByRawDateBefore(LocalDateTime.now().minusDays(3));
         collectRssNews();
@@ -175,7 +192,6 @@ public class NewsRssTypeAService {
                             String feature = (matchedKeyword != null) ? matchedKeyword : "정보";
                             String finalStockName = (!stockName.isEmpty()) ? stockName : source.get("name");
                             
-                            // 🚩 DB 저장 시엔 정밀한 LocalDateTime 사용
                             LocalDateTime now = LocalDateTime.now();
 
                             repository.save(new NewsIntegratedEntity(
@@ -217,7 +233,6 @@ public class NewsRssTypeAService {
         map.put("stockName", entity.getStockName());
         map.put("stockCode", entity.getStockCode()); 
         
-        // 🚩 화면용 날짜 포맷팅 (네이버/DART와 동일하게 통일)
         String formattedDate = entity.getRawDate().format(displayFormatter);
         map.put("regDate", formattedDate);
         map.put("rawDate", formattedDate);

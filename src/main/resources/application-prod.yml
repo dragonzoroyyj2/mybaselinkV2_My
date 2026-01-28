@@ -39,8 +39,5 @@ python:
     path: "${python.root.path}/python/stock/py/athena_k_market_ai_prod.py"
 
   stock:
-    stock_listing:
+    json:
       path: "${python.root.path}/python/data/stock_list/stock_listing.json"
-
-    stock_listing_prod:
-      path: "${python.root.path}/python/data/stock_list/stock_listing_prod.json"
