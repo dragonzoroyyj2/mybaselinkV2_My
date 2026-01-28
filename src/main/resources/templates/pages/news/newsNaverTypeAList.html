@@ -128,8 +128,10 @@
 
 <th:block layout:fragment="pageScript">
 <script>
-/** * ✅ 기기별 최적화 앱 호출 함수 (iPhone/Android/PC 통합)
- * 미래에셋 아이폰 호출 실패 대응 보강
+/**
+ * ✅ 기기별 최적화 앱 호출 함수 (순차 Fallback 방식)
+ * 1. 신형/구형 스킴을 배열에 담아 순차적으로 실행
+ * 2. 0.6초 간격으로 시도하여 앱이 설치된 경우 즉시 반응 유도
  */
 function openBrokerApp(type, stockCode) {
     if (!stockCode || stockCode.trim() === "") {
@@ -138,52 +140,77 @@ function openBrokerApp(type, stockCode) {
     }
 
     const ua = navigator.userAgent.toLowerCase();
-    const isAndroid = /android/i.test(ua);
-    const isIos = /iphone|ipad|ipod/i.test(ua);
-    
-    let url = "";
+    const isAndroid = ua.includes("android");
+    const isIos = /iphone|ipad|ipod/.test(ua);
 
-    // 1. 기기별 호출 주소(Scheme/Intent) 설정
-    switch(type) {
-        case 'mstock': 
-            if (isAndroid) {
-                // 미래에셋 안드로이드 (인텐트 방식)
-                url = `intent://open?page=1101&code=${stockCode}#Intent;scheme=mstock;package=com.miraeasset.trade;end`;
-            } else {
-                // 🚩 아이폰 미래에셋: 통합앱용 최신 스킴을 먼저 사용
-                url = `miraeasset-mstock://open?page=1101&code=${stockCode}`;
+    const urls = [];
+
+    /* ===============================
+       1️⃣ 증권사별 스킴 / 인텐트 풀세트
+       =============================== */
+    switch (type) {
+        case "mstock":
+            // 미래에셋증권 (M-STOCK)
+            if (isIos) {
+                urls.push(`miraeasset-mstock://open?page=1101&code=${stockCode}`); // 신형
+                urls.push(`mstock://open?page=1101&code=${stockCode}`);            // 구형
+            } else if (isAndroid) {
+                // 최신 통합앱 패키지(com.miraeasset.trade) 우선순위
+                urls.push(`intent://open?page=1101&code=${stockCode}#Intent;scheme=mstock;package=com.miraeasset.trade;end`);
+                urls.push(`mstock://open?page=1101&code=${stockCode}`);
             }
             break;
-        case 'kiwoom': 
-            url = isAndroid
-                ? `intent://open?page=100&code=${stockCode}#Intent;scheme=kiwoommts;package=com.pantech.app.kiwoom;end`
-                : `kiwoommts://open?page=100&code=${stockCode}`;
+
+        case "kiwoom":
+            // 키움증권 (영웅문S#)
+            if (isIos) {
+                urls.push(`kiwoommts://open?page=100&code=${stockCode}`);
+            } else if (isAndroid) {
+                urls.push(`intent://open?page=100&code=${stockCode}#Intent;scheme=kiwoommts;package=com.pantech.app.kiwoom;end`);
+                urls.push(`kiwoommts://open?page=100&code=${stockCode}`);
+            }
             break;
-        case 'toss': url = `supertoss://stock/detail?code=${stockCode}`; break;
-        case 'kakao': url = `kakaotalk://kakaopay/securities/stock_detail?stock_code=${stockCode}`; break;
-        case 'namu': url = `nhqvnamu://open?page=stockDetail&code=${stockCode}`; break;
-        default: url = `miraeasset-mstock://open?page=1101&code=${stockCode}`;
+
+        case "toss":
+            // 토스 (주식 상세)
+            urls.push(`supertoss://stock/detail?code=${stockCode}`);
+            break;
+
+        case "kakao":
+            // 카카오페이증권
+            urls.push(`kakaotalk://kakaopay/securities/stock_detail?stock_code=${stockCode}`);
+            break;
+
+        case "namu":
+            // NH투자증권 (나무)
+            urls.push(`nhqvnamu://open?page=stockDetail&code=${stockCode}`);
+            break;
+
+        default:
+            // 기본값은 미래에셋 신형으로 시도
+            urls.push(`miraeasset-mstock://open?page=1101&code=${stockCode}`);
     }
 
-    // 2. 실행 방식 결정
-    if (isIos) {
-        // 아이폰: 직접 할당 방식이 가장 정확함
-        window.location.href = url;
+    /* ===============================
+       2️⃣ 실행 로직 (0.6초 간격 순차 fallback)
+       =============================== */
+    let idx = 0;
+
+    const tryOpen = () => {
+        // 모든 후보 주소를 다 찔러봤으면 종료
+        if (idx >= urls.length) return;
+
+        const url = urls[idx++];
+        console.log(`[App Launch Try ${idx}] : ${url}`);
         
-        // 🚩 미래에셋일 경우, 혹시 구형 앱일 수 있으니 0.5초 뒤 구형 스킴으로 한 번 더 시도
-        if(type === 'mstock') {
-            setTimeout(() => {
-                window.location.href = `mstock://open?page=1101&code=${stockCode}`;
-            }, 500);
-        }
-    } else {
-        // 안드로이드: 가상 클릭 방식
-        const a = document.createElement('a');
-        a.href = url;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { document.body.removeChild(a); }, 100);
-    }
+        // 브라우저 화면 이동 (앱이 있으면 실행되고, 없으면 변화 없음)
+        window.location.href = url;
+
+        // 0.6초 뒤에 다음 후보 주소 실행 (첫 번째가 실패했을 경우 대비)
+        setTimeout(tryOpen, 600);
+    };
+
+    tryOpen();
 }
 
 
