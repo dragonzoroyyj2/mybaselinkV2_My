@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-📘 update_stock_listing_prod_final.py (v1.1 실전 안정판 - 섹터 정보 추가판)
+📘 update_stock_listing_prod_final.py (v1.0 실전 안정판 - 최종 개선판)
 ----------------------------------------------------------
 ✅ StockBatchGProdService(v3.3) 완전 동기화
 ✅ BASE_DIR = Path(__file__).resolve().parents[2]
 ✅ 로직/구조/진행률/로깅 기존 완전 유지
-✅ 추가: stock_listing.json 저장 시 Sector(업종) 필드 포함 로직 적용
 ----------------------------------------------------------
 🌟 개선점 반영 완료: KRX 종목 목록 캐시 기간 (KRX_LIST_CACHE_DAYS) 명시적 검사 로직 적용
 🔥 개선점 반영 완료: fetch_and_save_data 내 상세 오류 로깅 적용
@@ -40,7 +39,7 @@ PER_STOCK_TIMEOUT = 15 # ⏱️ 증가: 10s -> 15s. API의 느린 응답에 대�
 MAX_RETRIES = 3
 KRX_LIST_CACHE_DAYS = 1 # 🌟 KRX 목록 캐시 유효 기간: 1일
 
-DEFAULT_WORKERS = 14     # 🌟 초안정화: 8 -> 4로 극단적 감소. 안정성 최대화
+DEFAULT_WORKERS = 14	 # 🌟 초안정화: 8 -> 4로 극단적 감소. 안정성 최대화
 DEFAULT_HISTORY_YEARS = 3
 
 # ==============================
@@ -89,7 +88,7 @@ def check_network_connection(host="www.google.com", port=80, timeout=5):
         sys.exit(1)
 
 # ==============================
-# KRX 목록 로드 (Sector 추가 반영)
+# KRX 목록 로드
 # ==============================
 def load_krx_listing():
     logging.info("[PROGRESS] 5.0 KRX 종목 목록 로드 중...")
@@ -104,39 +103,27 @@ def load_krx_listing():
         if cache_age < KRX_LIST_CACHE_DAYS:
             try:
                 krx = pd.read_json(LISTING_FILE, orient="records")
-                # 🌟 섹터 정보가 포함되어 있는지 추가 확인
-                if not krx.empty and 'Sector' in krx.columns:
+                if not krx.empty:
                     total = len(krx)
-                    logging.info(f"[LOG] KRX 종목 목록 캐시 로드 ({total}개, 캐시 기간 {cache_age}일, Sector 포함)")
+                    logging.info(f"[LOG] KRX 종목 목록 캐시 로드 ({total}개, 캐시 기간 {cache_age}일)")
                     logging.info(f"[KRX_TOTAL] {total}")
                     logging.info(f"[KRX_SAVED] {total}")
                     logging.info("[PROGRESS] 10.0 KRX 목록 로드 완료 (캐시 유효)")
                     return krx
             except Exception:
-                logging.warning("[LOG] KRX 캐시 로드 실패 혹은 Sector 누락, 재다운로드 시도")
+                logging.warning("[LOG] KRX 캐시 로드 실패, 재다운로드 시도")
         else:
              logging.warning(f"[LOG] KRX 캐시 만료 (기준 {KRX_LIST_CACHE_DAYS}일, 현재 {cache_age}일), 재다운로드 시도")
 
     try:
-        # 🌟 KRX 전체 목록을 가져올 때 Sector 정보가 포함된 리스트를 가져옵니다.
         krx = fdr.StockListing("KRX")
         if krx is None or krx.empty:
             raise ValueError("KRX 데이터 다운로드 실패")
-        
-        # Symbol -> Code 이름 변경 (기존 로직 유지)
         krx.rename(columns={'Symbol': 'Code'}, inplace=True)
-        
-        # 🌟 데이터프레임에 Sector가 없는 경우를 대비해 빈 값 처리
-        if 'Sector' not in krx.columns:
-            krx['Sector'] = ""
-            
         krx["Date"] = datetime.now().strftime("%Y-%m-%d")
-        
-        # JSON 저장 시 Sector 필드가 포함되도록 저장
         krx.to_json(LISTING_FILE, orient="records", force_ascii=False, indent=2)
-        
         total = len(krx)
-        logging.info(f"[LOG] KRX 종목 리스트 저장 완료 ({total}개, Sector 정보 포함)")
+        logging.info(f"[LOG] KRX 종목 리스트 저장 완료 ({total}개)")
         logging.info(f"[KRX_TOTAL] {total}")
         logging.info(f"[KRX_SAVED] {total}")
         logging.info("[PROGRESS] 10.0 KRX 목록 로드 완료 (재다운로드)")

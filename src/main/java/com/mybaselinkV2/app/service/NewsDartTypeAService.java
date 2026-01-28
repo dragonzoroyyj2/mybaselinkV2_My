@@ -1,7 +1,7 @@
 package com.mybaselinkV2.app.service;
 
-import com.mybaselinkV2.app.entity.NewsDartEntity;
-import com.mybaselinkV2.app.repository.NewsDartRepository;
+import com.mybaselinkV2.app.entity.NewsIntegratedEntity;
+import com.mybaselinkV2.app.repository.NewsIntegratedRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,78 +23,79 @@ import java.util.stream.Collectors;
 public class NewsDartTypeAService {
 
     @Autowired
-    private NewsDartRepository repository;
+    private NewsIntegratedRepository repository; 
 
     private final String API_KEY = "599b24c052bb23453a48da3916ae7faf1befd03e";
     private final RestTemplate restTemplate = new RestTemplate();
     private final Map<String, String> profitStatusCache = new ConcurrentHashMap<>();
+    
+    // 🚩 화면에 표시할 날짜 포맷 (너무 길지 않게 세팅)
+    private final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final List<String> GOOD_KEYWORDS = Arrays.asList(
             "공급계약", "수주", "판매계약", "체결", "흑자전환",
             "영업이익증가", "무상증자", "자사주소각", "자사주취득", "인수", "합병", "단일판매"
     );
 
-    /** ✅ 네이버 서비스 스타일로 통합된 리스트 조회 */
+    /** ✅ 리스트 조회 (포맷팅 적용) */
     @Transactional
     public Map<String, Object> getList(int page, int size, String search, String mode, boolean pagination) {
         
-        // 1. [청소] 3일 지난 데이터 삭제
         repository.deleteByRawDateBefore(LocalDateTime.now().minusDays(3));
-
-        // 2. [수집] 실시간 DART 데이터 긁어와서 저장 (중복 제외)
         collectAndSave();
 
-        // 3. [조회] DB 데이터 가져와서 Map 리스트로 변환
-        List<NewsDartEntity> entities = repository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+        List<NewsIntegratedEntity> entities = repository.findByNewsType("DART", Sort.by(Sort.Direction.DESC, "rawDate"));
         
         List<Map<String, Object>> filtered = entities.stream()
             .filter(e -> {
                 if (search == null || search.trim().isEmpty() || "1".equals(search)) return true;
-                else if ("3".equals(search)) return GOOD_KEYWORDS.stream().anyMatch(k -> e.getTitle().contains(k));
-                else return e.getTitle().contains(search) || e.getOwner().contains(search);
+                if ("3".equals(search)) return GOOD_KEYWORDS.stream().anyMatch(k -> e.getTitle().contains(k));
+                
+                String s = search.toLowerCase();
+                return e.getTitle().toLowerCase().contains(s) || 
+                       (e.getStockName() != null && e.getStockName().toLowerCase().contains(s)) || 
+                       (e.getStockCode() != null && e.getStockCode().toLowerCase().contains(s));
             })
             .map(e -> {
                 Map<String, Object> item = new HashMap<>();
                 item.put("id", e.getId());
+                item.put("stockCode", e.getStockCode()); 
+                item.put("stockName", e.getStockName());
                 item.put("title", e.getTitle());
-                item.put("owner", e.getOwner());
-                item.put("regDate", e.getRegDate());
-                item.put("serverStatus", e.getServerStatus());
-                item.put("featureOption", e.getFeatureOption());
-                item.put("remark", e.getLink());
+                
+                // 🚩 핵심: 너무 긴 포맷 대신 깔끔하게 문자열로 변환해서 전달
+                String formattedDate = e.getRawDate().format(displayFormatter);
+                item.put("regDate", formattedDate); 
+                item.put("rawDate", formattedDate); 
+                
+                item.put("serverStatus", e.getServerStatus());   
+                item.put("featureOption", e.getFeatureOption()); 
+                item.put("link", e.getLink());
+                item.put("newsType", e.getNewsType());
                 return item;
             })
             .collect(Collectors.toList());
 
-        // 4. [결과 반환] 페이징 처리
         Map<String, Object> result = new HashMap<>();
         int totalElements = filtered.size();
         
         if (!pagination || "client".equalsIgnoreCase(mode)) {
             result.put("content", filtered);
-            result.put("page", 0);
-            result.put("totalPages", 1);
             result.put("totalElements", totalElements);
             return result;
         }
 
-        int totalPages = (size > 0) ? (int) Math.ceil((double) totalElements / size) : 0;
         int start = page * size;
-        List<Map<String, Object>> paged = (totalElements == 0 || start >= totalElements) 
-                                          ? new ArrayList<>() 
-                                          : filtered.subList(start, Math.min(start + size, totalElements));
-
-        result.put("content", paged);
-        result.put("page", page);
-        result.put("totalPages", totalPages);
+        int end = Math.min(start + size, totalElements);
+        result.put("content", (start >= totalElements) ? new ArrayList<>() : filtered.subList(start, end));
         result.put("totalElements", totalElements);
+        result.put("totalPages", (int) Math.ceil((double) totalElements / size));
         return result;
     }
 
-    /** ✅ 데이터 수집 로직 (Private으로 변경하여 getList 내부에서 호출) */
+    /** ✅ 데이터 수집 및 통합 테이블 저장 */
     private void collectAndSave() {
         LocalDate targetLocalDate = LocalDate.now();
-        // 아침 7:30 전이면 어제 공시부터 가져옴
         if (LocalTime.now().isBefore(LocalTime.of(7, 30))) targetLocalDate = targetLocalDate.minusDays(1);
         String targetDate = targetLocalDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
@@ -119,20 +120,25 @@ public class NewsDartTypeAService {
                     if (!Arrays.asList("Y", "K", "N").contains(corpCls)) continue;
 
                     String link = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + obj.optString("rcept_no");
-                    
-                    // 🚩 중복 체크: 이미 저장된 링크면 패스
                     if (repository.existsByLink(link)) continue;
 
                     String corpCode = obj.optString("corp_code");
-                    // 재무 상태 확인 (속도 저하 방지를 위해 캐시 사용)
+                    String stockCode = obj.optString("stock_code");
+                    String corpName = obj.optString("corp_name");
+
                     String feature = profitStatusCache.computeIfAbsent(corpCode, this::getProfitStatusFromDart);
 
-                    NewsDartEntity entity = new NewsDartEntity(
-                            obj.optString("report_nm"), link, obj.optString("corp_name"),
-                            obj.optString("rcept_dt"), LocalDateTime.now(),
-                            getMarketName(corpCls), feature
-                    );
-                    repository.save(entity);
+                    // 🚩 DB 저장 시엔 LocalDateTime.now()로 정밀하게 저장
+                    repository.save(new NewsIntegratedEntity(
+                            stockCode, 
+                            corpName,           
+                            obj.optString("report_nm"), 
+                            link, 
+                            LocalDateTime.now(), 
+                            feature,             
+                            getMarketName(corpCls), 
+                            "DART"               
+                    ));
                 }
             }
         } catch (Exception e) {

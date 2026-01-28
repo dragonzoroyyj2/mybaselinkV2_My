@@ -12,6 +12,7 @@
 
 <body>
 <div layout:fragment="content">
+
   <div class="content-container">
 		<div class="page-header">
 		  <div class="page-title">
@@ -43,30 +44,25 @@
       </div>
     </div>
 
-    <!-- 🧾 테이블 -->
-    <div class="table-container">
-      <table>
-        <thead>
-        <tr>
-            <th>No</th>
-            <th>종목코드</th>
-            <th>회사명</th>
-            <th>시장구분</th>
-            <th>업종</th>
-            <th>종가</th>
-            <th>시가</th>
-            <th>고가</th>
-            <th>저가</th>
-            <th>거래량</th>
-            <th>기준일</th>
-        </tr>
-        </thead>
-        <tbody id="dataTable"></tbody>
-      </table>
-    </div>
+	<!-- 시작 : 공통 테이블 구조 -->
+    <div style="position: relative;">
+        <div id="globalLoading" class="global-loading-overlay">
+            <div class="global-spinner-wrap">
+                <div class="spinner"></div>
+            </div>
+        </div>
 
-    <!-- 📑 페이징 -->
+        <div class="table-container">
+          <table>
+            <thead id="headerTable"></thead>
+            <tbody id="dataTable"></tbody>
+          </table>
+        </div>
+    </div> 
+    
     <div id="pagination" class="pagination"></div>
+    <!-- 종료 : 공통 테이블 구조 -->
+    
   </div>
 
   <!-- ➕ 등록 모달 -->
@@ -163,17 +159,17 @@ document.addEventListener("DOMContentLoaded", () => {
   	  // 체크박스 있는 테이블{ checkbox: true } 사용
   	  // 체크박스 없는 테이블checkbox 컬럼 자체 삭제
     	
-   	  { key: "id", label: "No" },
-      { key: "Code", label: "종목코드" },
-      { key: "Name", label: "회사명" },
-      { key: "Market", label: "시장구분" },
-      { key: "Dept", label: "업종" },
-      { key: "Close", label: "종가" },
-      { key: "Open", label: "시가" },
-      { key: "High", label: "고가" },
-      { key: "Low", label: "저가" },
-      { key: "Volume", label: "거래량" },
-      { key: "Date", label: "기준일" }
+   	  { columnId: "id", label: "No" },
+      { columnId: "Code", label: "종목코드" },
+      { columnId: "Name", label: "회사명" },
+      { columnId: "Market", label: "시장구분" },
+      { columnId: "Dept", label: "업종" },
+      { columnId: "Close", label: "종가" },
+      { columnId: "Open", label: "시가" },
+      { columnId: "High", label: "고가" },
+      { columnId: "Low", label: "저가" },
+      { columnId: "Volume", label: "거래량" },
+      { columnId: "Date", label: "기준일" }
     ],
     pageSize: 10,
     pageGroupSize: window.pageGroupSize, <!-- ✅ 이제 전역변수로부터 자동 주입 -->
@@ -190,7 +186,27 @@ document.addEventListener("DOMContentLoaded", () => {
       update: true,
       delete: false
     },
-    onAddModalOpen: () => console.log("➕ Add Modal Open"),
+    
+    
+   	// onAddModalOpen: () => console.log("➕ Add Modal Open"),
+   	
+    // ✅ 상세 모달이 열릴 때 실행될 콜백 함수
+    onDetailModalOpen: (id) => {
+        console.log("🔍 상세 데이터 로드 ID:", id);
+        
+        // 1. 현재 테이블에서 해당 행의 데이터를 찾거나 서버에 다시 요청하여 링크(remark)를 가져옵니다.
+        // 보통 unifiedListManager가 내부 데이터를 가지고 있으므로 해당 row의 remark를 추출합니다.
+        const rowData = unifiedListManager.getRowData(id); 
+        const dartUrl = rowData.remark; // 서비스에서 넣어준 DART 링크
+
+        // 2. iframe의 src에 주소 삽입
+        const iframe = document.getElementById("dartViewer");
+        if (iframe && dartUrl) {
+            iframe.src = dartUrl;
+        }
+      },
+    
+    
     onDetailModalOpen: (id) => console.log("🔍 Detail Modal Open:", id),
     onDeleteSuccess: (ids) => console.log("🗑️ Deleted:", ids)
   });

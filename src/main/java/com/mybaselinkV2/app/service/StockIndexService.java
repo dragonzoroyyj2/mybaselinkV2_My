@@ -28,8 +28,8 @@ public class StockIndexService {
     private final DecimalFormat df = new DecimalFormat("#,###.##");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // ✅ 캐시 유지 시간 (10분으로 설정하여 Yahoo API 429 차단 방지)
-    private static final long CACHE_DURATION = 600000;
+    // ✅ 캐시 유지 시간 (2분으로 설정하여 Yahoo API 429 차단 방지)
+    private static final long CACHE_DURATION = 120000;
 
     /**
      * 실시간 지수 정보를 반환 (캐싱 적용)
@@ -37,7 +37,7 @@ public class StockIndexService {
     public Map<String, Object> getStockIndices() {
         long currentTime = System.currentTimeMillis();
 
-        // 데이터가 없거나 10분이 지난 경우에만 외부 API 호출
+        // 데이터가 없거나 2분이 지난 경우에만 외부 API 호출
         if (stockData.isEmpty() || (currentTime - lastUpdateTimeMillis > CACHE_DURATION)) {
             updateStockIndices();
         }
@@ -114,10 +114,10 @@ public class StockIndexService {
      * 장애 시 노출될 초기/기본값
      */
     private void setDefaultValues() {
-        stockData.put("NASDAQ", "16,000"); stockData.put("NASDAQ_TYPE", "up");
-        stockData.put("DOW", "38,000"); stockData.put("DOW_TYPE", "up");
-        stockData.put("KOSPI", "2,500"); stockData.put("KOSPI_TYPE", "down");
-        stockData.put("KOSDAQ", "850"); stockData.put("KOSDAQ_TYPE", "up");
+        stockData.put("NASDAQ", "0,000"); stockData.put("NASDAQ_TYPE", "up");
+        stockData.put("DOW", "0,000"); stockData.put("DOW_TYPE", "up");
+        stockData.put("KOSPI", "0,000"); stockData.put("KOSPI_TYPE", "down");
+        stockData.put("KOSDAQ", "000"); stockData.put("KOSDAQ_TYPE", "up");
         stockData.put("updateTime", "점검중");
     }
 }

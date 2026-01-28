@@ -11,6 +11,7 @@
 
 <body>
 <div layout:fragment="content">
+
   <div class="content-container">
 		<div class="page-header">
 		  <div class="page-title">
@@ -42,27 +43,25 @@
       </div>
     </div>
 
-    <!-- 🧾 테이블 -->
-    <div class="table-container">
-      <table>
-        <thead>
-        <tr>
-          <th><input type="checkbox" id="checkAll" /></th>
-          <th>No</th>
-          <th>제목</th>
-          <th>담당자</th>
-          <th>등록일</th>
-          <th>서버 상태</th>
-          <th>기능 옵션</th>
-          <th>비고</th>
-        </tr>
-        </thead>
-        <tbody id="dataTable"></tbody>
-      </table>
-    </div>
+    <!-- 시작 : 공통 테이블 기본 구조 -->
+    <div style="position: relative;">
+        <div id="globalLoading" class="global-loading-overlay">
+            <div class="global-spinner-wrap">
+                <div class="spinner"></div>
+            </div>
+        </div>
 
-    <!-- 📑 페이징 -->
+        <div class="table-container">
+          <table>
+            <thead id="headerTable"></thead>
+            <tbody id="dataTable"></tbody>
+          </table>
+        </div>
+    </div> 
+    
     <div id="pagination" class="pagination"></div>
+    <!-- 종료 : 공통 테이블 기본 구조 -->
+    
   </div>
 
   <!-- ➕ 등록 모달 -->

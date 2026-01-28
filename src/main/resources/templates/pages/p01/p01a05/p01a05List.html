@@ -42,27 +42,25 @@
       </div>
     </div>
 
-    <!-- 🧾 테이블 -->
-    <div class="table-container">
-      <table>
-        <thead>
-        <tr>
-          <th><input type="checkbox" id="checkAll" /></th>
-          <th>No</th>
-          <th>제목</th>
-          <th>담당자</th>
-          <th>등록일</th>
-          <th>서버 상태</th>
-          <th>기능 옵션</th>
-          <th>비고</th>
-        </tr>
-        </thead>
-        <tbody id="dataTable"></tbody>
-      </table>
-    </div>
+	<!-- 시작 : 공통 테이블 구조 -->
+    <div style="position: relative;">
+        <div id="globalLoading" class="global-loading-overlay">
+            <div class="global-spinner-wrap">
+                <div class="spinner"></div>
+            </div>
+        </div>
 
-    <!-- 📑 페이징 -->
+        <div class="table-container">
+          <table>
+            <thead id="headerTable"></thead>
+            <tbody id="dataTable"></tbody>
+          </table>
+        </div>
+    </div> 
+    
     <div id="pagination" class="pagination"></div>
+    <!-- 종료 : 공통 테이블 구조 -->
+    
   </div>
 
   <!-- ➕ 등록 모달 -->
@@ -159,14 +157,14 @@ document.addEventListener("DOMContentLoaded", () => {
   	  // 체크박스 있는 테이블{ checkbox: true } 사용
   	  // 체크박스 없는 테이블checkbox 컬럼 자체 삭제
     	
-    	  { key: "checkbox", label: "", checkbox: true }, 
-      { key: "id", label: "No" },
-      { key: "title", label: "제목", isDetailLink: true, required: true },
-      { key: "owner", label: "담당자", isDetailLink: true, required: true },
-      { key: "regDate", label: "등록일" },
-      { key: "serverStatus", label: "서버 상태" },
-      { key: "featureOption", label: "기능 옵션" },
-      { key: "remark", label: "비고" }
+      { columnId: "checkbox", label: "", checkbox: true }, 
+      { columnId: "id", label: "No" },
+      { columnId: "title", label: "제목", isDetailLink: true, required: true },
+      { columnId: "owner", label: "담당자", isDetailLink: true, required: true },
+      { columnId: "regDate", label: "등록일" },
+      { columnId: "serverStatus", label: "서버 상태" },
+      { columnId: "featureOption", label: "기능 옵션" },
+      { columnId: "remark", label: "비고" }
     ],
     pageSize: 10,
     pageGroupSize: window.pageGroupSize, <!-- ✅ 이제 전역변수로부터 자동 주입 -->

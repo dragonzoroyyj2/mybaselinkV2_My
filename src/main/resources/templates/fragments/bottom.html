@@ -1,15 +1,12 @@
 <div th:fragment="bottomFragment">
-  <!-- ✅ 환율 및 지수 정보 바 (Footer 상단 위치, 반응형 및 다크모드 완벽 대응) -->
   <div class="bottom-info-bar">
     <div class="info-bar-content">
-      <!-- 주요 외환/지수 그룹 (USD 환율, 나스닥, 다우, 코스피, 코스닥) -->
       <div class="info-main-scroll">
         <div class="info-group">
           <span class="label-text">USD</span>
           <span class="value-text" id="val-usd" th:text="${exchange != null ? exchange.USD : '1,342'}">1,342</span>
         </div>
         
-        <!-- ✅ 나스닥 (NASDAQ) 동적 바인딩 -->
         <div class="info-group">
           <span class="label-text">나스닥</span>
           <span class="value-text" id="val-nasdaq">
@@ -22,7 +19,6 @@
           </span>
         </div>
 
-        <!-- ✅ 다우산업 (DOW) 동적 바인딩 -->
         <div class="info-group">
           <span class="label-text">다우</span>
           <span class="value-text" id="val-dow">
@@ -35,7 +31,6 @@
           </span>
         </div>
 
-        <!-- ✅ 코스피 (KOSPI) 동적 바인딩 -->
         <div class="info-group">
           <span class="label-text">코스피</span>
           <span class="value-text" id="val-kospi">
@@ -48,7 +43,6 @@
           </span>
         </div>
 
-        <!-- ✅ 코스닥 (KOSDAQ) 동적 바인딩 -->
         <div class="info-group">
           <span class="label-text">코스닥</span>
           <span class="value-text" id="val-kosdaq">
@@ -62,11 +56,9 @@
         </div>
       </div>
       
-      <!-- 업데이트 및 제어 그룹 -->
       <div class="info-control-group">
         <div class="info-group update-group">
           <span class="label-text"><i class="fa-regular fa-clock" style="font-size: 6px;"></i></span>
-          <!-- ✅ 업데이트 시간 동적 바인딩 (지수 데이터 기준 우선) -->
           <span class="value-text" id="val-time" 
                 th:text="${stockIndices != null && stockIndices.updateTime != null ? stockIndices.updateTime : (exchange != null && exchange['updateTime'] != null ? exchange['updateTime'] : '실시간')}">00:00</span>
         </div>
@@ -83,21 +75,20 @@
 
   <style>
     /* ============================================================
-       ✅ 하단 정보 바 (Bottom Info Bar) - 초슬림(Ultra-Compact) 버전
+       ✅ 하단 정보 바 (Bottom Info Bar) - 높이만 키운 버전
     ============================================================ */
     .bottom-info-bar {
       position: fixed;
-      bottom: 30px; /* 푸터 높이 축소에 따른 조정 */
+      bottom: 30px; 
       left: 0;
       width: 100%;
-      height: 18px; /* 20px -> 18px 축소 */
+      height: 32px; /* 🚩 높이 대폭 확장 (18px -> 32px) */
       background: #ffffff;
       border-top: 1px solid #e5e7eb;
       z-index: 2400;
       display: flex;
-      align-items: center;
-      box-shadow: 0 -1px 2px rgba(0,0,0,0.02);
-      transition: height 0.2s ease;
+      align-items: center; /* 내부 글자는 세로 가운데 정렬 */
+      box-shadow: 0 -1px 3px rgba(0,0,0,0.03);
     }
 
     .info-bar-content {
@@ -105,14 +96,14 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      padding: 0 4px; /* 여백 최소화 */
-      gap: 3px;
+      padding: 0 10px; 
+      gap: 5px;
     }
 
     .info-main-scroll {
       display: flex;
       flex-wrap: nowrap;
-      gap: 6px; /* 간격 더 축소 */
+      gap: 12px; 
       overflow-x: auto;
       scrollbar-width: none;
       flex: 1;
@@ -122,30 +113,31 @@
     .info-control-group {
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 5px;
       flex-shrink: 0;
       border-left: 1px solid #f1f5f9;
-      padding-left: 4px;
+      padding-left: 10px;
     }
 
     .info-group {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
       white-space: nowrap;
     }
 
+    /* 🚩 글씨 크기는 형님이 원하셨던 아주 작은 사이즈 그대로 유지 */
     .label-text {
       color: #64748b;
       font-weight: 800;
-      font-size: 7.5px; /* 8px -> 7.5px 축소 */
+      font-size: 7.5px; 
       letter-spacing: -0.04em;
     }
 
     .value-text {
       color: #334155;
       font-weight: 700;
-      font-size: 8.5px; /* 9px -> 8.5px 축소 */
+      font-size: 7px; 
       font-family: 'Inter', -apple-system, sans-serif;
     }
 
@@ -155,16 +147,15 @@
     .refresh-btn {
       cursor: pointer;
       color: #94a3b8;
-      font-size: 7.5px; /* 아이콘 크기 축소 */
+      font-size: 8px; 
       display: flex;
       align-items: center;
-      padding: 1px;
+      padding: 2px;
     }
     .refresh-btn:hover { color: #475569; }
     .spinning { animation: spin 1s linear infinite; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-    /* ✅ Footer 스타일 축소 (36px -> 30px) */
     .footer-bar {
       position: fixed;
       bottom: 0;
@@ -174,7 +165,7 @@
       background: #f9fafb;
       border-top: 1px solid #e5e7eb;
       color: #9ca3af;
-      font-size: 8px; /* 9px -> 8px 축소 */
+      font-size: 8px; 
       display: flex;
       align-items: center;
       justify-content: center;
@@ -187,14 +178,6 @@
     body.dark-mode .label-text { color: #94a3b8; }
     body.dark-mode .value-text { color: #f1f5f9; }
     body.dark-mode .info-control-group { border-left-color: #334155; }
-
-    /* 📱 초소형 모바일 반응형 최적화 */
-    @media (max-width: 380px) {
-      .info-main-scroll { gap: 4px; }
-      .label-text { font-size: 7px; letter-spacing: -0.05em; }
-      .value-text { font-size: 8px; }
-      .info-bar-content { padding: 0 2px; }
-    }
   </style>
 
   <script th:inline="javascript">
@@ -203,30 +186,21 @@
       if(yearEl) yearEl.textContent = new Date().getFullYear();
     });
 
-    /**
-     * ✅ 환율 및 지수 정보 갱신 로직 (독립 실행형)
-     */
     (function initStockBar() {
       let __isExchangeFetching = false;
-
       window.handleExchangeRefresh = async function(e) {
         if (e) { e.preventDefault(); e.stopPropagation(); }
         if (__isExchangeFetching) return;
-
         const icon = document.getElementById('refresh-icon');
         const btn = document.getElementById('btn-refresh-info');
-
         __isExchangeFetching = true;
         if (icon) icon.classList.add('spinning');
         if (btn) btn.style.opacity = '0.5';
-
         try {
           const response = await fetch('/api/exchange/latest?nocache=' + Date.now());
           if (response.ok) {
             const data = await response.json();
-            
             if (data.USD) document.getElementById('val-usd').innerText = data.USD;
-            
             const updateIndex = (id, value, type) => {
               const el = document.getElementById(id);
               if (!el || !value) return;
@@ -234,16 +208,14 @@
               const iconMark = type === 'up' ? '▲' : '▼';
               el.innerHTML = `${value} <span class="${colorClass}">${iconMark}</span>`;
             };
-
             if (data.NASDAQ) updateIndex('val-nasdaq', data.NASDAQ, data.NASDAQ_TYPE || 'up');
             if (data.DOW) updateIndex('val-dow', data.DOW, data.DOW_TYPE || 'up');
             if (data.KOSPI) updateIndex('val-kospi', data.KOSPI, data.KOSPI_TYPE || 'down');
             if (data.KOSDAQ) updateIndex('val-kosdaq', data.KOSDAQ, data.KOSDAQ_TYPE || 'up');
-
             if (data.updateTime) document.getElementById('val-time').innerText = data.updateTime;
           }
         } catch (err) {
-          console.error("Exchange & Index Update Error:", err);
+          console.error("Update Error:", err);
         } finally {
           setTimeout(() => {
             if (icon) icon.classList.remove('spinning');
