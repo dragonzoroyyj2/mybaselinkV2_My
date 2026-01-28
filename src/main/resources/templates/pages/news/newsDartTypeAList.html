@@ -68,6 +68,7 @@
 <th:block layout:fragment="pageScript">
 <script>
 /** * ✅ 기기별 최적화 앱 호출 함수 (iPhone/Android/PC 통합)
+ * 미래에셋 아이폰 호출 실패 대응 보강
  */
 function openBrokerApp(type, stockCode) {
     if (!stockCode || stockCode.trim() === "") {
@@ -85,9 +86,11 @@ function openBrokerApp(type, stockCode) {
     switch(type) {
         case 'mstock': 
             if (isAndroid) {
+                // 미래에셋 안드로이드 (인텐트 방식)
                 url = `intent://open?page=1101&code=${stockCode}#Intent;scheme=mstock;package=com.miraeasset.trade;end`;
             } else {
-                url = `mstock://open?page=1101&code=${stockCode}`;
+                // 🚩 아이폰 미래에셋: 통합앱용 최신 스킴을 먼저 사용
+                url = `miraeasset-mstock://open?page=1101&code=${stockCode}`;
             }
             break;
         case 'kiwoom': 
@@ -98,15 +101,22 @@ function openBrokerApp(type, stockCode) {
         case 'toss': url = `supertoss://stock/detail?code=${stockCode}`; break;
         case 'kakao': url = `kakaotalk://kakaopay/securities/stock_detail?stock_code=${stockCode}`; break;
         case 'namu': url = `nhqvnamu://open?page=stockDetail&code=${stockCode}`; break;
-        default: url = `mstock://open?page=1101&code=${stockCode}`;
+        default: url = `miraeasset-mstock://open?page=1101&code=${stockCode}`;
     }
 
-    // 2. 실행 방식 결정 (아이폰은 직접 assign이 가장 잘 먹힘)
+    // 2. 실행 방식 결정
     if (isIos) {
-        // 아이폰 사파리/크롬 최적화
+        // 아이폰: 직접 할당 방식이 가장 정확함
         window.location.href = url;
+        
+        // 🚩 미래에셋일 경우, 혹시 구형 앱일 수 있으니 0.5초 뒤 구형 스킴으로 한 번 더 시도
+        if(type === 'mstock') {
+            setTimeout(() => {
+                window.location.href = `mstock://open?page=1101&code=${stockCode}`;
+            }, 500);
+        }
     } else {
-        // 안드로이드 및 기타: 가상 클릭 방식
+        // 안드로이드: 가상 클릭 방식
         const a = document.createElement('a');
         a.href = url;
         document.body.appendChild(a);
